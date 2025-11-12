@@ -1,0 +1,1503 @@
+==== tables ====
+"CREATE TABLE affected_count (count bigint);"
+"CREATE TABLE compliance_violations (affected_users integer NOT NULL DEFAULT 0, remediation_steps text, resolved_at timestamptz, updated_at timestamptz NOT NULL DEFAULT now(), created_at timestamptz NOT NULL DEFAULT now(), software_id uuid, district_id uuid, status text NOT NULL DEFAULT 'open'::text, id uuid NOT NULL DEFAULT gen_random_uuid(), software_name text NOT NULL, violation_type text NOT NULL, severity text NOT NULL, description text NOT NULL, detected_at timestamptz NOT NULL DEFAULT now());"
+"CREATE TABLE district_policy_rules (category text NOT NULL, description text, name text NOT NULL, id uuid NOT NULL DEFAULT gen_random_uuid(), district_id uuid, updated_at timestamptz DEFAULT now(), created_at timestamptz DEFAULT now(), is_active boolean DEFAULT true, regulation_type text, severity text NOT NULL);"
+"CREATE TABLE districts (size_classification text, id uuid NOT NULL DEFAULT gen_random_uuid(), name text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), url text, original_id text, state_id uuid, is_client boolean DEFAULT false, student_enrollment integer, number_of_schools integer, staff_count integer, district_type text, technology_budget_range text, total_budget_range text, grade_levels_served ARRAY, performance_tier text, special_programs ARRAY, technology_funding_sources ARRAY, region text);"
+"CREATE TABLE manual_profiles (email text NOT NULL, source_notes text, last_name text, role text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), school_id uuid, district_id uuid NOT NULL, created_by uuid NOT NULL, id uuid NOT NULL DEFAULT gen_random_uuid(), first_name text, grade_level text, status text NOT NULL DEFAULT 'pending'::text);"
+"CREATE TABLE one_roster_configurations (status text NOT NULL DEFAULT 'inactive'::text, sync_frequency text NOT NULL, scope text, token_url text, api_url text NOT NULL, client_secret text NOT NULL, client_id text NOT NULL, name text NOT NULL, district_id uuid NOT NULL, id uuid NOT NULL DEFAULT gen_random_uuid(), last_sync timestamptz, next_sync timestamptz, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());"
+"CREATE TABLE profiles (district_id uuid, id uuid NOT NULL DEFAULT gen_random_uuid(), email text NOT NULL, first_name text, display_name text, updated_at timestamptz DEFAULT now(), created_at timestamptz DEFAULT now(), auth_user_id uuid, roster_source_id text, last_name text, role text, grade text, school_id uuid);"
+"CREATE TABLE report_schedules (active boolean NOT NULL DEFAULT true, paused_at timestamptz, timezone text DEFAULT 'UTC'::text, time_display text, id uuid NOT NULL DEFAULT gen_random_uuid(), report_id uuid NOT NULL, user_id uuid NOT NULL, frequency text NOT NULL, day_of_week text, day_of_month text, custom_date timestamptz, time text NOT NULL, next_run_at timestamptz NOT NULL, last_run_at timestamptz, recipients ARRAY NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());"
+"CREATE TABLE report_shares (expires_at timestamptz NOT NULL DEFAULT (now() + '7 days'::interval), id uuid NOT NULL DEFAULT gen_random_uuid(), report_id uuid NOT NULL, shared_by uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), email text NOT NULL, access_token text NOT NULL, viewed_at timestamptz);"
+"CREATE TABLE reports (date_range text NOT NULL, district_id uuid, updated_at timestamptz NOT NULL DEFAULT now(), created_at timestamptz NOT NULL DEFAULT now(), report_data jsonb NOT NULL, filters jsonb NOT NULL, selected_software jsonb NOT NULL, report_type text NOT NULL, name text NOT NULL, user_id uuid NOT NULL, id uuid NOT NULL DEFAULT gen_random_uuid());"
+"CREATE TABLE school_hours_config (updated_at timestamptz DEFAULT now(), created_at timestamptz DEFAULT now(), description text DEFAULT 'Standard school hours: 8 AM - 4 PM, Monday-Friday'::text, end_hour integer NOT NULL DEFAULT 16, id uuid NOT NULL DEFAULT gen_random_uuid(), start_hour integer NOT NULL DEFAULT 8);"
+"CREATE TABLE schools (created_at timestamptz NOT NULL DEFAULT now(), district_id uuid NOT NULL, name text NOT NULL, id uuid NOT NULL DEFAULT gen_random_uuid(), source_id text);"
+"CREATE TABLE shared_reports (software_id uuid NOT NULL, shared_with text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), expires_at timestamptz NOT NULL DEFAULT (now() + '7 days'::interval), id uuid NOT NULL DEFAULT gen_random_uuid(), created_by uuid NOT NULL);"
+"CREATE TABLE software (grade_range text, id uuid NOT NULL DEFAULT gen_random_uuid(), name text NOT NULL, category text, students_licensed integer DEFAULT 0, school_name text, grade text, sub_population text, program_population text, funding_source text, purchase_date timestamptz, expiration_date timestamptz, district_id uuid, authorized boolean DEFAULT true, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), url text, selected_schools ARRAY, applicable_grade_bands ARRAY, icon text, urlpattern text, studentslicensed integer DEFAULT 0, district_purchased boolean DEFAULT false, district_approved boolean DEFAULT false, approval_status text DEFAULT 'unauthorized'::text, user_type text DEFAULT 'both'::text, license_term_months integer DEFAULT 12, temporary_removed_for text, other_domains ARRAY NOT NULL DEFAULT '{}'::text[]);"
+"CREATE TABLE software_categories (id uuid NOT NULL DEFAULT gen_random_uuid(), name text NOT NULL, created_at timestamptz DEFAULT now());"
+"CREATE TABLE software_usage (user_type text NOT NULL DEFAULT 'student'::text, data_source text, usage_hour integer, category text, user_id uuid, expiration_date date, purchase_date date, id uuid NOT NULL DEFAULT gen_random_uuid(), isfromoldenv boolean NOT NULL DEFAULT false, school_name text, funding_source text, program_population text, software_id uuid NOT NULL, date date NOT NULL);"
+"CREATE TABLE states (created_at timestamptz NOT NULL DEFAULT now(), name text NOT NULL, original_id text, id uuid NOT NULL, abbreviation text, updated_at timestamptz NOT NULL DEFAULT now());"
+"CREATE TABLE students (school_id uuid, updated_at timestamptz NOT NULL DEFAULT now(), active_software integer DEFAULT 0, grade text, total_hours integer DEFAULT 0, id uuid NOT NULL DEFAULT gen_random_uuid(), created_at timestamptz NOT NULL DEFAULT now(), name text NOT NULL);"
+"CREATE TABLE swye360_configurations (original_district_id text, status text NOT NULL DEFAULT 'inactive'::text, last_sync timestamptz, next_sync timestamptz, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), id uuid NOT NULL DEFAULT gen_random_uuid(), district_id uuid NOT NULL, name text NOT NULL, client_key text NOT NULL, bucket_name text NOT NULL, sync_frequency text NOT NULL DEFAULT 'daily'::text);"
+
+===all materialized views====
+"CREATE MATERIALIZED VIEW mv_unauthorized_software_analytics AS  WITH unauthorized_software AS (
+         SELECT s.id,
+            s.name,
+            s.category,
+            s.url,
+            s.district_id,
+            s.school_name,
+            d.name AS district_name
+           FROM (software s
+             LEFT JOIN districts d ON ((s.district_id = d.id)))
+          WHERE (s.authorized = false)
+        ), usage_aggregates AS (
+         SELECT su.software_id,
+            sum(su.minutes_used) AS total_minutes,
+            count(DISTINCT su.user_id) FILTER (WHERE (su.user_id IS NOT NULL)) AS unique_users,
+            count(DISTINCT su.date) AS usage_days,
+            max(su.date) AS last_usage_date
+           FROM software_usage su
+          WHERE ((su.software_id IN ( SELECT unauthorized_software.id
+                   FROM unauthorized_software)) AND (su.minutes_used > (0)::numeric))
+          GROUP BY su.software_id
+        )
+ SELECT us.id,
+    us.name,
+    COALESCE(us.category, 'Uncategorized'::text) AS category,
+    us.url,
+    us.district_id,
+    us.school_name,
+    COALESCE(us.district_name, 'Unknown District'::text) AS district_name,
+    COALESCE(ua.total_minutes, (0)::numeric) AS total_usage_minutes,
+    COALESCE(ua.unique_users, (0)::bigint) AS unique_users,
+    COALESCE(ua.usage_days, (0)::bigint) AS usage_count,
+    ua.last_usage_date,
+        CASE
+            WHEN (ua.unique_users > 0) THEN (ua.total_minutes / (ua.unique_users)::numeric)
+            ELSE (0)::numeric
+        END AS avg_minutes_per_user,
+    now() AS refreshed_at
+   FROM (unauthorized_software us
+     LEFT JOIN usage_aggregates ua ON ((us.id = ua.software_id)));;"
+"CREATE MATERIALIZED VIEW mv_software_usage_analytics_v1 AS  WITH software_with_metrics AS (
+         SELECT s.id,
+            s.name,
+            s.category,
+            s.total_cost,
+            s.students_licensed,
+            s.school_name,
+            s.authorized,
+            s.district_purchased,
+            s.user_type,
+            s.district_id,
+            s.grade,
+            s.grade_range,
+            s.funding_source,
+            s.url,
+            s.icon,
+            s.applicable_grade_bands,
+            s.sub_population,
+            s.program_population,
+            COALESCE(sm.roi_status, 'low'::text) AS roi_status,
+            COALESCE(sm.roi_percentage, (0)::numeric) AS roi_percentage,
+            COALESCE(sm.percent_days_with_minimum_usage, (0)::numeric) AS percent_days_with_minimum_usage,
+            COALESCE(sm.cost_per_student, (0)::numeric) AS cost_per_student
+           FROM (software s
+             LEFT JOIN software_metrics sm ON ((s.id = sm.software_id)))
+          WHERE ((s.authorized = true) OR (s.district_purchased = true))
+        ), usage_per_software AS (
+         SELECT su.software_id,
+            sum(su.minutes_used) AS total_usage_minutes,
+            count(DISTINCT su.date) AS usage_days,
+            min(su.date) AS first_use_date,
+            max(su.date) AS last_use_date
+           FROM software_usage su
+          WHERE (su.minutes_used > (0)::numeric)
+          GROUP BY su.software_id
+        ), grouped_by_name_and_district_pre AS (
+         SELECT lower(swm.name) AS name_lower,
+            min(swm.name) AS name,
+            swm.district_id,
+            array_agg(DISTINCT swm.id) AS software_ids,
+            array_agg(DISTINCT swm.category) FILTER (WHERE (swm.category IS NOT NULL)) AS categories,
+            array_agg(DISTINCT swm.school_name) FILTER (WHERE (swm.school_name IS NOT NULL)) AS school_names,
+            array_agg(DISTINCT swm.user_type) FILTER (WHERE (swm.user_type IS NOT NULL)) AS user_types,
+            array_agg(DISTINCT swm.grade) FILTER (WHERE (swm.grade IS NOT NULL)) AS raw_grades,
+            array_agg(DISTINCT swm.grade_range) FILTER (WHERE (swm.grade_range IS NOT NULL)) AS grade_ranges,
+            array_agg(DISTINCT swm.funding_source) FILTER (WHERE (swm.funding_source IS NOT NULL)) AS funding_sources,
+            sum(swm.total_cost) AS total_cost,
+            sum(swm.students_licensed) AS students_licensed,
+            bool_or(swm.authorized) AS authorized,
+            bool_or(COALESCE(swm.district_purchased, false)) AS district_purchased,
+            min(swm.roi_status) AS roi_status,
+            avg(swm.roi_percentage) AS avg_roi_percentage,
+            avg(swm.percent_days_with_minimum_usage) AS avg_usage_compliance,
+            avg(swm.cost_per_student) AS avg_cost_per_student,
+            max(swm.url) AS url,
+            max(swm.icon) AS icon,
+            min((swm.applicable_grade_bands)::text) AS applicable_grade_bands,
+            min(swm.sub_population) AS sub_population,
+            min(swm.program_population) AS program_population
+           FROM software_with_metrics swm
+          GROUP BY (lower(swm.name)), swm.district_id
+        ), grouped_by_name_and_district AS (
+         SELECT grouped_by_name_and_district_pre.name,
+            grouped_by_name_and_district_pre.district_id,
+            grouped_by_name_and_district_pre.software_ids,
+            grouped_by_name_and_district_pre.categories,
+            grouped_by_name_and_district_pre.school_names,
+            grouped_by_name_and_district_pre.user_types,
+            ( SELECT array_agg(DISTINCT all_expanded_grades.expanded_grade) AS array_agg
+                   FROM ( SELECT unnest(expand_grade_range(g.g)) AS expanded_grade
+                           FROM unnest(grouped_by_name_and_district_pre.raw_grades) g(g)
+                          WHERE (g.g IS NOT NULL)
+                        UNION
+                         SELECT unnest(expand_grade_range(gr.gr)) AS expanded_grade
+                           FROM unnest(grouped_by_name_and_district_pre.grade_ranges) gr(gr)
+                          WHERE (gr.gr IS NOT NULL)
+                        UNION
+                         SELECT unnest(expand_grade_range(band.band)) AS expanded_grade
+                           FROM unnest(string_to_array(TRIM(BOTH '{}'::text FROM COALESCE(grouped_by_name_and_district_pre.applicable_grade_bands, '{}'::text)), ','::text)) band(band)
+                          WHERE ((band.band IS NOT NULL) AND (TRIM(BOTH '""'::text FROM band.band) <> ''::text))) all_expanded_grades
+                  WHERE ((all_expanded_grades.expanded_grade IS NOT NULL) AND (TRIM(BOTH FROM all_expanded_grades.expanded_grade) <> ''::text))) AS grades,
+            grouped_by_name_and_district_pre.grade_ranges,
+            grouped_by_name_and_district_pre.funding_sources,
+            grouped_by_name_and_district_pre.total_cost,
+            grouped_by_name_and_district_pre.students_licensed,
+            grouped_by_name_and_district_pre.authorized,
+            grouped_by_name_and_district_pre.district_purchased,
+            grouped_by_name_and_district_pre.roi_status,
+            grouped_by_name_and_district_pre.avg_roi_percentage,
+            grouped_by_name_and_district_pre.avg_usage_compliance,
+            grouped_by_name_and_district_pre.avg_cost_per_student,
+            grouped_by_name_and_district_pre.url,
+            grouped_by_name_and_district_pre.icon,
+            grouped_by_name_and_district_pre.applicable_grade_bands,
+            grouped_by_name_and_district_pre.sub_population,
+            grouped_by_name_and_district_pre.program_population
+           FROM grouped_by_name_and_district_pre
+        ), name_district_users AS (
+         SELECT DISTINCT lower(s.name) AS name,
+            s.district_id,
+            su.user_id,
+            p.role
+           FROM ((software s
+             JOIN software_usage su ON ((su.software_id = s.id)))
+             LEFT JOIN profiles p ON ((p.id = su.user_id)))
+          WHERE (((s.authorized = true) OR (s.district_purchased = true)) AND (su.minutes_used > (0)::numeric) AND (su.user_id IS NOT NULL))
+        ), user_counts AS (
+         SELECT name_district_users.name,
+            name_district_users.district_id,
+            count(DISTINCT name_district_users.user_id) AS active_users,
+            count(DISTINCT
+                CASE
+                    WHEN (name_district_users.role = 'student'::text) THEN name_district_users.user_id
+                    ELSE NULL::uuid
+                END) AS active_students,
+            count(DISTINCT
+                CASE
+                    WHEN (name_district_users.role = 'teacher'::text) THEN name_district_users.user_id
+                    ELSE NULL::uuid
+                END) AS active_teachers
+           FROM name_district_users
+          GROUP BY name_district_users.name, name_district_users.district_id
+        ), aggregated_usage AS (
+         SELECT lower(gbn_1.name) AS name,
+            gbn_1.district_id,
+            sum(ups.total_usage_minutes) AS total_minutes,
+            max(ups.usage_days) AS usage_days,
+            min(ups.first_use_date) AS first_use_date,
+            max(ups.last_use_date) AS last_use_date
+           FROM ((grouped_by_name_and_district gbn_1
+             CROSS JOIN LATERAL unnest(gbn_1.software_ids) unnested_software(software_id))
+             LEFT JOIN usage_per_software ups ON ((ups.software_id = unnested_software.software_id)))
+          GROUP BY (lower(gbn_1.name)), gbn_1.district_id
+        )
+ SELECT gbn.name,
+    gbn.district_id,
+    gbn.software_ids AS ids,
+    gbn.categories,
+    gbn.school_names,
+    gbn.user_types,
+    gbn.grades,
+    gbn.grade_ranges,
+    gbn.funding_sources,
+    gbn.total_cost,
+    gbn.students_licensed,
+    gbn.authorized,
+    gbn.district_purchased,
+    gbn.roi_status,
+    gbn.avg_roi_percentage,
+    gbn.avg_usage_compliance,
+    gbn.avg_cost_per_student,
+    gbn.url,
+    gbn.icon,
+    gbn.applicable_grade_bands,
+    gbn.sub_population,
+    gbn.program_population,
+    COALESCE(gbn.categories[1], 'Uncategorized'::text) AS primary_category,
+    COALESCE(au.total_minutes, (0)::numeric) AS total_minutes,
+    COALESCE(uc.active_users, (0)::bigint) AS active_users,
+    COALESCE(au.usage_days, (0)::bigint) AS usage_days,
+    au.first_use_date,
+    au.last_use_date,
+    COALESCE(uc.active_students, (0)::bigint) AS active_students,
+    COALESCE(uc.active_teachers, (0)::bigint) AS active_teachers,
+        CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+            WHEN 'Educational'::text THEN (14)::numeric
+            WHEN 'E-learning'::text THEN (14)::numeric
+            WHEN 'Gamified Learning'::text THEN (14)::numeric
+            WHEN 'STEM'::text THEN (7)::numeric
+            WHEN 'Arts & Music'::text THEN (7)::numeric
+            WHEN 'Language Learning'::text THEN (7)::numeric
+            WHEN 'Assessment'::text THEN 4.5
+            WHEN 'Data Analysis'::text THEN 4.5
+            WHEN 'Cyber Safety'::text THEN 2.25
+            WHEN 'Future Ready'::text THEN 2.25
+            ELSE (7)::numeric
+        END AS expected_daily_minutes,
+        CASE
+            WHEN ((COALESCE(au.usage_days, (0)::bigint) > 0) AND (
+            CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+                WHEN 'Educational'::text THEN (14)::numeric
+                WHEN 'E-learning'::text THEN (14)::numeric
+                WHEN 'Gamified Learning'::text THEN (14)::numeric
+                WHEN 'STEM'::text THEN (7)::numeric
+                WHEN 'Arts & Music'::text THEN (7)::numeric
+                WHEN 'Language Learning'::text THEN (7)::numeric
+                WHEN 'Assessment'::text THEN 4.5
+                WHEN 'Data Analysis'::text THEN 4.5
+                WHEN 'Cyber Safety'::text THEN 2.25
+                WHEN 'Future Ready'::text THEN 2.25
+                ELSE (7)::numeric
+            END > (0)::numeric)) THEN LEAST((100)::numeric, ((COALESCE(au.total_minutes, (0)::numeric) / ((au.usage_days)::numeric *
+            CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+                WHEN 'Educational'::text THEN (14)::numeric
+                WHEN 'E-learning'::text THEN (14)::numeric
+                WHEN 'Gamified Learning'::text THEN (14)::numeric
+                WHEN 'STEM'::text THEN (7)::numeric
+                WHEN 'Arts & Music'::text THEN (7)::numeric
+                WHEN 'Language Learning'::text THEN (7)::numeric
+                WHEN 'Assessment'::text THEN 4.5
+                WHEN 'Data Analysis'::text THEN 4.5
+                WHEN 'Cyber Safety'::text THEN 2.25
+                WHEN 'Future Ready'::text THEN 2.25
+                ELSE (7)::numeric
+            END)) * (100)::numeric))
+            ELSE (0)::numeric
+        END AS engagement_rate,
+        CASE
+            WHEN ((COALESCE(au.usage_days, (0)::bigint) > 0) AND (
+            CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+                WHEN 'Educational'::text THEN (14)::numeric
+                WHEN 'E-learning'::text THEN (14)::numeric
+                WHEN 'Gamified Learning'::text THEN (14)::numeric
+                WHEN 'STEM'::text THEN (7)::numeric
+                WHEN 'Arts & Music'::text THEN (7)::numeric
+                WHEN 'Language Learning'::text THEN (7)::numeric
+                WHEN 'Assessment'::text THEN 4.5
+                WHEN 'Data Analysis'::text THEN 4.5
+                WHEN 'Cyber Safety'::text THEN 2.25
+                WHEN 'Future Ready'::text THEN 2.25
+                ELSE (7)::numeric
+            END > (0)::numeric)) THEN
+            CASE
+                WHEN ((COALESCE(au.total_minutes, (0)::numeric) / (au.usage_days)::numeric) >=
+                CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+                    WHEN 'Educational'::text THEN (14)::numeric
+                    WHEN 'E-learning'::text THEN (14)::numeric
+                    WHEN 'Gamified Learning'::text THEN (14)::numeric
+                    WHEN 'STEM'::text THEN (7)::numeric
+                    WHEN 'Arts & Music'::text THEN (7)::numeric
+                    WHEN 'Language Learning'::text THEN (7)::numeric
+                    WHEN 'Assessment'::text THEN 4.5
+                    WHEN 'Data Analysis'::text THEN 4.5
+                    WHEN 'Cyber Safety'::text THEN 2.25
+                    WHEN 'Future Ready'::text THEN 2.25
+                    ELSE (7)::numeric
+                END) THEN (100)::numeric
+                ELSE round(((COALESCE(au.total_minutes, (0)::numeric) / ((au.usage_days)::numeric *
+                CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+                    WHEN 'Educational'::text THEN (14)::numeric
+                    WHEN 'E-learning'::text THEN (14)::numeric
+                    WHEN 'Gamified Learning'::text THEN (14)::numeric
+                    WHEN 'STEM'::text THEN (7)::numeric
+                    WHEN 'Arts & Music'::text THEN (7)::numeric
+                    WHEN 'Language Learning'::text THEN (7)::numeric
+                    WHEN 'Assessment'::text THEN 4.5
+                    WHEN 'Data Analysis'::text THEN 4.5
+                    WHEN 'Cyber Safety'::text THEN 2.25
+                    WHEN 'Future Ready'::text THEN 2.25
+                    ELSE (7)::numeric
+                END)) * (100)::numeric), 1)
+            END
+            ELSE (0)::numeric
+        END AS usage_compliance
+   FROM ((grouped_by_name_and_district gbn
+     LEFT JOIN aggregated_usage au ON (((lower(gbn.name) = au.name) AND (gbn.district_id = au.district_id))))
+     LEFT JOIN user_counts uc ON (((lower(gbn.name) = uc.name) AND (gbn.district_id = uc.district_id))));;"
+"CREATE MATERIALIZED VIEW mv_dashboard_software_metrics AS  SELECT s.id AS software_id,
+    s.name,
+    s.district_id,
+    s.school_name,
+    s.category,
+    s.funding_source,
+    s.total_cost,
+    s.user_type,
+    s.authorized,
+    s.district_purchased,
+    s.students_licensed,
+    s.purchase_date,
+    s.grade_range,
+    s.created_at,
+    COALESCE(sm.roi_percentage, (0)::numeric) AS roi_percentage,
+    COALESCE(sm.cost_per_student, (0)::numeric) AS cost_per_student,
+    COALESCE(( SELECT count(DISTINCT su.user_id) AS count
+           FROM software_usage su
+          WHERE ((su.software_id = s.id) AND (su.date >= (CURRENT_DATE - '30 days'::interval)))), (0)::bigint) AS active_users_30d,
+    COALESCE(( SELECT count(DISTINCT su.user_id) AS count
+           FROM software_usage su
+          WHERE (su.software_id = s.id)), (0)::bigint) AS active_users_all_time,
+    COALESCE(( SELECT sum(su.minutes_used) AS sum
+           FROM software_usage su
+          WHERE ((su.software_id = s.id) AND (su.date >= (CURRENT_DATE - '90 days'::interval)))), (0)::numeric) AS total_minutes_90d,
+    ( SELECT max(su.date) AS max
+           FROM software_usage su
+          WHERE (su.software_id = s.id)) AS last_usage_date,
+        CASE
+            WHEN (s.students_licensed > 0) THEN round((((COALESCE(( SELECT count(DISTINCT su.user_id) AS count
+               FROM software_usage su
+              WHERE ((su.software_id = s.id) AND (su.date >= (CURRENT_DATE - '30 days'::interval)))), (0)::bigint))::numeric / (s.students_licensed)::numeric) * (100)::numeric), 2)
+            ELSE (0)::numeric
+        END AS utilization,
+        CASE
+            WHEN (COALESCE(sm.roi_percentage, (0)::numeric) >= (70)::numeric) THEN 'high'::text
+            WHEN (COALESCE(sm.roi_percentage, (0)::numeric) >= (40)::numeric) THEN 'moderate'::text
+            ELSE 'low'::text
+        END AS roi_status
+   FROM (software s
+     LEFT JOIN software_metrics sm ON ((s.id = sm.software_id)))
+  WHERE ((s.authorized = true) OR (s.district_purchased = true));;"
+"CREATE MATERIALIZED VIEW mv_unauthorized_usage_dashboard AS  WITH unauthorized_software AS (
+         SELECT DISTINCT ON (s.name, s.district_id) s.id AS software_id,
+            s.name AS software_name,
+            s.category,
+            s.url,
+            s.district_id,
+            d.name AS district_name
+           FROM (software s
+             LEFT JOIN districts d ON ((s.district_id = d.id)))
+          WHERE (s.authorized = false)
+          ORDER BY s.name, s.district_id, s.created_at
+        ), aggregated_usage AS (
+         SELECT s.name AS software_name,
+            s.district_id,
+            string_agg(DISTINCT su.user_type, ', '::text ORDER BY su.user_type) AS user_type,
+            sum(su.minutes_used) AS total_minutes,
+            sum((su.minutes_used * 0.60)) AS in_school_minutes,
+            sum((su.minutes_used * 0.40)) AS out_of_school_minutes,
+            count(DISTINCT su.user_id) FILTER (WHERE (su.user_id IS NOT NULL)) AS unique_users,
+            count(DISTINCT su.date) AS usage_days,
+            max(su.date) AS last_used_date,
+            string_agg(DISTINCT COALESCE(sch.name, s.school_name, 'Unknown'::text), ', '::text ORDER BY COALESCE(sch.name, s.school_name, 'Unknown'::text)) AS school_names
+           FROM ((software s
+             JOIN software_usage su ON ((s.id = su.software_id)))
+             LEFT JOIN schools sch ON (((s.school_name = sch.name) OR (su.school_name = sch.name))))
+          WHERE ((s.authorized = false) AND (su.minutes_used > (0)::numeric) AND (su.date >= (CURRENT_DATE - '90 days'::interval)))
+          GROUP BY s.name, s.district_id
+        )
+ SELECT us.software_id,
+    us.software_name,
+    COALESCE(us.category, 'Uncategorized'::text) AS category,
+    us.url,
+    us.district_id,
+    COALESCE(us.district_name, 'Unknown District'::text) AS district_name,
+    COALESCE(au.user_type, 'Unknown'::text) AS user_type,
+    round(COALESCE(au.total_minutes, (0)::numeric), 2) AS total_minutes,
+    round(COALESCE(au.in_school_minutes, (0)::numeric), 2) AS in_school_minutes,
+    round(COALESCE(au.out_of_school_minutes, (0)::numeric), 2) AS out_of_school_minutes,
+    COALESCE(au.unique_users, (0)::bigint) AS active_users,
+    COALESCE(au.usage_days, (0)::bigint) AS usage_count,
+    au.last_used_date,
+    COALESCE(au.school_names, 'Unknown'::text) AS school_name,
+        CASE
+            WHEN (au.total_minutes > (0)::numeric) THEN round(((au.in_school_minutes / au.total_minutes) * (100)::numeric), 2)
+            ELSE 60.00
+        END AS in_school_percentage,
+        CASE
+            WHEN (au.total_minutes > (0)::numeric) THEN round(((au.out_of_school_minutes / au.total_minutes) * (100)::numeric), 2)
+            ELSE 40.00
+        END AS out_of_school_percentage,
+    now() AS refreshed_at
+   FROM (unauthorized_software us
+     JOIN aggregated_usage au ON (((us.software_name = au.software_name) AND (us.district_id = au.district_id))))
+  WHERE (au.total_minutes > (0)::numeric);;"
+"CREATE MATERIALIZED VIEW mv_software_usage_analytics_v2 AS  WITH software_with_metrics AS (
+         SELECT s.id,
+            s.name,
+            s.category,
+            s.total_cost,
+            s.students_licensed,
+            s.school_name,
+            s.authorized,
+            s.district_purchased,
+            s.user_type,
+            s.district_id,
+            s.grade,
+            s.grade_range,
+            s.funding_source,
+            s.url,
+            s.icon,
+            s.applicable_grade_bands,
+            s.sub_population,
+            s.program_population
+           FROM software s
+          WHERE ((s.authorized = true) OR (s.district_purchased = true))
+        ), usage_per_software AS (
+         SELECT su.software_id,
+            sum(su.minutes_used) AS total_usage_minutes,
+            count(DISTINCT su.date) AS usage_days,
+            min(su.date) AS first_use_date,
+            max(su.date) AS last_use_date
+           FROM software_usage su
+          WHERE (su.minutes_used > (0)::numeric)
+          GROUP BY su.software_id
+        ), grouped_by_name_and_district_pre AS (
+         SELECT lower(swm.name) AS name_lower,
+            min(swm.name) AS name,
+            swm.district_id,
+            array_agg(DISTINCT swm.id) AS software_ids,
+            array_agg(DISTINCT swm.category) FILTER (WHERE (swm.category IS NOT NULL)) AS categories,
+            array_agg(DISTINCT swm.school_name) FILTER (WHERE (swm.school_name IS NOT NULL)) AS school_names,
+            array_agg(DISTINCT swm.user_type) FILTER (WHERE (swm.user_type IS NOT NULL)) AS user_types,
+            array_agg(DISTINCT swm.grade) FILTER (WHERE (swm.grade IS NOT NULL)) AS raw_grades,
+            array_agg(DISTINCT swm.grade_range) FILTER (WHERE (swm.grade_range IS NOT NULL)) AS grade_ranges,
+            array_agg(DISTINCT swm.funding_source) FILTER (WHERE (swm.funding_source IS NOT NULL)) AS funding_sources,
+            sum(swm.total_cost) AS total_cost,
+            sum(swm.students_licensed) AS students_licensed,
+            bool_or(swm.authorized) AS authorized,
+            bool_or(COALESCE(swm.district_purchased, false)) AS district_purchased,
+            max(swm.url) AS url,
+            max(swm.icon) AS icon,
+            min((swm.applicable_grade_bands)::text) AS applicable_grade_bands,
+            min(swm.sub_population) AS sub_population,
+            min(swm.program_population) AS program_population
+           FROM software_with_metrics swm
+          GROUP BY (lower(swm.name)), swm.district_id
+        ), grouped_by_name_and_district AS (
+         SELECT grouped_by_name_and_district_pre.name,
+            grouped_by_name_and_district_pre.district_id,
+            grouped_by_name_and_district_pre.software_ids,
+            grouped_by_name_and_district_pre.categories,
+            grouped_by_name_and_district_pre.school_names,
+            grouped_by_name_and_district_pre.user_types,
+            ( SELECT array_agg(DISTINCT all_expanded_grades.expanded_grade) AS array_agg
+                   FROM ( SELECT unnest(expand_grade_range(g.g)) AS expanded_grade
+                           FROM unnest(grouped_by_name_and_district_pre.raw_grades) g(g)
+                          WHERE (g.g IS NOT NULL)
+                        UNION
+                         SELECT unnest(expand_grade_range(gr.gr)) AS expanded_grade
+                           FROM unnest(grouped_by_name_and_district_pre.grade_ranges) gr(gr)
+                          WHERE (gr.gr IS NOT NULL)
+                        UNION
+                         SELECT unnest(expand_grade_range(band.band)) AS expanded_grade
+                           FROM unnest(string_to_array(TRIM(BOTH '{}'::text FROM COALESCE(grouped_by_name_and_district_pre.applicable_grade_bands, '{}'::text)), ','::text)) band(band)
+                          WHERE ((band.band IS NOT NULL) AND (TRIM(BOTH '""'::text FROM band.band) <> ''::text))) all_expanded_grades
+                  WHERE ((all_expanded_grades.expanded_grade IS NOT NULL) AND (TRIM(BOTH FROM all_expanded_grades.expanded_grade) <> ''::text))) AS grades,
+            grouped_by_name_and_district_pre.grade_ranges,
+            grouped_by_name_and_district_pre.funding_sources,
+            grouped_by_name_and_district_pre.total_cost,
+            grouped_by_name_and_district_pre.students_licensed,
+            grouped_by_name_and_district_pre.authorized,
+            grouped_by_name_and_district_pre.district_purchased,
+            grouped_by_name_and_district_pre.url,
+            grouped_by_name_and_district_pre.icon,
+            grouped_by_name_and_district_pre.applicable_grade_bands,
+            grouped_by_name_and_district_pre.sub_population,
+            grouped_by_name_and_district_pre.program_population
+           FROM grouped_by_name_and_district_pre
+        ), name_district_users AS (
+         SELECT DISTINCT lower(s.name) AS name,
+            s.district_id,
+            su.user_id,
+            p.role
+           FROM ((software s
+             JOIN software_usage su ON ((su.software_id = s.id)))
+             LEFT JOIN profiles p ON ((p.id = su.user_id)))
+          WHERE (((s.authorized = true) OR (s.district_purchased = true)) AND (su.minutes_used > (0)::numeric) AND (su.user_id IS NOT NULL))
+        ), user_counts AS (
+         SELECT name_district_users.name,
+            name_district_users.district_id,
+            count(DISTINCT name_district_users.user_id) AS active_users,
+            count(DISTINCT
+                CASE
+                    WHEN (name_district_users.role = 'student'::text) THEN name_district_users.user_id
+                    ELSE NULL::uuid
+                END) AS active_students,
+            count(DISTINCT
+                CASE
+                    WHEN (name_district_users.role = 'teacher'::text) THEN name_district_users.user_id
+                    ELSE NULL::uuid
+                END) AS active_teachers
+           FROM name_district_users
+          GROUP BY name_district_users.name, name_district_users.district_id
+        ), aggregated_usage AS (
+         SELECT lower(gbn_1.name) AS name,
+            gbn_1.district_id,
+            sum(ups.total_usage_minutes) AS total_minutes,
+            max(ups.usage_days) AS usage_days,
+            min(ups.first_use_date) AS first_use_date,
+            max(ups.last_use_date) AS last_use_date
+           FROM ((grouped_by_name_and_district gbn_1
+             CROSS JOIN LATERAL unnest(gbn_1.software_ids) unnested_software(software_id))
+             LEFT JOIN usage_per_software ups ON ((ups.software_id = unnested_software.software_id)))
+          GROUP BY (lower(gbn_1.name)), gbn_1.district_id
+        ), category_expectations AS (
+         SELECT lower(grouped_by_name_and_district.name) AS name,
+            grouped_by_name_and_district.district_id,
+            grouped_by_name_and_district.categories,
+            COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text) AS primary_category,
+                CASE COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text)
+                    WHEN 'Educational'::text THEN (10)::numeric
+                    WHEN 'E-learning'::text THEN (15)::numeric
+                    WHEN 'Gamified Learning'::text THEN (12)::numeric
+                    WHEN 'Student Engagement'::text THEN (8)::numeric
+                    WHEN 'Productivity (Students)'::text THEN (10)::numeric
+                    WHEN 'Productivity (Staff)'::text THEN (15)::numeric
+                    WHEN 'Blended/Flipped Lessons'::text THEN (20)::numeric
+                    WHEN 'STEM'::text THEN (7)::numeric
+                    WHEN 'Arts & Music'::text THEN (6)::numeric
+                    WHEN 'Language Learning'::text THEN (5)::numeric
+                    WHEN 'Special Education'::text THEN (9)::numeric
+                    WHEN 'Curriculum Design & Instruction (Students)'::text THEN (6)::numeric
+                    WHEN 'Curriculum Design & Instruction (Teachers)'::text THEN (8)::numeric
+                    WHEN 'Learning Management Systems'::text THEN (7)::numeric
+                    WHEN 'Online Literary Resources'::text THEN (5)::numeric
+                    WHEN 'Professional Development & Supports (Staff)'::text THEN (9)::numeric
+                    WHEN 'Supplemental - Intervention'::text THEN (8)::numeric
+                    WHEN 'Virtual Experiences & Lessons'::text THEN (6)::numeric
+                    WHEN 'Assessment'::text THEN 4.5
+                    WHEN 'Data Analysis & Progress Monitoring'::text THEN (6)::numeric
+                    WHEN 'Test Prep'::text THEN (4)::numeric
+                    WHEN 'Student Information & Monitoring Systems'::text THEN (3)::numeric
+                    WHEN 'Cyber Safety/Security'::text THEN 1.5
+                    WHEN 'Future Ready'::text THEN 2.25
+                    WHEN 'Esports'::text THEN (3)::numeric
+                    WHEN 'Entertainment'::text THEN (2)::numeric
+                    WHEN 'Social Media'::text THEN (1)::numeric
+                    WHEN 'Textbooks'::text THEN (3)::numeric
+                    ELSE (5)::numeric
+                END AS expected_daily_minutes,
+                CASE
+                    WHEN (COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text) = ANY (ARRAY['Educational'::text, 'E-learning'::text, 'Gamified Learning'::text, 'Student Engagement'::text, 'Productivity (Students)'::text, 'Productivity (Staff)'::text, 'Blended/Flipped Lessons'::text])) THEN 'daily'::text
+                    WHEN (COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text) = ANY (ARRAY['STEM'::text, 'Arts & Music'::text, 'Language Learning'::text, 'Special Education'::text, 'Curriculum Design & Instruction (Students)'::text, 'Curriculum Design & Instruction (Teachers)'::text, 'Learning Management Systems'::text, 'Online Literary Resources'::text, 'Professional Development & Supports (Staff)'::text, 'Supplemental - Intervention'::text, 'Virtual Experiences & Lessons'::text])) THEN 'weekly'::text
+                    WHEN (COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text) = ANY (ARRAY['Assessment'::text, 'Data Analysis & Progress Monitoring'::text, 'Test Prep'::text, 'Student Information & Monitoring Systems'::text, 'Cyber Safety/Security'::text, 'Future Ready'::text, 'Esports'::text])) THEN 'periodic'::text
+                    WHEN (COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text) = ANY (ARRAY['Entertainment'::text, 'Social Media'::text, 'Textbooks'::text])) THEN 'sporadic'::text
+                    ELSE 'daily'::text
+                END AS category_type
+           FROM grouped_by_name_and_district
+        ), roi_thresholds AS (
+         SELECT category_expectations.name,
+            category_expectations.district_id,
+            category_expectations.category_type,
+                CASE category_expectations.category_type
+                    WHEN 'daily'::text THEN 0.9
+                    WHEN 'weekly'::text THEN 0.8
+                    WHEN 'periodic'::text THEN 0.7
+                    WHEN 'sporadic'::text THEN 0.6
+                    ELSE 0.9
+                END AS high_threshold,
+                CASE category_expectations.category_type
+                    WHEN 'daily'::text THEN 0.75
+                    WHEN 'weekly'::text THEN 0.65
+                    WHEN 'periodic'::text THEN 0.5
+                    WHEN 'sporadic'::text THEN 0.4
+                    ELSE 0.75
+                END AS moderate_threshold
+           FROM category_expectations
+        )
+ SELECT gbn.name,
+    gbn.district_id,
+    gbn.software_ids AS ids,
+    ce.categories,
+    gbn.school_names,
+    gbn.user_types,
+    gbn.grades,
+    gbn.grade_ranges,
+    gbn.funding_sources,
+    gbn.total_cost,
+    gbn.students_licensed,
+    gbn.authorized,
+    gbn.district_purchased,
+    gbn.url,
+    gbn.icon,
+    gbn.applicable_grade_bands,
+    gbn.sub_population,
+    gbn.program_population,
+    ce.primary_category,
+    COALESCE(au.total_minutes, (0)::numeric) AS total_minutes,
+    COALESCE(uc.active_users, (0)::bigint) AS active_users,
+    COALESCE(au.usage_days, (0)::bigint) AS usage_days,
+    au.first_use_date,
+    au.last_use_date,
+    COALESCE(uc.active_students, (0)::bigint) AS active_students,
+    COALESCE(uc.active_teachers, (0)::bigint) AS active_teachers,
+    ce.expected_daily_minutes,
+        CASE
+            WHEN (gbn.students_licensed > 0) THEN (gbn.total_cost / (gbn.students_licensed)::numeric)
+            ELSE (0)::numeric
+        END AS cost_per_student,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL)) THEN (LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric
+            ELSE (0)::numeric
+        END AS days_since_start,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL)) THEN ((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes)
+            ELSE (0)::numeric
+        END AS expected_minutes_to_date,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL) AND (ce.expected_daily_minutes > (0)::numeric) AND (((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes) > (0)::numeric)) THEN (COALESCE(au.total_minutes, (0)::numeric) / ((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes))
+            ELSE (0)::numeric
+        END AS usage_ratio,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL) AND (LEAST(((au.last_use_date - au.first_use_date) + 1), 180) > 0)) THEN (COALESCE(au.total_minutes, (0)::numeric) / (LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric)
+            ELSE (0)::numeric
+        END AS avg_minutes_per_day,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL) AND (ce.expected_daily_minutes > (0)::numeric) AND (((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes) > (0)::numeric)) THEN (((COALESCE(au.total_minutes, (0)::numeric) / ((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes)) - (1)::numeric) * (100)::numeric)
+            ELSE (- (100)::numeric)
+        END AS avg_roi_percentage,
+        CASE
+            WHEN ((au.first_use_date IS NULL) OR (ce.expected_daily_minutes = (0)::numeric) OR (LEAST(((au.last_use_date - au.first_use_date) + 1), 180) = 0)) THEN 'low'::text
+            WHEN (((COALESCE(au.total_minutes, (0)::numeric) / NULLIF(((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes), (0)::numeric)) >= rt.high_threshold) AND ((COALESCE(au.total_minutes, (0)::numeric) / NULLIF((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric, (0)::numeric)) >= (ce.expected_daily_minutes * 0.8))) THEN 'high'::text
+            WHEN (((COALESCE(au.total_minutes, (0)::numeric) / NULLIF(((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes), (0)::numeric)) >= rt.moderate_threshold) AND ((COALESCE(au.total_minutes, (0)::numeric) / NULLIF((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric, (0)::numeric)) >= (ce.expected_daily_minutes * 0.6))) THEN 'moderate'::text
+            ELSE 'low'::text
+        END AS roi_status,
+        CASE
+            WHEN ((COALESCE(au.usage_days, (0)::bigint) > 0) AND (ce.expected_daily_minutes > (0)::numeric)) THEN LEAST((100)::numeric, ((COALESCE(au.total_minutes, (0)::numeric) / ((au.usage_days)::numeric * ce.expected_daily_minutes)) * (100)::numeric))
+            ELSE (0)::numeric
+        END AS engagement_rate,
+        CASE
+            WHEN ((COALESCE(au.usage_days, (0)::bigint) > 0) AND (ce.expected_daily_minutes > (0)::numeric)) THEN
+            CASE
+                WHEN ((COALESCE(au.total_minutes, (0)::numeric) / (au.usage_days)::numeric) >= ce.expected_daily_minutes) THEN (100)::numeric
+                ELSE round(((COALESCE(au.total_minutes, (0)::numeric) / ((au.usage_days)::numeric * ce.expected_daily_minutes)) * (100)::numeric), 1)
+            END
+            ELSE (0)::numeric
+        END AS usage_compliance,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL) AND (COALESCE(au.usage_days, (0)::bigint) > 0) AND (LEAST(((au.last_use_date - au.first_use_date) + 1), 180) > 0)) THEN (((COALESCE(au.usage_days, (0)::bigint))::numeric / (LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric) * (100)::numeric)
+            ELSE (0)::numeric
+        END AS avg_usage_compliance
+   FROM ((((grouped_by_name_and_district gbn
+     LEFT JOIN aggregated_usage au ON (((lower(gbn.name) = au.name) AND (gbn.district_id = au.district_id))))
+     LEFT JOIN user_counts uc ON (((lower(gbn.name) = uc.name) AND (gbn.district_id = uc.district_id))))
+     LEFT JOIN category_expectations ce ON (((lower(gbn.name) = ce.name) AND (gbn.district_id = ce.district_id))))
+     LEFT JOIN roi_thresholds rt ON (((lower(gbn.name) = rt.name) AND (gbn.district_id = rt.district_id))));;"
+"CREATE MATERIALIZED VIEW mv_software_district_stats AS  SELECT s.district_id,
+    count(*) AS total_software,
+    count(*) FILTER (WHERE (s.authorized = true)) AS authorized_software,
+    count(*) FILTER (WHERE (s.authorized = false)) AS unauthorized_software,
+    sum(s.total_cost) FILTER (WHERE (s.authorized = true)) AS total_investment,
+    sum(s.total_cost) FILTER (WHERE (s.authorized = false)) AS unauthorized_investment,
+    count(*) FILTER (WHERE (s.user_type = 'student'::text)) AS student_software,
+    count(*) FILTER (WHERE (s.user_type = 'teacher'::text)) AS teacher_software,
+    count(*) FILTER (WHERE (s.user_type = 'both'::text)) AS both_software,
+    max(s.updated_at) AS last_updated
+   FROM software s
+  WHERE (s.district_id IS NOT NULL)
+  GROUP BY s.district_id;;"
+"CREATE MATERIALIZED VIEW mv_recent_usage_stats AS  SELECT su.software_id,
+    count(DISTINCT su.user_id) AS active_users_30d,
+    sum(su.minutes_used) AS total_minutes_30d,
+    count(DISTINCT su.date) AS active_days_30d,
+    avg(su.minutes_used) AS avg_minutes_per_session,
+    max(su.date) AS last_usage_date
+   FROM software_usage su
+  WHERE (su.date >= (CURRENT_DATE - '30 days'::interval))
+  GROUP BY su.software_id;;"
+"CREATE MATERIALIZED VIEW mv_software_roi_summary AS  SELECT s.district_id,
+    sm.roi_status,
+    count(*) AS software_count,
+    sum(s.total_cost) AS total_investment,
+    avg(sm.percent_days_with_minimum_usage) AS avg_utilization,
+    avg(sm.roi_percentage) AS avg_roi_percentage
+   FROM (software s
+     LEFT JOIN software_metrics sm ON ((s.id = sm.software_id)))
+  WHERE ((s.authorized = true) AND (s.district_id IS NOT NULL))
+  GROUP BY s.district_id, sm.roi_status;;"
+"CREATE MATERIALIZED VIEW mv_user_analytics AS  SELECT p.district_id,
+    p.role,
+    count(*) AS total_users,
+    count(*) FILTER (WHERE (p.grade IS NOT NULL)) AS users_with_grade,
+    count(*) FILTER (WHERE (p.school_id IS NOT NULL)) AS users_with_school,
+    count(DISTINCT p.school_id) AS unique_schools
+   FROM profiles p
+  WHERE (p.district_id IS NOT NULL)
+  GROUP BY p.district_id, p.role;;"
+"CREATE MATERIALIZED VIEW mv_software_roi_analytics AS  SELECT s.id,
+    s.name,
+    s.category,
+    s.total_cost,
+    s.students_licensed,
+    s.school_name,
+    s.grade,
+    s.sub_population,
+    s.funding_source,
+    s.authorized,
+    s.district_id,
+    s.user_type,
+    COALESCE(usage_stats.total_minutes, (0)::numeric) AS total_minutes_used,
+    COALESCE(usage_stats.unique_days, (0)::bigint) AS days_with_usage,
+    COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) AS avg_daily_minutes,
+    COALESCE(usage_stats.student_minutes, (0)::numeric) AS student_minutes,
+    COALESCE(usage_stats.teacher_minutes, (0)::numeric) AS teacher_minutes,
+    COALESCE(sm.cost_per_student, (s.total_cost / (GREATEST(s.students_licensed, 1))::numeric)) AS cost_per_student,
+        CASE
+            WHEN ((COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (60)::numeric) AND (COALESCE(sm.cost_per_student, (s.total_cost / (GREATEST(s.students_licensed, 1))::numeric)) < (50)::numeric)) THEN 85
+            WHEN ((COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (30)::numeric) AND (COALESCE(sm.cost_per_student, (s.total_cost / (GREATEST(s.students_licensed, 1))::numeric)) < (100)::numeric)) THEN 70
+            WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (15)::numeric) THEN 55
+            WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (5)::numeric) THEN 35
+            ELSE 15
+        END AS roi_percentage,
+        CASE
+            WHEN (
+            CASE
+                WHEN ((COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (60)::numeric) AND (COALESCE(sm.cost_per_student, (s.total_cost / (GREATEST(s.students_licensed, 1))::numeric)) < (50)::numeric)) THEN 85
+                WHEN ((COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (30)::numeric) AND (COALESCE(sm.cost_per_student, (s.total_cost / (GREATEST(s.students_licensed, 1))::numeric)) < (100)::numeric)) THEN 70
+                WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (15)::numeric) THEN 55
+                WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (5)::numeric) THEN 35
+                ELSE 15
+            END > 60) THEN 'high'::text
+            WHEN (
+            CASE
+                WHEN ((COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (60)::numeric) AND (COALESCE(sm.cost_per_student, (s.total_cost / (GREATEST(s.students_licensed, 1))::numeric)) < (50)::numeric)) THEN 85
+                WHEN ((COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (30)::numeric) AND (COALESCE(sm.cost_per_student, (s.total_cost / (GREATEST(s.students_licensed, 1))::numeric)) < (100)::numeric)) THEN 70
+                WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (15)::numeric) THEN 55
+                WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (5)::numeric) THEN 35
+                ELSE 15
+            END > 40) THEN 'moderate'::text
+            ELSE 'low'::text
+        END AS roi_status,
+    COALESCE(usage_stats.unique_days, (0)::bigint) AS utilization_rate,
+        CASE
+            WHEN (
+            CASE
+                WHEN ((COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (60)::numeric) AND (COALESCE(sm.cost_per_student, (s.total_cost / (GREATEST(s.students_licensed, 1))::numeric)) < (50)::numeric)) THEN 85
+                WHEN ((COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (30)::numeric) AND (COALESCE(sm.cost_per_student, (s.total_cost / (GREATEST(s.students_licensed, 1))::numeric)) < (100)::numeric)) THEN 70
+                WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (15)::numeric) THEN 55
+                WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (5)::numeric) THEN 35
+                ELSE 15
+            END >= 70) THEN 'high_roi'::text
+            WHEN (
+            CASE
+                WHEN ((COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (60)::numeric) AND (COALESCE(sm.cost_per_student, (s.total_cost / (GREATEST(s.students_licensed, 1))::numeric)) < (50)::numeric)) THEN 85
+                WHEN ((COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (30)::numeric) AND (COALESCE(sm.cost_per_student, (s.total_cost / (GREATEST(s.students_licensed, 1))::numeric)) < (100)::numeric)) THEN 70
+                WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (15)::numeric) THEN 55
+                WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) > (5)::numeric) THEN 35
+                ELSE 15
+            END >= 40) THEN 'moderate_roi'::text
+            ELSE 'low_roi'::text
+        END AS roi_category,
+        CASE
+            WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) >= (60)::numeric) THEN 'high_usage'::text
+            WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) >= (30)::numeric) THEN 'moderate_usage'::text
+            WHEN (COALESCE(usage_stats.avg_daily_minutes, (0)::numeric) >= (15)::numeric) THEN 'low_usage'::text
+            ELSE 'very_low_usage'::text
+        END AS usage_category
+   FROM ((software s
+     LEFT JOIN software_metrics sm ON ((s.id = sm.software_id)))
+     LEFT JOIN ( SELECT software_usage.software_id,
+            sum(software_usage.minutes_used) AS total_minutes,
+            count(DISTINCT software_usage.date) AS unique_days,
+                CASE
+                    WHEN (count(DISTINCT software_usage.date) > 0) THEN (sum(software_usage.minutes_used) / (count(DISTINCT software_usage.date))::numeric)
+                    ELSE (0)::numeric
+                END AS avg_daily_minutes,
+            sum(
+                CASE
+                    WHEN (software_usage.user_type = 'student'::text) THEN software_usage.minutes_used
+                    ELSE (0)::numeric
+                END) AS student_minutes,
+            sum(
+                CASE
+                    WHEN (software_usage.user_type = 'teacher'::text) THEN software_usage.minutes_used
+                    ELSE (0)::numeric
+                END) AS teacher_minutes
+           FROM software_usage
+          WHERE (software_usage.date >= (CURRENT_DATE - '90 days'::interval))
+          GROUP BY software_usage.software_id) usage_stats ON ((s.id = usage_stats.software_id)))
+  WHERE ((s.authorized = true) AND (s.total_cost > (0)::numeric));;"
+"CREATE MATERIALIZED VIEW mv_software_usage_rankings AS  WITH software_aggregated AS (
+         SELECT s.name,
+            s.category,
+            s.funding_source,
+            s.district_id,
+            s.school_name,
+            s.user_type,
+            s.grade_range,
+            s.authorized,
+            s.district_purchased,
+            sum(s.total_cost) AS total_cost,
+            sum(s.students_licensed) AS total_students_licensed,
+            count(*) AS instance_count,
+            array_agg(s.id) AS software_ids
+           FROM software s
+          WHERE (((s.authorized = true) OR (s.district_purchased = true)) AND (s.total_cost > (0)::numeric))
+          GROUP BY s.name, s.category, s.funding_source, s.district_id, s.school_name, s.user_type, s.grade_range, s.authorized, s.district_purchased
+        ), usage_aggregated AS (
+         SELECT sa.name,
+            sa.category,
+            sa.funding_source,
+            sa.district_id,
+            sa.school_name,
+            sa.user_type,
+            sa.grade_range,
+            sa.authorized,
+            sa.district_purchased,
+            sa.total_cost,
+            sa.total_students_licensed,
+            sa.instance_count,
+            sa.software_ids,
+            COALESCE(sum(su.minutes_used), (0)::numeric) AS total_minutes,
+            count(DISTINCT su.user_id) AS unique_users,
+            count(DISTINCT su.date) AS usage_days
+           FROM (software_aggregated sa
+             LEFT JOIN software_usage su ON ((su.software_id = ANY (sa.software_ids))))
+          GROUP BY sa.name, sa.category, sa.funding_source, sa.district_id, sa.school_name, sa.user_type, sa.grade_range, sa.authorized, sa.district_purchased, sa.total_cost, sa.total_students_licensed, sa.instance_count, sa.software_ids
+        ), rankings_calculated AS (
+         SELECT gen_random_uuid() AS id,
+            usage_aggregated.name,
+            usage_aggregated.category,
+            usage_aggregated.funding_source,
+            usage_aggregated.district_id,
+            usage_aggregated.school_name,
+            usage_aggregated.user_type,
+            usage_aggregated.grade_range,
+            usage_aggregated.authorized,
+            usage_aggregated.district_purchased,
+            usage_aggregated.total_cost,
+            usage_aggregated.total_students_licensed,
+            usage_aggregated.instance_count,
+            usage_aggregated.software_ids,
+            usage_aggregated.total_minutes,
+            usage_aggregated.unique_users,
+            usage_aggregated.usage_days,
+                CASE
+                    WHEN (usage_aggregated.total_students_licensed > 0) THEN LEAST((100)::numeric, (((usage_aggregated.unique_users)::numeric / (usage_aggregated.total_students_licensed)::numeric) * (100)::numeric))
+                    ELSE (0)::numeric
+                END AS usage_percentage,
+            row_number() OVER (ORDER BY
+                CASE
+                    WHEN (usage_aggregated.total_students_licensed > 0) THEN LEAST((100)::numeric, (((usage_aggregated.unique_users)::numeric / (usage_aggregated.total_students_licensed)::numeric) * (100)::numeric))
+                    ELSE (0)::numeric
+                END DESC, usage_aggregated.total_minutes DESC) AS usage_rank_desc,
+            row_number() OVER (ORDER BY
+                CASE
+                    WHEN (usage_aggregated.total_students_licensed > 0) THEN LEAST((100)::numeric, (((usage_aggregated.unique_users)::numeric / (usage_aggregated.total_students_licensed)::numeric) * (100)::numeric))
+                    ELSE (0)::numeric
+                END, usage_aggregated.total_minutes) AS usage_rank_asc,
+            count(*) OVER () AS total_count
+           FROM usage_aggregated
+        )
+ SELECT rankings_calculated.id,
+    rankings_calculated.name,
+    rankings_calculated.category,
+    rankings_calculated.funding_source,
+    rankings_calculated.district_id,
+    rankings_calculated.school_name,
+    rankings_calculated.user_type,
+    rankings_calculated.grade_range,
+    rankings_calculated.authorized,
+    rankings_calculated.district_purchased,
+    rankings_calculated.total_cost,
+    rankings_calculated.total_students_licensed,
+    rankings_calculated.instance_count,
+    rankings_calculated.software_ids,
+    rankings_calculated.total_minutes,
+    rankings_calculated.unique_users,
+    rankings_calculated.usage_days,
+    rankings_calculated.usage_percentage,
+    rankings_calculated.usage_rank_desc,
+    rankings_calculated.usage_rank_asc,
+    rankings_calculated.total_count
+   FROM rankings_calculated;;"
+"CREATE MATERIALIZED VIEW software_usage_aggregated AS  SELECT su.software_id,
+    count(DISTINCT su.user_id) FILTER (WHERE (su.user_id IS NOT NULL)) AS unique_users,
+    count(DISTINCT su.date) AS unique_days,
+    sum(su.minutes_used) AS total_minutes,
+    count(*) AS usage_count,
+    count(DISTINCT
+        CASE
+            WHEN (su.minutes_used >= (30)::numeric) THEN su.date
+            ELSE NULL::date
+        END) AS days_with_minimum_usage,
+    avg(su.minutes_used) AS avg_minutes_per_entry,
+    max(su.date) AS last_usage_date,
+    min(su.date) AS first_usage_date,
+    sum(
+        CASE
+            WHEN (su.user_type = 'student'::text) THEN su.minutes_used
+            ELSE (0)::numeric
+        END) AS student_minutes,
+    sum(
+        CASE
+            WHEN (su.user_type = 'teacher'::text) THEN su.minutes_used
+            ELSE (0)::numeric
+        END) AS teacher_minutes,
+    count(DISTINCT
+        CASE
+            WHEN (su.user_type = 'student'::text) THEN su.user_id
+            ELSE NULL::uuid
+        END) AS unique_students,
+    count(DISTINCT
+        CASE
+            WHEN (su.user_type = 'teacher'::text) THEN su.user_id
+            ELSE NULL::uuid
+        END) AS unique_teachers
+   FROM software_usage su
+  GROUP BY su.software_id;;"
+"CREATE MATERIALIZED VIEW mv_software_usage_analytics AS  WITH software_with_metrics AS (
+         SELECT s.id,
+            s.name,
+            s.category,
+            s.total_cost,
+            s.students_licensed,
+            s.school_name,
+            s.authorized,
+            s.district_purchased,
+            s.user_type,
+            s.district_id,
+            s.grade,
+            s.grade_range,
+            s.funding_source,
+            s.url,
+            s.icon,
+            s.applicable_grade_bands,
+            s.sub_population,
+            s.program_population,
+            COALESCE(sm.roi_status, 'low'::text) AS roi_status,
+            COALESCE(sm.roi_percentage, (0)::numeric) AS roi_percentage,
+            COALESCE(sm.percent_days_with_minimum_usage, (0)::numeric) AS percent_days_with_minimum_usage,
+            COALESCE(sm.cost_per_student, (0)::numeric) AS cost_per_student
+           FROM (software s
+             LEFT JOIN software_metrics sm ON ((s.id = sm.software_id)))
+          WHERE ((s.authorized = true) OR (s.district_purchased = true))
+        ), usage_per_software AS (
+         SELECT su.software_id,
+            sum(su.minutes_used) AS total_usage_minutes,
+            count(DISTINCT su.user_id) FILTER (WHERE (su.user_id IS NOT NULL)) AS unique_users,
+            count(DISTINCT su.date) AS usage_days,
+            min(su.date) AS first_use_date,
+            max(su.date) AS last_use_date,
+            count(DISTINCT su.user_id) FILTER (WHERE ((su.user_id IS NOT NULL) AND (EXISTS ( SELECT 1
+                   FROM profiles p
+                  WHERE ((p.id = su.user_id) AND (p.role = 'student'::text)))))) AS active_students,
+            count(DISTINCT su.user_id) FILTER (WHERE ((su.user_id IS NOT NULL) AND (EXISTS ( SELECT 1
+                   FROM profiles p
+                  WHERE ((p.id = su.user_id) AND (p.role = 'teacher'::text)))))) AS active_teachers
+           FROM software_usage su
+          WHERE (su.minutes_used > (0)::numeric)
+          GROUP BY su.software_id
+        ), grouped_by_name_and_district AS (
+         SELECT min(swm.name) AS name,
+            swm.district_id,
+            array_agg(DISTINCT swm.id) AS software_ids,
+            array_agg(DISTINCT swm.category) FILTER (WHERE (swm.category IS NOT NULL)) AS categories,
+            array_agg(DISTINCT swm.school_name) FILTER (WHERE (swm.school_name IS NOT NULL)) AS school_names,
+            array_agg(DISTINCT swm.user_type) FILTER (WHERE (swm.user_type IS NOT NULL)) AS user_types,
+            array_agg(DISTINCT swm.grade) FILTER (WHERE (swm.grade IS NOT NULL)) AS grades,
+            array_agg(DISTINCT swm.grade_range) FILTER (WHERE (swm.grade_range IS NOT NULL)) AS grade_ranges,
+            array_agg(DISTINCT swm.funding_source) FILTER (WHERE (swm.funding_source IS NOT NULL)) AS funding_sources,
+            sum(swm.total_cost) AS total_cost,
+            sum(swm.students_licensed) AS students_licensed,
+            bool_or(swm.authorized) AS authorized,
+            bool_or(COALESCE(swm.district_purchased, false)) AS district_purchased,
+            min(swm.roi_status) AS roi_status,
+            avg(swm.roi_percentage) AS avg_roi_percentage,
+            avg(swm.percent_days_with_minimum_usage) AS avg_usage_compliance,
+            avg(swm.cost_per_student) AS avg_cost_per_student,
+            max(swm.url) AS url,
+            max(swm.icon) AS icon,
+            min((swm.applicable_grade_bands)::text) AS applicable_grade_bands,
+            min(swm.sub_population) AS sub_population,
+            min(swm.program_population) AS program_population
+           FROM software_with_metrics swm
+          GROUP BY (lower(swm.name)), swm.district_id
+        ), aggregated_usage AS (
+         SELECT lower(gbn_1.name) AS name,
+            gbn_1.district_id,
+            sum(ups.total_usage_minutes) AS total_minutes,
+            sum(ups.unique_users) AS active_users,
+            max(ups.usage_days) AS usage_days,
+            min(ups.first_use_date) AS first_use_date,
+            max(ups.last_use_date) AS last_use_date,
+            sum(ups.active_students) AS active_students,
+            sum(ups.active_teachers) AS active_teachers
+           FROM ((grouped_by_name_and_district gbn_1
+             CROSS JOIN LATERAL unnest(gbn_1.software_ids) unnested_software(software_id))
+             LEFT JOIN usage_per_software ups ON ((ups.software_id = unnested_software.software_id)))
+          GROUP BY (lower(gbn_1.name)), gbn_1.district_id
+        )
+ SELECT gbn.name,
+    gbn.district_id,
+    gbn.software_ids AS ids,
+    gbn.categories,
+    gbn.school_names,
+    gbn.user_types,
+    gbn.grades,
+    gbn.grade_ranges,
+    gbn.funding_sources,
+    gbn.total_cost,
+    gbn.students_licensed,
+    gbn.authorized,
+    gbn.district_purchased,
+    gbn.roi_status,
+    gbn.avg_roi_percentage,
+    gbn.avg_usage_compliance,
+    gbn.avg_cost_per_student,
+    gbn.url,
+    gbn.icon,
+    gbn.applicable_grade_bands,
+    gbn.sub_population,
+    gbn.program_population,
+    COALESCE(gbn.categories[1], 'Uncategorized'::text) AS primary_category,
+    COALESCE(au.total_minutes, (0)::numeric) AS total_minutes,
+    COALESCE(au.active_users, (0)::numeric) AS active_users,
+    COALESCE(au.usage_days, (0)::bigint) AS usage_days,
+    au.first_use_date,
+    au.last_use_date,
+    COALESCE(au.active_students, (0)::numeric) AS active_students,
+    COALESCE(au.active_teachers, (0)::numeric) AS active_teachers,
+        CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+            WHEN 'Educational'::text THEN (14)::numeric
+            WHEN 'E-learning'::text THEN (14)::numeric
+            WHEN 'Gamified Learning'::text THEN (14)::numeric
+            WHEN 'STEM'::text THEN (7)::numeric
+            WHEN 'Arts & Music'::text THEN (7)::numeric
+            WHEN 'Language Learning'::text THEN (7)::numeric
+            WHEN 'Assessment'::text THEN 4.5
+            WHEN 'Data Analysis'::text THEN 4.5
+            WHEN 'Cyber Safety'::text THEN 2.25
+            WHEN 'Future Ready'::text THEN 2.25
+            ELSE (7)::numeric
+        END AS expected_daily_minutes,
+        CASE
+            WHEN ((COALESCE(au.usage_days, (0)::bigint) > 0) AND (
+            CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+                WHEN 'Educational'::text THEN (14)::numeric
+                WHEN 'E-learning'::text THEN (14)::numeric
+                WHEN 'Gamified Learning'::text THEN (14)::numeric
+                WHEN 'STEM'::text THEN (7)::numeric
+                WHEN 'Arts & Music'::text THEN (7)::numeric
+                WHEN 'Language Learning'::text THEN (7)::numeric
+                WHEN 'Assessment'::text THEN 4.5
+                WHEN 'Data Analysis'::text THEN 4.5
+                WHEN 'Cyber Safety'::text THEN 2.25
+                WHEN 'Future Ready'::text THEN 2.25
+                ELSE (7)::numeric
+            END > (0)::numeric)) THEN LEAST((100)::numeric, ((COALESCE(au.total_minutes, (0)::numeric) / ((au.usage_days)::numeric *
+            CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+                WHEN 'Educational'::text THEN (14)::numeric
+                WHEN 'E-learning'::text THEN (14)::numeric
+                WHEN 'Gamified Learning'::text THEN (14)::numeric
+                WHEN 'STEM'::text THEN (7)::numeric
+                WHEN 'Arts & Music'::text THEN (7)::numeric
+                WHEN 'Language Learning'::text THEN (7)::numeric
+                WHEN 'Assessment'::text THEN 4.5
+                WHEN 'Data Analysis'::text THEN 4.5
+                WHEN 'Cyber Safety'::text THEN 2.25
+                WHEN 'Future Ready'::text THEN 2.25
+                ELSE (7)::numeric
+            END)) * (100)::numeric))
+            ELSE (0)::numeric
+        END AS engagement_rate,
+        CASE
+            WHEN ((COALESCE(au.usage_days, (0)::bigint) > 0) AND (
+            CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+                WHEN 'Educational'::text THEN (14)::numeric
+                WHEN 'E-learning'::text THEN (14)::numeric
+                WHEN 'Gamified Learning'::text THEN (14)::numeric
+                WHEN 'STEM'::text THEN (7)::numeric
+                WHEN 'Arts & Music'::text THEN (7)::numeric
+                WHEN 'Language Learning'::text THEN (7)::numeric
+                WHEN 'Assessment'::text THEN 4.5
+                WHEN 'Data Analysis'::text THEN 4.5
+                WHEN 'Cyber Safety'::text THEN 2.25
+                WHEN 'Future Ready'::text THEN 2.25
+                ELSE (7)::numeric
+            END > (0)::numeric)) THEN
+            CASE
+                WHEN ((COALESCE(au.total_minutes, (0)::numeric) / (au.usage_days)::numeric) >=
+                CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+                    WHEN 'Educational'::text THEN (14)::numeric
+                    WHEN 'E-learning'::text THEN (14)::numeric
+                    WHEN 'Gamified Learning'::text THEN (14)::numeric
+                    WHEN 'STEM'::text THEN (7)::numeric
+                    WHEN 'Arts & Music'::text THEN (7)::numeric
+                    WHEN 'Language Learning'::text THEN (7)::numeric
+                    WHEN 'Assessment'::text THEN 4.5
+                    WHEN 'Data Analysis'::text THEN 4.5
+                    WHEN 'Cyber Safety'::text THEN 2.25
+                    WHEN 'Future Ready'::text THEN 2.25
+                    ELSE (7)::numeric
+                END) THEN (100)::numeric
+                ELSE round(((COALESCE(au.total_minutes, (0)::numeric) / ((au.usage_days)::numeric *
+                CASE COALESCE(gbn.categories[1], 'Uncategorized'::text)
+                    WHEN 'Educational'::text THEN (14)::numeric
+                    WHEN 'E-learning'::text THEN (14)::numeric
+                    WHEN 'Gamified Learning'::text THEN (14)::numeric
+                    WHEN 'STEM'::text THEN (7)::numeric
+                    WHEN 'Arts & Music'::text THEN (7)::numeric
+                    WHEN 'Language Learning'::text THEN (7)::numeric
+                    WHEN 'Assessment'::text THEN 4.5
+                    WHEN 'Data Analysis'::text THEN 4.5
+                    WHEN 'Cyber Safety'::text THEN 2.25
+                    WHEN 'Future Ready'::text THEN 2.25
+                    ELSE (7)::numeric
+                END)) * (100)::numeric), 1)
+            END
+            ELSE (0)::numeric
+        END AS usage_compliance
+   FROM (grouped_by_name_and_district gbn
+     LEFT JOIN aggregated_usage au ON (((lower(gbn.name) = au.name) AND (gbn.district_id = au.district_id))));;"
+"CREATE MATERIALIZED VIEW software_usage_aggregates AS  SELECT su.software_id,
+    date_trunc('day'::text, (su.date)::timestamp with time zone) AS usage_date,
+    sum(su.minutes_used) AS total_minutes,
+    count(DISTINCT su.user_id) AS unique_users,
+    avg(su.minutes_used) AS avg_minutes_per_session,
+    count(*) AS session_count
+   FROM software_usage su
+  GROUP BY su.software_id, (date_trunc('day'::text, (su.date)::timestamp with time zone));;"
+"CREATE MATERIALIZED VIEW software_usage_by_district AS  SELECT su.software_id,
+    p.district_id,
+    count(DISTINCT su.user_id) FILTER (WHERE (su.user_id IS NOT NULL)) AS unique_users,
+    count(DISTINCT su.date) AS unique_days,
+    sum(su.minutes_used) AS total_minutes,
+    count(*) AS usage_count
+   FROM (software_usage su
+     LEFT JOIN profiles p ON ((su.user_id = p.id)))
+  WHERE (p.district_id IS NOT NULL)
+  GROUP BY su.software_id, p.district_id;;"
+"CREATE MATERIALIZED VIEW mv_user_software_utilization AS  SELECT su.software_id,
+    su.user_id,
+    p.email AS user_email,
+    p.first_name,
+    p.last_name,
+    p.grade,
+    p.school_id,
+    p.district_id,
+    s.name AS school_name,
+    d.name AS district_name,
+    sw.name AS software_name,
+    sw.category AS software_category,
+    (count(*))::integer AS sessions_count,
+    (sum(su.minutes_used))::integer AS total_minutes,
+    min(su.date) AS first_active,
+    max(su.date) AS last_active,
+    ((max(su.date) - min(su.date)) + 1) AS days_active,
+        CASE
+            WHEN ((max(su.date) - min(su.date)) = 0) THEN (sum(su.minutes_used))::integer
+            ELSE (round(((sum(su.minutes_used) / (NULLIF(((max(su.date) - min(su.date)) + 1), 0))::numeric) * (7)::numeric)))::integer
+        END AS avg_weekly_minutes
+   FROM ((((software_usage su
+     JOIN profiles p ON ((su.user_id = p.id)))
+     JOIN software sw ON ((su.software_id = sw.id)))
+     LEFT JOIN schools s ON ((p.school_id = s.id)))
+     LEFT JOIN districts d ON ((p.district_id = d.id)))
+  WHERE (su.user_id IS NOT NULL)
+  GROUP BY su.software_id, su.user_id, p.email, p.first_name, p.last_name, p.grade, p.school_id, p.district_id, s.name, d.name, sw.name, sw.category;;"
+"CREATE MATERIALIZED VIEW mv_software_usage_analytics_v3 AS  WITH software_with_metrics AS (
+         SELECT s.id,
+            s.name,
+            s.category,
+            s.total_cost,
+            s.students_licensed,
+            s.school_name,
+            s.authorized,
+            s.district_purchased,
+            s.user_type,
+            s.district_id,
+            s.grade,
+            s.grade_range,
+            s.funding_source,
+            s.url,
+            s.icon,
+            s.applicable_grade_bands,
+            s.sub_population,
+            s.program_population
+           FROM software s
+          WHERE ((s.authorized = true) OR (s.district_purchased = true))
+        ), usage_per_software AS (
+         SELECT su.software_id,
+            sum(su.minutes_used) AS total_usage_minutes,
+            count(DISTINCT su.date) AS usage_days,
+            min(su.date) AS first_use_date,
+            max(su.date) AS last_use_date
+           FROM software_usage su
+          WHERE (su.minutes_used > (0)::numeric)
+          GROUP BY su.software_id
+        ), grouped_by_name_and_district_pre AS (
+         SELECT lower(swm.name) AS name_lower,
+            min(swm.name) AS name,
+            swm.district_id,
+            array_agg(DISTINCT swm.id) AS software_ids,
+            array_agg(DISTINCT swm.category) FILTER (WHERE (swm.category IS NOT NULL)) AS categories,
+            array_agg(DISTINCT swm.school_name) FILTER (WHERE (swm.school_name IS NOT NULL)) AS school_names,
+            array_agg(DISTINCT swm.user_type) FILTER (WHERE (swm.user_type IS NOT NULL)) AS user_types,
+            array_agg(DISTINCT swm.grade) FILTER (WHERE (swm.grade IS NOT NULL)) AS raw_grades,
+            array_agg(DISTINCT swm.grade_range) FILTER (WHERE (swm.grade_range IS NOT NULL)) AS grade_ranges,
+            array_agg(DISTINCT swm.funding_source) FILTER (WHERE (swm.funding_source IS NOT NULL)) AS funding_sources,
+            sum(swm.total_cost) AS total_cost,
+            sum(swm.students_licensed) AS students_licensed,
+            bool_or(swm.authorized) AS authorized,
+            bool_or(COALESCE(swm.district_purchased, false)) AS district_purchased,
+            max(swm.url) AS url,
+            max(swm.icon) AS icon,
+            min((swm.applicable_grade_bands)::text) AS applicable_grade_bands,
+            min(swm.sub_population) AS sub_population,
+            min(swm.program_population) AS program_population
+           FROM software_with_metrics swm
+          GROUP BY (lower(swm.name)), swm.district_id
+        ), grouped_by_name_and_district AS (
+         SELECT grouped_by_name_and_district_pre.name,
+            grouped_by_name_and_district_pre.district_id,
+            grouped_by_name_and_district_pre.software_ids,
+            grouped_by_name_and_district_pre.categories,
+            grouped_by_name_and_district_pre.school_names,
+            grouped_by_name_and_district_pre.user_types,
+            ( SELECT array_agg(DISTINCT all_expanded_grades.expanded_grade) AS array_agg
+                   FROM ( SELECT unnest(expand_grade_range(g.g)) AS expanded_grade
+                           FROM unnest(grouped_by_name_and_district_pre.raw_grades) g(g)
+                          WHERE (g.g IS NOT NULL)
+                        UNION
+                         SELECT unnest(expand_grade_range(gr.gr)) AS expanded_grade
+                           FROM unnest(grouped_by_name_and_district_pre.grade_ranges) gr(gr)
+                          WHERE (gr.gr IS NOT NULL)
+                        UNION
+                         SELECT unnest(expand_grade_range(band.band)) AS expanded_grade
+                           FROM unnest(string_to_array(TRIM(BOTH '{}'::text FROM COALESCE(grouped_by_name_and_district_pre.applicable_grade_bands, '{}'::text)), ','::text)) band(band)
+                          WHERE ((band.band IS NOT NULL) AND (TRIM(BOTH '""'::text FROM band.band) <> ''::text))) all_expanded_grades
+                  WHERE ((all_expanded_grades.expanded_grade IS NOT NULL) AND (TRIM(BOTH FROM all_expanded_grades.expanded_grade) <> ''::text))) AS grades,
+            grouped_by_name_and_district_pre.grade_ranges,
+            grouped_by_name_and_district_pre.funding_sources,
+            grouped_by_name_and_district_pre.total_cost,
+            grouped_by_name_and_district_pre.students_licensed,
+            grouped_by_name_and_district_pre.authorized,
+            grouped_by_name_and_district_pre.district_purchased,
+            grouped_by_name_and_district_pre.url,
+            grouped_by_name_and_district_pre.icon,
+            grouped_by_name_and_district_pre.applicable_grade_bands,
+            grouped_by_name_and_district_pre.sub_population,
+            grouped_by_name_and_district_pre.program_population
+           FROM grouped_by_name_and_district_pre
+        ), name_district_users AS (
+         SELECT DISTINCT lower(s.name) AS name,
+            s.district_id,
+            su.user_id,
+            p.role
+           FROM ((software s
+             JOIN software_usage su ON ((su.software_id = s.id)))
+             LEFT JOIN profiles p ON ((p.id = su.user_id)))
+          WHERE (((s.authorized = true) OR (s.district_purchased = true)) AND (su.minutes_used > (0)::numeric) AND (su.user_id IS NOT NULL))
+        ), user_counts AS (
+         SELECT name_district_users.name,
+            name_district_users.district_id,
+            count(DISTINCT name_district_users.user_id) AS active_users,
+            count(DISTINCT
+                CASE
+                    WHEN (name_district_users.role = 'student'::text) THEN name_district_users.user_id
+                    ELSE NULL::uuid
+                END) AS active_students,
+            count(DISTINCT
+                CASE
+                    WHEN (name_district_users.role = 'teacher'::text) THEN name_district_users.user_id
+                    ELSE NULL::uuid
+                END) AS active_teachers
+           FROM name_district_users
+          GROUP BY name_district_users.name, name_district_users.district_id
+        ), aggregated_usage AS (
+         SELECT lower(gbn_1.name) AS name,
+            gbn_1.district_id,
+            sum(ups.total_usage_minutes) AS total_minutes,
+            max(ups.usage_days) AS usage_days,
+            min(ups.first_use_date) AS first_use_date,
+            max(ups.last_use_date) AS last_use_date
+           FROM ((grouped_by_name_and_district gbn_1
+             CROSS JOIN LATERAL unnest(gbn_1.software_ids) unnested_software(software_id))
+             LEFT JOIN usage_per_software ups ON ((ups.software_id = unnested_software.software_id)))
+          GROUP BY (lower(gbn_1.name)), gbn_1.district_id
+        ), category_expectations AS (
+         SELECT lower(grouped_by_name_and_district.name) AS name,
+            grouped_by_name_and_district.district_id,
+            grouped_by_name_and_district.categories,
+            COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text) AS primary_category,
+                CASE COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text)
+                    WHEN 'Educational'::text THEN (10)::numeric
+                    WHEN 'E-learning'::text THEN (15)::numeric
+                    WHEN 'Gamified Learning'::text THEN (12)::numeric
+                    WHEN 'Student Engagement'::text THEN (8)::numeric
+                    WHEN 'Productivity (Students)'::text THEN (10)::numeric
+                    WHEN 'Productivity (Staff)'::text THEN (15)::numeric
+                    WHEN 'Blended/Flipped Lessons'::text THEN (20)::numeric
+                    WHEN 'STEM'::text THEN (7)::numeric
+                    WHEN 'Arts & Music'::text THEN (6)::numeric
+                    WHEN 'Language Learning'::text THEN (5)::numeric
+                    WHEN 'Special Education'::text THEN (9)::numeric
+                    WHEN 'Curriculum Design & Instruction (Students)'::text THEN (6)::numeric
+                    WHEN 'Curriculum Design & Instruction (Teachers)'::text THEN (8)::numeric
+                    WHEN 'Learning Management Systems'::text THEN (7)::numeric
+                    WHEN 'Online Literary Resources'::text THEN (5)::numeric
+                    WHEN 'Professional Development & Supports (Staff)'::text THEN (9)::numeric
+                    WHEN 'Supplemental - Intervention'::text THEN (8)::numeric
+                    WHEN 'Virtual Experiences & Lessons'::text THEN (6)::numeric
+                    WHEN 'Assessment'::text THEN 4.5
+                    WHEN 'Data Analysis & Progress Monitoring'::text THEN (6)::numeric
+                    WHEN 'Test Prep'::text THEN (4)::numeric
+                    WHEN 'Student Information & Monitoring Systems'::text THEN (3)::numeric
+                    WHEN 'Cyber Safety/Security'::text THEN 1.5
+                    WHEN 'Future Ready'::text THEN 2.25
+                    WHEN 'Esports'::text THEN (3)::numeric
+                    WHEN 'Entertainment'::text THEN (2)::numeric
+                    WHEN 'Social Media'::text THEN (1)::numeric
+                    WHEN 'Textbooks'::text THEN (3)::numeric
+                    ELSE (5)::numeric
+                END AS expected_daily_minutes,
+                CASE
+                    WHEN (COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text) = ANY (ARRAY['Educational'::text, 'E-learning'::text, 'Gamified Learning'::text, 'Student Engagement'::text, 'Productivity (Students)'::text, 'Productivity (Staff)'::text, 'Blended/Flipped Lessons'::text])) THEN 'daily'::text
+                    WHEN (COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text) = ANY (ARRAY['STEM'::text, 'Arts & Music'::text, 'Language Learning'::text, 'Special Education'::text, 'Curriculum Design & Instruction (Students)'::text, 'Curriculum Design & Instruction (Teachers)'::text, 'Learning Management Systems'::text, 'Online Literary Resources'::text, 'Professional Development & Supports (Staff)'::text, 'Supplemental - Intervention'::text, 'Virtual Experiences & Lessons'::text])) THEN 'weekly'::text
+                    WHEN (COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text) = ANY (ARRAY['Assessment'::text, 'Data Analysis & Progress Monitoring'::text, 'Test Prep'::text, 'Student Information & Monitoring Systems'::text, 'Cyber Safety/Security'::text, 'Future Ready'::text, 'Esports'::text])) THEN 'periodic'::text
+                    WHEN (COALESCE(grouped_by_name_and_district.categories[1], 'Other'::text) = ANY (ARRAY['Entertainment'::text, 'Social Media'::text, 'Textbooks'::text])) THEN 'sporadic'::text
+                    ELSE 'daily'::text
+                END AS category_type
+           FROM grouped_by_name_and_district
+        ), roi_thresholds AS (
+         SELECT category_expectations.name,
+            category_expectations.district_id,
+            category_expectations.category_type,
+                CASE category_expectations.category_type
+                    WHEN 'daily'::text THEN 0.9
+                    WHEN 'weekly'::text THEN 0.8
+                    WHEN 'periodic'::text THEN 0.7
+                    WHEN 'sporadic'::text THEN 0.6
+                    ELSE 0.9
+                END AS high_threshold,
+                CASE category_expectations.category_type
+                    WHEN 'daily'::text THEN 0.75
+                    WHEN 'weekly'::text THEN 0.65
+                    WHEN 'periodic'::text THEN 0.5
+                    WHEN 'sporadic'::text THEN 0.4
+                    ELSE 0.75
+                END AS moderate_threshold
+           FROM category_expectations
+        )
+ SELECT gbn.name,
+    gbn.district_id,
+    gbn.software_ids AS ids,
+    ce.categories,
+    gbn.school_names,
+    gbn.user_types,
+    gbn.grades,
+    gbn.grade_ranges,
+    gbn.funding_sources,
+    gbn.total_cost,
+    gbn.students_licensed,
+    gbn.authorized,
+    gbn.district_purchased,
+    gbn.url,
+    gbn.icon,
+    gbn.applicable_grade_bands,
+    gbn.sub_population,
+    gbn.program_population,
+    ce.primary_category,
+    COALESCE(au.total_minutes, (0)::numeric) AS total_minutes,
+    COALESCE(uc.active_users, (0)::bigint) AS active_users,
+    COALESCE(au.usage_days, (0)::bigint) AS usage_days,
+    au.first_use_date,
+    au.last_use_date,
+    COALESCE(uc.active_students, (0)::bigint) AS active_students,
+    COALESCE(uc.active_teachers, (0)::bigint) AS active_teachers,
+    ce.expected_daily_minutes,
+        CASE
+            WHEN (gbn.students_licensed > 0) THEN (gbn.total_cost / (gbn.students_licensed)::numeric)
+            ELSE (0)::numeric
+        END AS cost_per_student,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL)) THEN (LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric
+            ELSE (0)::numeric
+        END AS days_since_start,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL)) THEN (((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes) * (COALESCE(gbn.students_licensed, (1)::bigint))::numeric)
+            ELSE (0)::numeric
+        END AS expected_minutes_to_date,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL) AND (ce.expected_daily_minutes > (0)::numeric) AND ((((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes) * (COALESCE(gbn.students_licensed, (1)::bigint))::numeric) > (0)::numeric)) THEN (COALESCE(au.total_minutes, (0)::numeric) / (((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes) * (COALESCE(gbn.students_licensed, (1)::bigint))::numeric))
+            ELSE (0)::numeric
+        END AS usage_ratio,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL) AND (LEAST(((au.last_use_date - au.first_use_date) + 1), 180) > 0)) THEN (COALESCE(au.total_minutes, (0)::numeric) / (LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric)
+            ELSE (0)::numeric
+        END AS avg_minutes_per_day,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL) AND (ce.expected_daily_minutes > (0)::numeric) AND ((((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes) * (COALESCE(gbn.students_licensed, (1)::bigint))::numeric) > (0)::numeric)) THEN ((COALESCE(au.total_minutes, (0)::numeric) / (((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes) * (COALESCE(gbn.students_licensed, (1)::bigint))::numeric)) * (100)::numeric)
+            ELSE (0)::numeric
+        END AS avg_roi_percentage,
+        CASE
+            WHEN ((au.first_use_date IS NULL) OR (ce.expected_daily_minutes = (0)::numeric) OR (LEAST(((au.last_use_date - au.first_use_date) + 1), 180) = 0)) THEN 'low'::text
+            WHEN (((COALESCE(au.total_minutes, (0)::numeric) / NULLIF((((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes) * (COALESCE(gbn.students_licensed, (1)::bigint))::numeric), (0)::numeric)) >= rt.high_threshold) AND ((COALESCE(au.total_minutes, (0)::numeric) / NULLIF((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric, (0)::numeric)) >= (ce.expected_daily_minutes * 0.8))) THEN 'high'::text
+            WHEN (((COALESCE(au.total_minutes, (0)::numeric) / NULLIF((((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric * ce.expected_daily_minutes) * (COALESCE(gbn.students_licensed, (1)::bigint))::numeric), (0)::numeric)) >= rt.moderate_threshold) AND ((COALESCE(au.total_minutes, (0)::numeric) / NULLIF((LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric, (0)::numeric)) >= (ce.expected_daily_minutes * 0.6))) THEN 'moderate'::text
+            ELSE 'low'::text
+        END AS roi_status,
+        CASE
+            WHEN ((COALESCE(au.usage_days, (0)::bigint) > 0) AND (ce.expected_daily_minutes > (0)::numeric)) THEN LEAST((100)::numeric, ((COALESCE(au.total_minutes, (0)::numeric) / ((au.usage_days)::numeric * ce.expected_daily_minutes)) * (100)::numeric))
+            ELSE (0)::numeric
+        END AS engagement_rate,
+        CASE
+            WHEN ((COALESCE(au.usage_days, (0)::bigint) > 0) AND (ce.expected_daily_minutes > (0)::numeric)) THEN
+            CASE
+                WHEN ((COALESCE(au.total_minutes, (0)::numeric) / (au.usage_days)::numeric) >= ce.expected_daily_minutes) THEN (100)::numeric
+                ELSE round(((COALESCE(au.total_minutes, (0)::numeric) / ((au.usage_days)::numeric * ce.expected_daily_minutes)) * (100)::numeric), 1)
+            END
+            ELSE (0)::numeric
+        END AS usage_compliance,
+        CASE
+            WHEN ((au.first_use_date IS NOT NULL) AND (au.last_use_date IS NOT NULL) AND (COALESCE(au.usage_days, (0)::bigint) > 0) AND (LEAST(((au.last_use_date - au.first_use_date) + 1), 180) > 0)) THEN (((COALESCE(au.usage_days, (0)::bigint))::numeric / (LEAST(((au.last_use_date - au.first_use_date) + 1), 180))::numeric) * (100)::numeric)
+            ELSE (0)::numeric
+        END AS avg_usage_compliance
+   FROM ((((grouped_by_name_and_district gbn
+     LEFT JOIN aggregated_usage au ON (((lower(gbn.name) = au.name) AND (gbn.district_id = au.district_id))))
+     LEFT JOIN user_counts uc ON (((lower(gbn.name) = uc.name) AND (gbn.district_id = uc.district_id))))
+     LEFT JOIN category_expectations ce ON (((lower(gbn.name) = ce.name) AND (gbn.district_id = ce.district_id))))
+     LEFT JOIN roi_thresholds rt ON (((lower(gbn.name) = rt.name) AND (gbn.district_id = rt.district_id))));;"
+"CREATE MATERIALIZED VIEW mv_software_investment_summary AS  SELECT s.software_id,
+    lower(s.name) AS software_name,
+    s.name AS display_name,
+    s.district_id,
+    s.school_name,
+    s.category,
+    COALESCE(s.funding_source, 'Unknown'::text) AS funding_source,
+    s.grade_range AS grade_ranges,
+    s.user_type,
+    COALESCE(s.purchase_date, s.created_at) AS latest_purchase_date,
+    s.last_usage_date,
+    s.created_at,
+    COALESCE(s.total_cost, (0)::numeric) AS total_investment,
+    COALESCE(s.students_licensed, 0) AS total_licensed_users,
+    COALESCE(s.active_users_all_time, (0)::bigint) AS active_users,
+    COALESCE(s.utilization, (0)::numeric) AS avg_utilization,
+    COALESCE(s.total_minutes_90d, (0)::numeric) AS total_minutes,
+    COALESCE(s.cost_per_student, (0)::numeric) AS avg_cost_per_student,
+    COALESCE(s.roi_percentage, (0)::numeric) AS avg_roi_percentage,
+    s.roi_status,
+        CASE s.roi_status
+            WHEN 'high'::text THEN 1
+            WHEN 'moderate'::text THEN 2
+            WHEN 'low'::text THEN 3
+            ELSE 4
+        END AS roi_status_priority,
+    s.authorized,
+    s.district_purchased
+   FROM mv_dashboard_software_metrics s
+  WHERE ((s.name IS NOT NULL) AND (s.name <> ''::text) AND (s.school_name IS NOT NULL));;"
+"CREATE MATERIALIZED VIEW mv_dashboard_user_analytics AS  SELECT row_number() OVER (ORDER BY p.district_id, p.school_id, p.role, p.grade) AS row_id,
+    p.district_id,
+    p.school_id,
+    s.name AS school_name,
+    p.role AS user_type,
+    p.grade,
+    count(*) AS total_users,
+    count(*) FILTER (WHERE (EXISTS ( SELECT 1
+           FROM software_usage su
+          WHERE ((su.user_id = p.id) AND (su.date >= (CURRENT_DATE - '30 days'::interval)))))) AS active_users_30d,
+    count(*) FILTER (WHERE (EXISTS ( SELECT 1
+           FROM software_usage su
+          WHERE (su.user_id = p.id)))) AS active_users_all_time,
+    COALESCE(sum(usage_agg.total_minutes), (0)::numeric) AS total_usage_minutes_90d
+   FROM ((profiles p
+     LEFT JOIN schools s ON ((p.school_id = s.id)))
+     LEFT JOIN LATERAL ( SELECT sum(su.minutes_used) AS total_minutes
+           FROM software_usage su
+          WHERE ((su.user_id = p.id) AND (su.date >= (CURRENT_DATE - '90 days'::interval)))) usage_agg ON (true))
+  WHERE ((p.role = ANY (ARRAY['student'::text, 'teacher'::text])) AND (p.district_id IS NOT NULL))
+  GROUP BY p.district_id, p.school_id, s.name, p.role, p.grade;;"

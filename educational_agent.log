@@ -1,0 +1,16 @@
+2025-11-06 11:56:58,891 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2025-11-06 11:56:58,891 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2025-11-10 12:23:17,900 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2025-11-10 12:23:17,900 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2025-11-10 12:23:40,833 - main - INFO - Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325, verbose: True, intercepting: False, intelligent: False, phi: True
+2025-11-10 12:23:40,834 - phi_educational_agent - INFO - Initializing PhiEducationalAgent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2025-11-10 12:23:40,848 - phi_educational_agent - INFO - PhiEducationalAgent initialized successfully for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2025-11-10 12:23:40,848 - main - INFO - Created phi agent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2025-11-10 12:23:40,849 - main - INFO - 🔥 Using Phi Native Agent (dynamic SQL generation from natural language)
+2025-11-10 12:23:40,849 - phi_educational_agent - INFO - === PHI AGENT PROCESSING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2025-11-10 12:23:40,849 - phi_educational_agent - INFO - User Query: Show me the list of authorized paid softwares with investment amount
+2025-11-10 12:23:43,549 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-10 12:24:30,509 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-10 12:24:31,575 - httpx - INFO - HTTP Request: POST https://api.phidata.com/v1/telemetry/agent/run/create "HTTP/1.1 200 OK"
+2025-11-10 12:24:31,581 - phi_educational_agent - INFO - âœ… PHI AGENT COMPLETED successfully
+2025-11-10 12:24:31,581 - main - INFO - 📊 Execution Summary (phi_native): Dynamic SQL generation completed

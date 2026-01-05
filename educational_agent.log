@@ -14,3 +14,130 @@
 2025-11-10 12:24:31,575 - httpx - INFO - HTTP Request: POST https://api.phidata.com/v1/telemetry/agent/run/create "HTTP/1.1 200 OK"
 2025-11-10 12:24:31,581 - phi_educational_agent - INFO - âœ… PHI AGENT COMPLETED successfully
 2025-11-10 12:24:31,581 - main - INFO - 📊 Execution Summary (phi_native): Dynamic SQL generation completed
+2025-11-12 13:40:37,233 - __main__ - INFO - 🔒 CORS allowed origins: ['http://localhost:3000', 'http://localhost:8000', 'http://localhost:8001', 'http://127.0.0.1:3000', 'http://127.0.0.1:8000', 'http://127.0.0.1:8001', 'https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai']
+2025-11-12 13:40:37,237 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2025-11-12 13:40:37,237 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2025-11-12 13:40:37,271 - main - INFO - 🔒 CORS allowed origins: ['http://localhost:3000', 'http://localhost:8000', 'http://localhost:8001', 'http://127.0.0.1:3000', 'http://127.0.0.1:8000', 'http://127.0.0.1:8001', 'https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai']
+2025-11-12 13:40:40,944 - main - INFO - 📨 Incoming Request - Origin: swye360.ai | Referer: No Referer | Host: localhost:8000 | Path: /health
+2025-11-12 13:40:40,944 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: swye360.ai
+2025-11-12 13:41:22,700 - main - INFO - 📨 Incoming Request - Origin: swye360.ai | Referer: No Referer | Host: localhost:8000 | Path: /health
+2025-11-12 13:41:22,701 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: swye360.ai
+2025-11-12 13:41:26,018 - __main__ - INFO - 🔒 CORS allowed origins: ['http://localhost:3000', 'http://localhost:8000', 'http://localhost:8001', 'http://127.0.0.1:3000', 'http://127.0.0.1:8000', 'http://127.0.0.1:8001', 'https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai']
+2025-11-12 13:41:26,021 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2025-11-12 13:41:26,021 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2025-11-12 13:41:26,047 - main - INFO - 🔒 CORS allowed origins: ['http://localhost:3000', 'http://localhost:8000', 'http://localhost:8001', 'http://127.0.0.1:3000', 'http://127.0.0.1:8000', 'http://127.0.0.1:8001', 'https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai']
+2025-11-12 13:41:27,714 - main - INFO - 📨 Incoming Request - Origin: swye360.ai | Referer: No Referer | Host: localhost:8000 | Path: /health
+2025-11-12 13:41:27,714 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: swye360.ai
+2025-11-12 13:41:36,656 - main - INFO - 📨 Incoming Request - Origin: swye360.ai | Referer: No Referer | Host: localhost:8000 | Path: /health
+2025-11-12 13:41:36,656 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: swye360.ai
+2025-11-12 13:41:42,363 - main - INFO - 📨 Incoming Request - Origin: No Origin Header | Referer: No Referer | Host: localhost:8000 | Path: /health
+2025-11-12 13:41:42,363 - main - INFO - ℹ️  No Origin header - allowing request (direct API access)
+2025-11-12 13:41:42,366 - tool_intercepting_agent - INFO - Initializing ToolCallInterceptingAgent for district: test
+2025-11-12 13:41:42,368 - tool_intercepting_agent - INFO - Agent initialized successfully for district: test
+2025-11-12 13:48:19,339 - __main__ - INFO - 🔒 CORS allowed origins: ['http://localhost:3000', 'http://localhost:8000', 'http://localhost:8001', 'http://127.0.0.1:3000', 'http://127.0.0.1:8000', 'http://127.0.0.1:8001', 'https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai']
+2025-11-12 13:48:19,342 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2025-11-12 13:48:19,343 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2025-11-12 13:48:19,369 - main - INFO - 🔒 CORS allowed origins: ['http://localhost:3000', 'http://localhost:8000', 'http://localhost:8001', 'http://127.0.0.1:3000', 'http://127.0.0.1:8000', 'http://127.0.0.1:8001', 'https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai']
+2025-11-12 13:48:27,246 - main - INFO - 📨 Incoming Request - Origin: swye360.ai | Referer: No Referer | Host: localhost:8000 | Path: /health
+2025-11-12 13:48:27,246 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: swye360.ai
+2025-11-12 13:48:43,979 - main - INFO - 📨 Incoming Request - Origin: https://swye360.ai | Referer: No Referer | Host: localhost:8000 | Path: /health
+2025-11-12 13:48:43,979 - main - INFO - ✅ Origin ALLOWED: https://swye360.ai
+2025-11-12 13:48:43,982 - tool_intercepting_agent - INFO - Initializing ToolCallInterceptingAgent for district: test
+2025-11-12 13:48:43,984 - tool_intercepting_agent - INFO - Agent initialized successfully for district: test
+2025-11-12 14:25:15,255 - __main__ - INFO - 🔒 CORS allowed origins: ['http://localhost:3000', 'http://localhost:8000', 'http://localhost:8001', 'http://127.0.0.1:3000', 'http://127.0.0.1:8000', 'http://127.0.0.1:8001', 'https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai']
+2025-11-12 14:25:15,259 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2025-11-12 14:25:15,259 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2025-11-12 14:25:15,290 - main - INFO - 🔒 CORS allowed origins: ['http://localhost:3000', 'http://localhost:8000', 'http://localhost:8001', 'http://127.0.0.1:3000', 'http://127.0.0.1:8000', 'http://127.0.0.1:8001', 'https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai']
+2025-11-12 14:25:18,800 - main - INFO - 📨 Incoming Request - Origin: No Origin Header | Referer: No Referer | Host: localhost:8000 | Path: /health
+2025-11-12 14:25:18,801 - main - ERROR - 🚫 BLOCKED - No Origin header present for path: /health
+2025-11-17 19:27:16,294 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://preview--roi-bright-future.lovable.app']
+2025-11-17 19:27:16,298 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2025-11-17 19:27:16,298 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2025-11-17 19:27:16,367 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://preview--roi-bright-future.lovable.app']
+2025-11-17 19:27:26,842 - main - INFO - 📨 Incoming Request - Origin: No Origin Header | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2025-11-17 19:27:26,843 - main - ERROR - 🚫 BLOCKED - No Origin header present for path: /api/ask
+2025-11-17 20:00:45,547 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://preview--roi-bright-future.lovable.app']
+2025-11-17 20:00:45,552 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2025-11-17 20:00:45,552 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2025-11-17 20:00:45,581 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://preview--roi-bright-future.lovable.app']
+2025-11-17 20:02:40,086 - main - INFO - 📨 Incoming Request - Origin: No Origin Header | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2025-11-17 20:02:40,087 - main - ERROR - 🚫 BLOCKED - No Origin header present for path: /api/ask
+2025-11-17 20:11:51,615 - main - INFO - 📨 Incoming Request - Origin: https://swye360.ai/ | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2025-11-17 20:11:51,617 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: https://swye360.ai/
+2025-11-17 20:12:11,575 - main - INFO - 📨 Incoming Request - Origin: https://swye360.ai/ | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2025-11-17 20:12:11,577 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: https://swye360.ai/
+2025-11-17 20:12:21,883 - main - INFO - 📨 Incoming Request - Origin: https://swye360.ai/ | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2025-11-17 20:12:21,888 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: https://swye360.ai/
+2025-11-17 20:12:31,103 - main - INFO - 📨 Incoming Request - Origin: swye360.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2025-11-17 20:12:31,104 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: swye360.ai
+2025-11-17 20:13:03,281 - main - INFO - 📨 Incoming Request - Origin: https://preview--roi-bright-future.lovable.app/ | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2025-11-17 20:13:03,283 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: https://preview--roi-bright-future.lovable.app/
+2025-11-17 20:13:20,653 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2025-11-17 20:13:20,657 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2025-11-17 20:13:50,349 - main - INFO - 📨 Incoming Request - Origin: No Origin Header | Referer: No Referer | Host: localhost:8000 | Path: /api/health
+2025-11-17 20:13:50,350 - main - ERROR - 🚫 BLOCKED - No Origin header present for path: /api/health
+2025-11-17 20:13:51,773 - main - INFO - 📨 Incoming Request - Origin: No Origin Header | Referer: No Referer | Host: localhost:8000 | Path: /api/health
+2025-11-17 20:13:51,773 - main - ERROR - 🚫 BLOCKED - No Origin header present for path: /api/health
+2025-11-17 20:14:06,634 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/health
+2025-11-17 20:14:06,636 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2025-11-17 20:14:12,638 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/health
+2025-11-17 20:14:12,639 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2025-11-17 20:14:18,571 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2025-11-17 20:14:18,572 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2025-11-17 20:14:33,880 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2025-11-17 20:14:33,882 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2025-11-17 20:14:33,886 - main - INFO - Received request for district 460a1bae-1070-4090-908d-6b3d02e74325, verbose: True, intercepting: False, intelligent: False, phi: True
+2025-11-17 20:14:33,888 - phi_educational_agent - INFO - Initializing PhiEducationalAgent for district: 460a1bae-1070-4090-908d-6b3d02e74325
+2025-11-17 20:14:33,914 - phi_educational_agent - INFO - PhiEducationalAgent initialized successfully for district: 460a1bae-1070-4090-908d-6b3d02e74325
+2025-11-17 20:14:33,914 - main - INFO - Created phi agent for district: 460a1bae-1070-4090-908d-6b3d02e74325
+2025-11-17 20:14:33,914 - main - INFO - 🔥 Using Phi Native Agent (dynamic SQL generation from natural language)
+2025-11-17 20:14:33,914 - phi_educational_agent - INFO - === PHI AGENT PROCESSING FOR DISTRICT 460a1bae-1070-4090-908d-6b3d02e74325 ===
+2025-11-17 20:14:33,914 - phi_educational_agent - INFO - User Query: What paid math software is most used in middle school ?
+2025-11-17 20:14:38,775 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:14:46,398 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:14:53,137 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:14:59,380 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:15:04,033 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:15:08,626 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:15:14,544 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:15:20,478 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:15:24,596 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:15:29,603 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:15:34,472 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:15:42,950 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:15:47,921 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:15:52,738 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:15:59,519 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:16:06,078 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:16:11,420 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:16:16,752 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:16:22,292 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:16:27,782 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:16:36,035 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:16:40,757 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:16:45,769 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:16:50,471 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:16:55,149 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:17:00,820 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:17:05,903 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:17:11,276 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:17:14,733 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:17:20,390 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:17:23,907 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:17:28,268 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:17:58,330 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:18:21,649 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 20:18:22,757 - httpx - INFO - HTTP Request: POST https://api.phidata.com/v1/telemetry/agent/run/create "HTTP/1.1 200 OK"
+2025-11-17 20:18:22,765 - phi_educational_agent - INFO - âœ… PHI AGENT COMPLETED successfully
+2025-11-17 20:18:22,766 - main - INFO - 📊 Execution Summary (phi_native): Dynamic SQL generation completed
+2025-11-17 21:11:07,188 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2025-11-17 21:11:07,190 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2025-11-17 21:11:07,204 - main - INFO - Received request for district 460a1bae-1070-4090-908d-6b3d02e74325, verbose: True, intercepting: False, intelligent: False, phi: True
+2025-11-17 21:11:07,204 - main - INFO - 🔥 Using Phi Native Agent (dynamic SQL generation from natural language)
+2025-11-17 21:11:07,205 - phi_educational_agent - INFO - === PHI AGENT PROCESSING FOR DISTRICT 460a1bae-1070-4090-908d-6b3d02e74325 ===
+2025-11-17 21:11:07,205 - phi_educational_agent - INFO - User Query: What paid math software is most used in middle school ?
+2025-11-17 21:11:13,125 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-17 21:12:12,222 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://preview--roi-bright-future.lovable.app']
+2025-11-17 21:12:12,226 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2025-11-17 21:12:12,226 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2025-11-17 21:12:12,256 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://preview--roi-bright-future.lovable.app']

@@ -13,7 +13,7 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 # Import all agent types
@@ -43,14 +43,84 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# Add CORS middleware
+# Add CORS middleware with restricted origins for security
+allowed_origins = [
+    "https://classsight.ai",
+    "https://www.classsight.ai",
+    "https://swye360.ai",
+    "https://www.swye360.ai",
+    "https://preview--roi-bright-future.lovable.app",
+]
+
+logger.info(f"🔒 CORS allowed origins: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Add middleware to log request origins for CORS debugging
+@app.middleware("http")
+async def log_request_origin(request, call_next):
+    """Log incoming request origins and enforce strict origin whitelist."""
+    origin = request.headers.get("origin", None)
+    referer = request.headers.get("referer", "No Referer")
+    host = request.headers.get("host", "No Host")
+
+    logger.info(
+        f"📨 Incoming Request - "
+        f"Origin: {origin if origin else 'No Origin Header'} | "
+        f"Referer: {referer} | "
+        f"Host: {host} | "
+        f"Path: {request.url.path}"
+    )
+
+    # Whitelist paths that don't require origin validation (e.g., health checks from monitoring)
+    # Remove paths from this list if you want to block everything without exception
+    whitelisted_paths = [
+        "/docs",  # API documentation
+        "/redoc",  # API documentation
+        "/openapi.json",  # OpenAPI schema
+    ]
+
+    # Check if Origin header is present
+    if origin is None:
+        # Block requests without Origin header unless path is whitelisted
+        if request.url.path not in whitelisted_paths:
+            logger.error(
+                f"🚫 BLOCKED - No Origin header present for path: {request.url.path}"
+            )
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "error": "Forbidden",
+                    "message": "You are not authorized to access this API.",
+                },
+            )
+        else:
+            logger.info(
+                f"ℹ️  No Origin header - allowing whitelisted path: {request.url.path}"
+            )
+    elif origin not in allowed_origins:
+        # Block requests with unauthorized Origin header
+        logger.error(f"🚫 BLOCKED - Origin NOT in allowed list: {origin}")
+        return JSONResponse(
+            status_code=403,
+            content={
+                "error": "Forbidden",
+                "message": "You are not authorized to access this API.",
+            },
+        )
+    else:
+        # Allow requests with valid Origin header
+        logger.info(f"✅ Origin ALLOWED: {origin}")
+
+    response = await call_next(request)
+    return response
 
 
 # Request/Response Models
@@ -498,7 +568,7 @@ async def root():
 
 if __name__ == "__main__":
     host = os.getenv("API_HOST", "0.0.0.0")
-    port = int(os.getenv("API_PORT", 8001))  # Different port to avoid conflicts
+    port = int(os.getenv("API_PORT", 8000))  # Different port to avoid conflicts
     debug = os.getenv("DEBUG", "False").lower() == "true"
 
     logger.info(f"Starting FIXED Educational Analytics API on {host}:{port}")

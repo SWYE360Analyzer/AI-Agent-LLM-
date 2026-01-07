@@ -24,6 +24,7 @@ from tool_intercepting_agent import (
     ToolCallInterceptingAgent,
     create_tool_intercepting_agent,
 )
+from mv_optimized_agent import MVOptimizedAgent, create_mv_optimized_agent
 
 # Load environment variables
 load_dotenv()
@@ -136,6 +137,10 @@ class AnalyticsRequest(BaseModel):
     verbose: bool = Field(
         False, description="Enable verbose logging and detailed execution tracking"
     )
+    use_mv_optimized_agent: bool = Field(
+        True,
+        description="Use MV-optimized agent (RECOMMENDED - 10-100x faster using materialized views)",
+    )
     use_intercepting_agent: bool = Field(
         False, description="Use tool-intercepting agent for guaranteed database calls"
     )
@@ -144,7 +149,7 @@ class AnalyticsRequest(BaseModel):
         description="Use intelligent agent with smart tool selection based on query",
     )
     use_phi_agent: bool = Field(
-        True,
+        False,
         description="Use phi's native PostgreSQL tools for dynamic query generation",
     )
 
@@ -191,6 +196,7 @@ original_agent_cache = {}
 intercepting_agent_cache = {}
 intelligent_agent_cache = {}
 phi_agent_cache = {}
+mv_optimized_agent_cache = {}
 
 
 def get_original_agent(district_id: str, verbose: bool = False) -> EducationalDataAgent:
@@ -281,6 +287,27 @@ def get_phi_agent(district_id: str, verbose: bool = False) -> PhiEducationalAgen
     return phi_agent_cache[cache_key]
 
 
+def get_mv_optimized_agent(district_id: str, verbose: bool = False) -> MVOptimizedAgent:
+    """Get or create MV-optimized educational agent (RECOMMENDED)."""
+    cache_key = f"{district_id}_{verbose}"
+
+    if cache_key not in mv_optimized_agent_cache:
+        try:
+            postgres_config = get_postgres_config()
+            agent = create_mv_optimized_agent(
+                district_id, postgres_config, verbose=verbose
+            )
+            mv_optimized_agent_cache[cache_key] = agent
+            logger.info(f"Created MV-optimized agent for district: {district_id}")
+        except Exception as e:
+            logger.error(f"Failed to create MV-optimized agent: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            )
+
+    return mv_optimized_agent_cache[cache_key]
+
+
 # API Endpoints
 @app.post("/api/ask", response_model=AnalyticsResponse)
 async def ask_analytics_question(request: AnalyticsRequest):
@@ -291,7 +318,8 @@ async def ask_analytics_question(request: AnalyticsRequest):
     try:
         logger.info(
             f"Received request for district {request.district_id}, "
-            f"verbose: {request.verbose}, intercepting: {request.use_intercepting_agent}, "
+            f"verbose: {request.verbose}, mv_optimized: {request.use_mv_optimized_agent}, "
+            f"intercepting: {request.use_intercepting_agent}, "
             f"intelligent: {request.use_intelligent_agent}, phi: {request.use_phi_agent}"
         )
 
@@ -307,8 +335,14 @@ async def ask_analytics_question(request: AnalyticsRequest):
                 detail="District ID is required",
             )
 
-        # Choose agent type with phi agent taking priority (recommended approach)
-        if request.use_phi_agent:
+        # Choose agent type with MV-optimized agent as the default (RECOMMENDED)
+        if request.use_mv_optimized_agent:
+            agent = get_mv_optimized_agent(request.district_id, verbose=request.verbose)
+            agent_type = "mv_optimized"
+            logger.info(
+                "🚀 Using MV-Optimized Agent (10-100x faster using materialized views)"
+            )
+        elif request.use_phi_agent:
             agent = get_phi_agent(request.district_id, verbose=request.verbose)
             agent_type = "phi_native"
             logger.info(
@@ -342,7 +376,16 @@ async def ask_analytics_question(request: AnalyticsRequest):
 
         # Log execution summary
         if execution_log:
-            if agent_type == "phi_native":
+            if agent_type == "mv_optimized":
+                mv_count = len(execution_log.get("mv_queries", []))
+                exec_time = execution_log.get("execution_time", 0)
+                primary_intent = execution_log.get("primary_intent", "unknown")
+                best_mv = execution_log.get("best_mv", "unknown")
+                logger.info(
+                    f"📊 Execution Summary ({agent_type}): {mv_count} MV queries, "
+                    f"{exec_time:.2f}s, intent: {primary_intent}, best_mv: {best_mv}"
+                )
+            elif agent_type == "phi_native":
                 logger.info(
                     f"📊 Execution Summary ({agent_type}): Dynamic SQL generation completed"
                 )

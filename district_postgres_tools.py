@@ -61,9 +61,17 @@ class DistrictAwarePostgresTools(Toolkit):
                 f.description = self._get_function_description(f.name)
 
     def _get_connection(self) -> psycopg2.extensions.connection:
-        """Get database connection with read-only settings."""
+        """Get database connection with read-only settings and autocommit."""
+        # Check if existing connection is valid
         if self._connection:
-            return self._connection
+            try:
+                # Test if connection is still alive
+                if not self._connection.closed:
+                    return self._connection
+            except Exception:
+                pass
+            # Connection is bad, reset it
+            self._connection = None
 
         try:
             conn = psycopg2.connect(
@@ -74,7 +82,10 @@ class DistrictAwarePostgresTools(Toolkit):
                 password=self.password,
                 cursor_factory=RealDictCursor,
             )
+            # Enable autocommit to prevent "transaction aborted" errors
             conn.set_session(readonly=True, autocommit=True)
+            self._connection = conn
+            logger.info("Database connection established with autocommit=True")
             return conn
         except Exception as e:
             logger.error(f"Failed to connect to database: {e}")
@@ -297,6 +308,12 @@ class DistrictAwarePostgresTools(Toolkit):
                 logger.info("✅ HTML table generated successfully")
                 return html_result
 
+        except psycopg2.Error as e:
+            logger.error(f"❌ SQL Query Error: {str(e)}")
+            logger.error(f"💥 Failed Query: {query}")
+            # Reset connection to recover from any transaction issues
+            self._connection = None
+            return f"❌ **Query Error:** {str(e)}"
         except Exception as e:
             logger.error(f"❌ SQL Query Error: {str(e)}")
             logger.error(f"💥 Failed Query: {query}")

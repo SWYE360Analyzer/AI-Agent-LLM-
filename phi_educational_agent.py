@@ -1,22 +1,33 @@
 """
-Proper Phi-based Educational Analytics Agent
-Uses phi's native PostgreSQL tools for dynamic query generation
+Phi-based Educational Analytics Agent with Materialized View Knowledge
+
+This agent uses robust PostgreSQL tools with comprehensive knowledge
+of all 16 materialized views for optimal query performance.
+
+IMPORTANT: Uses RobustPostgresTools with autocommit to prevent
+"current transaction is aborted" errors.
 """
 
 import logging
 import os
+import re
 from typing import Optional
 
 from phi.agent import Agent
 from phi.model.openai import OpenAIChat
-from phi.tools.postgres import PostgresTools
+
+# Use our robust postgres tools instead of phi's native one
+from robust_postgres_tools import RobustPostgresTools
 
 logger = logging.getLogger(__name__)
 
 
 class PhiEducationalAgent:
     """
-    Educational agent using phi's native PostgreSQL tools for dynamic query generation
+    Educational agent using phi's native PostgreSQL tools with MV knowledge.
+
+    IMPORTANT: This agent is configured with comprehensive knowledge of all
+    materialized views to ensure optimal query performance.
     """
 
     def __init__(
@@ -35,222 +46,307 @@ class PhiEducationalAgent:
 
         logger.info(f"Initializing PhiEducationalAgent for district: {district_id}")
 
-        # Create PostgreSQL tools with district-aware context
-        self.postgres_tools = PostgresTools(
+        # Create Robust PostgreSQL tools with autocommit to prevent transaction errors
+        # This fixes "current transaction is aborted, commands ignored" errors
+        self.postgres_tools = RobustPostgresTools(
             db_name=postgres_config.get("database"),
             user=postgres_config.get("user"),
             password=postgres_config.get("password"),
             host=postgres_config.get("host"),
             port=postgres_config.get("port", 5432),
+            schema=postgres_config.get("schema", "public"),
+            district_id=district_id,
             run_queries=True,
-            inspect_queries=verbose,  # Show query plans in verbose mode
-            summarize_tables=True,
+            inspect_queries=verbose,
         )
 
-        # Create the agent with comprehensive instructions
+        # Create the agent with comprehensive MV instructions
         self.agent = Agent(
             name="Educational Data Analytics Agent",
             model=OpenAIChat(
-                id="gpt-4o-mini", api_key=openai_api_key or os.getenv("OPENAI_API_KEY")
+                id="gpt-4o-mini",
+                api_key=openai_api_key or os.getenv("OPENAI_API_KEY")
             ),
             tools=[self.postgres_tools],
-            instructions=self._get_comprehensive_instructions(),
-            show_tool_calls=False,  # Hide tool calls from user response
+            instructions=self._get_mv_aware_instructions(),
+            show_tool_calls=False,
             markdown=True,
             description=f"AI agent for educational software analytics in district {district_id}",
             debug_mode=verbose,
         )
 
-        logger.info(
-            f"PhiEducationalAgent initialized successfully for district: {district_id}"
-        )
+        logger.info(f"PhiEducationalAgent initialized with MV knowledge for district: {district_id}")
 
-    def _get_comprehensive_instructions(self) -> list:
-        """Get comprehensive instructions for the agent including schema knowledge"""
+    def _get_mv_aware_instructions(self) -> list:
+        """Get comprehensive instructions with complete MV schema knowledge."""
         return [
             f"You are an AI assistant specialized in educational software analytics for district {self.district_id}.",
-            "IMPORTANT: You have access to a PostgreSQL database with educational software data.",
-            "You MUST use the run_query function to execute SQL queries to get real data.",
-            "NEVER provide mock or example data - always query the database first.",
-            "DATABASE SCHEMA KNOWLEDGE:",
-            "The database contains these key tables:",
-            "- software: Contains software applications with columns like id, name, category, district_id, total_cost, students_licensed, authorized",
-            "- software_usage: Contains usage records with columns like software_id, user_id, date, minutes_used, user_type",
-            "- profiles: Contains user profiles with columns like id, email, first_name, last_name, role, grade, district_id, school_id",
-            "- schools: Contains school information with columns like id, name, district_id",
-            "- districts: Contains district information",
-            "MATERIALIZED VIEWS AVAILABLE (use these for better performance):",
-            "- mv_software_usage_analytics_v3: Comprehensive software analytics with ROI data",
-            "- mv_software_investment_summary: Investment analysis by software",
-            "- mv_dashboard_software_metrics: Dashboard-ready software metrics",
-            "- mv_user_software_utilization: User-level software utilization data",
-            "- mv_dashboard_user_analytics: User analytics by district",
-            "CRITICAL DISTRICT FILTERING:",
-            f"- ALL queries MUST include 'WHERE district_id = '{self.district_id}' to ensure data security",
-            "- Never show data from other districts",
-            "- Always verify district_id in WHERE clauses",
-            "QUERY GENERATION GUIDELINES:",
-            "1. Analyze the user's question to understand what data they need",
-            "2. Choose the most appropriate table/view for the query",
-            "3. Always include district_id filter in WHERE clause",
-            "4. Use efficient queries with proper JOINs when needed",
-            "5. Limit results to reasonable amounts (use LIMIT for large datasets)",
-            "RESPONSE FORMAT:",
-            "- Convert all responses to clean HTML (no CSS, JavaScript, or styling)",
-            "- Use proper HTML elements: tables, divs, headers, lists",
-            "- Present data in tables when showing multiple records",
-            "- Provide insights and recommendations based on real data",
-            "- Never wrap responses in markdown code blocks",
-            "- Return pure HTML suitable for React dangerouslySetInnerHTML",
-            "- IMPORTANT: Use user-friendly titles and headings",
-            "- Never show technical district IDs in titles or headings",
-            "- Use descriptive titles like 'District Executive Summary' instead of 'Executive Summary for District 3ef51192-1070-4090-908d-ef3ab03b4325'",
-            "- Focus on business-friendly language that administrators and educators would understand",
-            "- Avoid technical jargon, UUIDs, or database terminology in user-facing content",
-            "EXAMPLE QUERY PATTERNS:",
-            "- For user questions: JOIN software_usage with profiles and software tables",
-            "- For investment analysis: Use mv_software_investment_summary view",
-            "- For usage trends: Query software_usage grouped by date",
-            "- For top software: Use mv_software_usage_analytics_v3 ordered by usage metrics",
-            "- For student data: Filter profiles where role = 'student'",
-            "- For teacher data: Filter profiles where role = 'teacher'",
-            "IMPORTANT: When the user asks about students, users, teachers, or specific people,",
-            "you MUST query the relevant user/profile tables, not just software tables.",
-            "Use JOINs to connect software_usage, profiles, and software tables as needed.",
-            "SAMPLE QUERIES FOR COMMON REQUESTS:",
-            "- 'Top students by usage': SELECT p.first_name, p.last_name, SUM(su.minutes_used) FROM profiles p JOIN software_usage su ON p.id = su.user_id WHERE p.district_id = '{district_id}' AND p.role = 'student' GROUP BY p.id ORDER BY SUM(su.minutes_used) DESC",
-            "- 'Software investments': SELECT * FROM mv_software_investment_summary WHERE district_id = '{district_id}' ORDER BY total_investment DESC",
-            "- 'Usage trends': SELECT date, SUM(minutes_used) FROM software_usage su JOIN software s ON su.software_id = s.id WHERE s.district_id = '{district_id}' GROUP BY date ORDER BY date DESC",
-            "SECURITY & PRIVACY:",
-            "- Never expose data from other districts",
-            "- Maintain student and user privacy",
-            "- Always verify district authorization",
-            "- NEVER show technical district IDs (UUIDs) in user-facing content",
-            "- Replace district ID references with user-friendly terms like 'Your District' or 'District Overview'",
-            "USER-FRIENDLY CONTENT GUIDELINES:",
-            "- Use business-friendly language appropriate for school administrators and educators",
-            "- Avoid technical database terms, UUIDs, or system identifiers in responses",
-            "- Use descriptive titles like 'District Executive Summary', 'Student Usage Report', 'Software Investment Analysis'",
-            "- Focus on actionable insights rather than technical data details",
-            "- Present information in a way that helps decision-making",
-            "Remember: Your goal is to provide accurate, data-driven insights about educational technology usage in this specific district.",
+            "",
+            "=" * 80,
+            "CRITICAL: ALWAYS USE MATERIALIZED VIEWS - NEVER RAW TABLES",
+            "=" * 80,
+            "",
+            "You MUST use materialized views (mv_*) for ALL queries. They are 10-100x faster.",
+            "The ROI data is PRE-CALCULATED in the views - do NOT try to calculate ROI yourself.",
+            "",
+            "=" * 80,
+            "MATERIALIZED VIEW SCHEMA - EXACT COLUMN NAMES",
+            "=" * 80,
+            "",
+            "### 1. mv_software_usage_analytics_v4 (PRIMARY - Use for most software queries)",
+            "Columns: name, district_id, ids, categories, school_names, user_types, grades,",
+            "         grade_ranges, funding_sources, total_cost, students_licensed, authorized,",
+            "         district_purchased, url, icon, primary_category, category_type,",
+            "         total_minutes, active_users, usage_days, first_use_date, last_use_date,",
+            "         active_students, active_teachers, expected_daily_minutes, cost_per_student,",
+            "         days_since_start, expected_minutes_to_date, usage_ratio, avg_minutes_per_day,",
+            "         avg_roi_percentage, roi_status, engagement_rate, usage_compliance",
+            "",
+            "USE THIS FOR: Software usage, ROI analysis, top software",
+            f"EXAMPLE: SELECT name, total_cost, total_minutes, active_users, avg_roi_percentage, roi_status FROM mv_software_usage_analytics_v4 WHERE district_id = '{self.district_id}' ORDER BY avg_roi_percentage DESC LIMIT 20",
+            "",
+            "### 2. mv_software_investment_summary (Use for investment/cost analysis)",
+            "Columns: software_id, software_name, display_name, district_id, school_name,",
+            "         category, funding_source, grade_ranges, user_type, latest_purchase_date,",
+            "         last_usage_date, created_at, total_investment, total_licensed_users,",
+            "         active_users, avg_utilization, total_minutes, avg_cost_per_student,",
+            "         avg_roi_percentage, roi_status, roi_status_priority, authorized, district_purchased",
+            "",
+            "USE THIS FOR: Investment analysis, budget reports, cost-per-student",
+            f"EXAMPLE: SELECT software_name, total_investment, active_users, avg_roi_percentage, roi_status FROM mv_software_investment_summary WHERE district_id = '{self.district_id}' AND total_investment > 0 ORDER BY avg_roi_percentage DESC LIMIT 20",
+            "",
+            "### 3. mv_dashboard_software_metrics (Use for dashboard overview)",
+            "Columns: software_id, name, district_id, school_name, category, funding_source,",
+            "         total_cost, user_type, authorized, district_purchased, students_licensed,",
+            "         purchase_date, grade_range, created_at, roi_percentage, cost_per_student,",
+            "         active_users_30d, active_users_all_time, total_minutes_90d, last_usage_date,",
+            "         utilization, roi_status",
+            "",
+            "USE THIS FOR: Dashboard metrics, overview cards, quick stats",
+            f"EXAMPLE: SELECT name, total_cost, roi_percentage, utilization, roi_status FROM mv_dashboard_software_metrics WHERE district_id = '{self.district_id}' ORDER BY total_minutes_90d DESC LIMIT 10",
+            "",
+            "### 4. mv_dashboard_user_analytics (Use for user counts)",
+            "Columns: row_id, district_id, school_id, school_name, user_type, grade,",
+            "         total_users, active_users_30d, active_users_all_time, total_usage_minutes_90d",
+            "",
+            "USE THIS FOR: User counts, student/teacher breakdown, grade-level analysis",
+            f"EXAMPLE: SELECT user_type, SUM(total_users) as total, SUM(active_users_30d) as active FROM mv_dashboard_user_analytics WHERE district_id = '{self.district_id}' GROUP BY user_type",
+            "",
+            "### 5. mv_user_software_utilization_v2 (Use for individual user data)",
+            "Columns: software_id, user_id, user_email, first_name, last_name, grade,",
+            "         school_id, district_id, user_role, school_name, district_name,",
+            "         software_name, software_category, sessions_count, total_minutes,",
+            "         minutes_in_school, minutes_at_home, first_active, last_active,",
+            "         days_active, avg_weekly_minutes",
+            "",
+            "USE THIS FOR: Top users, individual usage reports, user-level analysis",
+            f"EXAMPLE: SELECT first_name, last_name, software_name, total_minutes FROM mv_user_software_utilization_v2 WHERE district_id = '{self.district_id}' ORDER BY total_minutes DESC LIMIT 20",
+            "",
+            "### 6. mv_unauthorized_software_analytics_v3 (Use for security/compliance)",
+            "Columns: id, name, category, url, district_id, school_name, user_type,",
+            "         district_name, total_usage_minutes, unique_users, student_users,",
+            "         teacher_users, usage_count, last_used_date, avg_minutes_per_user, refreshed_at",
+            "",
+            "USE THIS FOR: Unauthorized software monitoring, security dashboards",
+            f"EXAMPLE: SELECT name, category, total_usage_minutes, unique_users, student_users FROM mv_unauthorized_software_analytics_v3 WHERE district_id = '{self.district_id}' ORDER BY total_usage_minutes DESC",
+            "",
+            "### 7. mv_software_usage_by_school_v2 (Use for school-level analysis)",
+            "Columns: software_id, software_name, school_id, school_name, district_id,",
+            "         total_cost, category, authorized, district_purchased, students_licensed,",
+            "         funding_source, user_type, grade, applicable_grade_bands, active_users,",
+            "         active_students, active_teachers, total_minutes, usage_days,",
+            "         first_use_date, last_use_date, days_since_start, expected_daily_minutes,",
+            "         category_type, avg_roi_percentage, roi_status, usage_compliance",
+            "",
+            "USE THIS FOR: School comparisons, per-school ROI",
+            f"EXAMPLE: SELECT school_name, software_name, total_minutes, avg_roi_percentage, roi_status FROM mv_software_usage_by_school_v2 WHERE district_id = '{self.district_id}' ORDER BY total_minutes DESC",
+            "",
+            "### 8. mv_software_usage_rankings_v4 (Use for rankings/top lists)",
+            "Columns: id, name, category, district_id, user_type, school_name,",
+            "         funding_source, grade_band, total_cost, total_minutes,",
+            "         instance_count, software_ids, context_total_minutes, usage_percentage",
+            "",
+            "USE THIS FOR: Top software rankings, usage percentage, grade band comparisons",
+            f"EXAMPLE: SELECT name, grade_band, total_minutes, usage_percentage FROM mv_software_usage_rankings_v4 WHERE district_id = '{self.district_id}' ORDER BY total_minutes DESC LIMIT 20",
+            "",
+            "### 9. mv_active_users_summary (Use for active user reports)",
+            "Columns: user_id, email, first_name, last_name, role, grade, school_id,",
+            "         district_id, school_name, district_name, total_usage_minutes,",
+            "         total_sessions, first_active_date, last_active_date, grade_band, full_name",
+            "",
+            "USE THIS FOR: Active user lists, user engagement reports",
+            f"EXAMPLE: SELECT full_name, role, total_usage_minutes, last_active_date FROM mv_active_users_summary WHERE district_id = '{self.district_id}' ORDER BY total_usage_minutes DESC LIMIT 20",
+            "",
+            "=" * 80,
+            "QUERY ROUTING RULES - WHICH MV TO USE",
+            "=" * 80,
+            "",
+            "• 'ROI', 'return on investment', 'best value' → mv_software_usage_analytics_v4 or mv_software_investment_summary",
+            "  COLUMN: avg_roi_percentage (NOT 'roi') and roi_status ('high', 'moderate', 'low')",
+            "",
+            "• 'paid software', 'investment', 'cost' → mv_software_investment_summary",
+            "  COLUMN: total_investment, avg_cost_per_student",
+            "",
+            "• 'top software', 'most used', 'usage' → mv_software_usage_analytics_v4",
+            "  COLUMN: total_minutes, active_users",
+            "",
+            "• 'students', 'teachers', 'users count' → mv_dashboard_user_analytics",
+            "  COLUMN: total_users, active_users_30d",
+            "",
+            "• 'top users', 'individual usage' → mv_user_software_utilization_v2",
+            "",
+            "• 'unauthorized', 'security', 'compliance' → mv_unauthorized_software_analytics_v3",
+            "",
+            "• 'by school', 'school comparison' → mv_software_usage_by_school_v2",
+            "",
+            "• 'dashboard', 'overview' → mv_dashboard_software_metrics",
+            "",
+            "=" * 80,
+            "CRITICAL RULES",
+            "=" * 80,
+            "",
+            f"1. ALWAYS filter by district_id = '{self.district_id}'",
+            "2. ROI column is called 'avg_roi_percentage' NOT 'roi'",
+            "3. Cost column is called 'total_investment' or 'total_cost' NOT 'cost'",
+            "4. NEVER calculate ROI manually - it's pre-calculated in the views",
+            "5. NEVER join raw tables when a materialized view has the data",
+            "6. Use LIMIT for large result sets",
+            "7. For paid software with ROI: total_investment > 0",
+            "",
+            "=" * 80,
+            "COMMON QUERY EXAMPLES",
+            "=" * 80,
+            "",
+            "### Paid software sorted by ROI:",
+            f"SELECT software_name, total_investment, active_users, avg_roi_percentage, roi_status",
+            f"FROM mv_software_investment_summary",
+            f"WHERE district_id = '{self.district_id}' AND total_investment > 0",
+            f"ORDER BY avg_roi_percentage DESC LIMIT 20;",
+            "",
+            "### Top software by usage:",
+            f"SELECT name, primary_category, total_cost, total_minutes, active_users, roi_status",
+            f"FROM mv_software_usage_analytics_v4",
+            f"WHERE district_id = '{self.district_id}'",
+            f"ORDER BY total_minutes DESC LIMIT 20;",
+            "",
+            "### User counts by role:",
+            f"SELECT user_type, SUM(total_users) as total, SUM(active_users_30d) as active",
+            f"FROM mv_dashboard_user_analytics",
+            f"WHERE district_id = '{self.district_id}'",
+            f"GROUP BY user_type;",
+            "",
+            "### Unauthorized software:",
+            f"SELECT name, category, total_usage_minutes, unique_users, student_users",
+            f"FROM mv_unauthorized_software_analytics_v3",
+            f"WHERE district_id = '{self.district_id}'",
+            f"ORDER BY total_usage_minutes DESC LIMIT 20;",
+            "",
+            "=" * 80,
+            "RESPONSE FORMAT",
+            "=" * 80,
+            "",
+            "- Return clean HTML (no CSS, JavaScript, markdown code blocks)",
+            "- Use <table>, <div>, <h3>, <h4> for structure",
+            "- Use user-friendly language (no UUIDs or technical jargon)",
+            "- Focus on actionable insights for educators",
+            "- Present ROI status as: High = Good, Moderate = OK, Low = Needs attention",
         ]
 
     def process_query(self, user_query: str) -> dict:
-        """
-        Process user query using phi's native PostgreSQL tools
-        """
+        """Process user query with MV-aware SQL generation."""
         try:
-            logger.info(f"=== PHI AGENT PROCESSING FOR DISTRICT {self.district_id} ===")
+            logger.info(f"=== PHI AGENT (MV-AWARE) FOR DISTRICT {self.district_id} ===")
             logger.info(f"User Query: {user_query}")
 
-            # Add district context to the query
+            # Build contextual query with explicit MV guidance
             contextual_query = f"""
-            District Context: {self.district_id}
+User Question: {user_query}
 
-            User Question: {user_query}
+IMPORTANT INSTRUCTIONS:
+1. Use ONLY materialized views (mv_*) for this query - they are 10-100x faster
+2. The district_id is: {self.district_id}
+3. For ROI queries, use column 'avg_roi_percentage' and 'roi_status' - NOT 'roi'
+4. For investment/cost queries, use 'total_investment' or 'total_cost'
+5. For paid software with ROI, filter: total_investment > 0
 
-            Please analyze this question and use the run_query function to get the relevant data from the database.
-            Remember to:
-            1. Always filter by district_id = '{self.district_id}' in your SQL queries
-            2. Use appropriate JOINs when connecting tables
-            3. Choose the most relevant tables/views for the question
-            4. Present results in clean HTML format
-            5. Provide insights based on the real data returned
+RECOMMENDED MVs for this query:
+- For ROI/investment: mv_software_investment_summary or mv_software_usage_analytics_v4
+- For usage analytics: mv_software_usage_analytics_v4
+- For user counts: mv_dashboard_user_analytics
+- For individual users: mv_user_software_utilization_v2
+- For unauthorized: mv_unauthorized_software_analytics_v3
 
-            Generate and execute the appropriate SQL query to answer this question with real data.
-            """
+Generate and execute the SQL query, then present results in clean HTML format.
+Remember: avg_roi_percentage (not roi), total_investment (not cost), roi_status values are 'high', 'moderate', 'low'.
+"""
 
-            # Let phi agent handle the query generation and execution
+            # Execute with phi agent
             response = self.agent.run(contextual_query)
 
-            # Extract HTML content
-            html_content = (
-                response.content if hasattr(response, "content") else str(response)
-            )
+            # Extract content
+            html_content = response.content if hasattr(response, "content") else str(response)
 
-            # Clean up any tool call output and markdown formatting
+            # Clean up markdown and tool output
             if html_content.startswith("```html\n"):
                 html_content = html_content[8:]
             if html_content.endswith("\n```"):
                 html_content = html_content[:-4]
 
-            # Remove any phi tool call output patterns
-            import re
-
-            # Remove patterns like "\nRunning:\n - run_query(query=...)\n - run_query(query=...)\n"
-            html_content = re.sub(
-                r"\n*Running:\s*\n(\s*-\s*\w+\([^)]*\)\s*\n)*", "", html_content
-            )
-            # Remove any standalone tool execution traces
-            html_content = re.sub(
-                r"Running:\s*\n(\s*-\s*\w+\([^)]*\)\s*\n)*", "", html_content
-            )
-            # Remove any remaining tool call patterns
+            # Remove tool execution traces
+            html_content = re.sub(r"\n*Running:\s*\n(\s*-\s*\w+\([^)]*\)\s*\n)*", "", html_content)
+            html_content = re.sub(r"Running:\s*\n(\s*-\s*\w+\([^)]*\)\s*\n)*", "", html_content)
             html_content = re.sub(r"\s*-\s*run_query\([^)]*\)\s*", "", html_content)
             html_content = re.sub(r"\s*-\s*\w+\([^)]*\)\s*", "", html_content)
-            # Clean up extra newlines
             html_content = re.sub(r"\n\s*\n\s*\n+", "\n\n", html_content)
-            # Remove leading/trailing whitespace
             html_content = html_content.strip()
 
-            logger.info(f"âœ… PHI AGENT COMPLETED successfully")
+            logger.info("✅ PHI AGENT (MV-AWARE) COMPLETED successfully")
 
-            # Note: phi agent handles tool calling internally, so we don't track individual SQL queries
             return {
                 "html_response": html_content,
                 "execution_log": {
                     "district_id": self.district_id,
                     "user_query": user_query,
                     "agent_type": "phi_native",
-                    "tools_available": ["PostgresTools with run_query capability"],
-                    "note": "Phi agent handles dynamic SQL generation based on natural language",
-                }
-                if self.verbose
-                else None,
+                    "mv_aware": True,
+                } if self.verbose else None,
             }
 
         except Exception as e:
-            logger.error(f"âŒ PHI AGENT ERROR: {e}")
+            logger.error(f"❌ PHI AGENT ERROR: {e}")
             return {
                 "html_response": f"<div class='alert alert-danger'>Error: {str(e)}</div>",
-                "execution_log": {
-                    "error": str(e),
-                    "district_id": self.district_id,
-                    "user_query": user_query,
-                }
-                if self.verbose
-                else None,
+                "execution_log": {"error": str(e)} if self.verbose else None,
             }
 
     def get_district_dashboard(self) -> dict:
-        """Generate a comprehensive district dashboard"""
+        """Generate a comprehensive district dashboard using MVs."""
         return self.process_query(
             "Generate a comprehensive executive dashboard showing overall software usage metrics, "
-            "top software by usage, recent trends, and key insights for district decision making"
+            "top software by ROI (use avg_roi_percentage from mv_software_usage_analytics_v4), "
+            "and key insights for district decision making"
         )
 
     def analyze_software_roi(self) -> dict:
-        """Analyze software return on investment"""
+        """Analyze software ROI using MVs."""
         return self.process_query(
-            "Analyze the ROI and cost-effectiveness of our educational software investments, "
-            "showing which software provides the best value and identifying underutilized applications"
+            "Analyze the ROI of our educational software investments. "
+            "Use mv_software_investment_summary with avg_roi_percentage and roi_status columns. "
+            "Show paid software (total_investment > 0) sorted by best ROI first."
         )
 
     def get_security_insights(self) -> dict:
-        """Get security and compliance insights"""
+        """Get security and compliance insights using MVs."""
         return self.process_query(
-            "Provide security insights including unauthorized software usage patterns, "
-            "unusual access patterns, and compliance status summary"
+            "Provide security insights using mv_unauthorized_software_analytics_v3. "
+            "Show unauthorized software sorted by total_usage_minutes, including student_users and teacher_users counts."
         )
 
 
 def create_phi_educational_agent(
     district_id: str, postgres_config: dict, verbose: bool = False
 ) -> PhiEducationalAgent:
-    """
-    Factory function to create a phi-based educational agent
-    """
+    """Factory function to create a phi-based educational agent with MV knowledge."""
     return PhiEducationalAgent(
         district_id=district_id, postgres_config=postgres_config, verbose=verbose
     )

@@ -71,7 +71,7 @@ gcloud run deploy ${SERVICE_NAME} \
   --platform managed \
   --allow-unauthenticated \
   --port 8080 \
-  --set-env-vars POSTGRES_HOST=aws-0-us-east-1.pooler.supabase.com,POSTGRES_PORT=5432,POSTGRES_DB=postgres,POSTGRES_USER=swye360_agent.ytpwaryvxdrwtevltgwp,POSTGRES_PASSWORD=aiengineerswye360agent,POSTGRES_SCHEMA=public,API_HOST=0.0.0.0,API_PORT=8000,DEBUG=False,OPENAI_API_KEY="sk-proj--..." \
+  --set-env-vars POSTGRES_HOST=aws-0-us-east-1.pooler.supabase.com,POSTGRES_PORT=5432,POSTGRES_DB=postgres,POSTGRES_USER=swye360_agent.ytpwaryvxdrwtevltgwp,POSTGRES_PASSWORD=aiengineerswye360agent,POSTGRES_SCHEMA=public,API_HOST=0.0.0.0,API_PORT=8000,DEBUG=False,OPENAI_API_KEY=... \
   --project ${GCP_PROJECT_ID}
 ```
 

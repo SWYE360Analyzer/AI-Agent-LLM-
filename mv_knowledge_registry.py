@@ -8,9 +8,12 @@ This enables the AI agent to intelligently route queries to the most efficient
 materialized view instead of querying raw tables.
 """
 
+import logging
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 
 class QueryIntent(Enum):
@@ -496,8 +499,9 @@ INTENT_KEYWORDS: Dict[QueryIntent, Set[str]] = {
         "kpi", "snapshot", "at a glance", "highlights"
     },
     QueryIntent.SOFTWARE_USAGE: {
-        "software", "usage", "app", "application", "tool", "platform", "minutes",
-        "sessions", "active", "used", "using", "utilization"
+        "software", "software usage", "app", "application", "tool", "platform",
+        "app usage", "tool usage", "application usage", "software minutes",
+        "sessions", "used", "using", "utilization"
     },
     QueryIntent.SOFTWARE_ROI: {
         "roi", "return on investment", "value", "effectiveness", "performance",
@@ -508,8 +512,9 @@ INTENT_KEYWORDS: Dict[QueryIntent, Set[str]] = {
         "purchase", "license", "pricing", "financial"
     },
     QueryIntent.USER_ANALYTICS: {
-        "user", "users", "profile", "profiles", "people", "person", "individual",
-        "active users", "unique users"
+        "user count", "user counts", "how many users", "number of users",
+        "user statistics", "user stats", "user summary", "users by role",
+        "users by grade", "users by school", "user breakdown", "user totals"
     },
     QueryIntent.STUDENT_ANALYSIS: {
         "student", "students", "learner", "learners", "pupil", "pupils", "kids",
@@ -544,8 +549,16 @@ INTENT_KEYWORDS: Dict[QueryIntent, Set[str]] = {
         "detailed", "comprehensive"
     },
     QueryIntent.ACTIVE_USERS: {
-        "active", "engagement", "engaged", "participating", "logged in",
-        "last active", "recently active"
+        "active profile", "active profiles", "active user", "active users",
+        "profile", "profiles", "user profile", "user profiles",
+        "user", "users", "all users", "all profiles", "list of users",
+        "user list", "users list", "show users", "show all users",
+        "usage hours", "total usage", "usage for each", "hours for each",
+        "usage data for", "user usage", "users usage", "individual usage",
+        "engagement", "engaged", "participating", "logged in",
+        "last active", "recently active", "most active",
+        "each user", "each profile", "per user", "per profile",
+        "user data", "user details", "user information"
     },
     QueryIntent.COST_ANALYSIS: {
         "cost", "price", "expensive", "cheap", "cost per student", "cost per user",
@@ -560,9 +573,25 @@ INTENT_KEYWORDS: Dict[QueryIntent, Set[str]] = {
 
 def detect_query_intents(query: str) -> List[QueryIntent]:
     """
-    Detect the intents from a user query based on keywords.
+    Detect the intents from a user query using LLM-based semantic understanding.
+    Falls back to keyword matching if LLM call fails.
     Returns a list of detected intents ordered by relevance.
     """
+    # Try LLM-based detection first
+    try:
+        llm_intents = _detect_intents_with_llm(query)
+        if llm_intents:
+            logger.info(f"🤖 LLM Intent Classification: {[i.value for i in llm_intents]}")
+            return llm_intents
+    except Exception as e:
+        logger.warning(f"LLM intent detection failed, falling back to keywords: {e}")
+
+    # Fallback to keyword-based detection
+    return _detect_intents_with_keywords(query)
+
+
+def _detect_intents_with_keywords(query: str) -> List[QueryIntent]:
+    """Fallback keyword-based intent detection."""
     query_lower = query.lower()
     intent_scores: Dict[QueryIntent, int] = {}
 
@@ -571,15 +600,174 @@ def detect_query_intents(query: str) -> List[QueryIntent]:
         if score > 0:
             intent_scores[intent] = score
 
-    # Sort by score descending
     sorted_intents = sorted(intent_scores.items(), key=lambda x: x[1], reverse=True)
 
-    # Return intents with scores > 0
     if sorted_intents:
         return [intent for intent, score in sorted_intents]
 
-    # Default to dashboard overview if no specific intent detected
     return [QueryIntent.DASHBOARD_OVERVIEW]
+
+
+def _detect_intents_with_llm(query: str) -> List[QueryIntent]:
+    """
+    Use LLM to intelligently classify query intent based on semantic understanding.
+    This allows users to phrase queries naturally without strict keyword matching.
+    """
+    import os
+    import json
+    from openai import OpenAI
+
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    # Define intent descriptions for the LLM
+    intent_descriptions = """
+You are an intent classifier for an educational software analytics system. Classify the user's query into one or more of these intents (return the most relevant first):
+
+1. ACTIVE_USERS - Questions about individual users/profiles and their usage data. Use when asking for:
+   - List of users/profiles with their usage time/hours/minutes
+   - Individual user activity or engagement
+   - Who is using the system and how much
+   - Active profiles, user details, per-person usage
+   - "Show me all users", "list of active profiles", "usage for each person"
+
+2. USER_ANALYTICS - Questions about aggregate user statistics (counts, totals by group). Use when asking for:
+   - How many users/students/teachers total
+   - User counts by role, grade, or school
+   - Summary statistics about user population
+   - "How many students do we have", "user count by grade"
+
+3. SOFTWARE_USAGE - Questions about software/application usage patterns. Use when asking for:
+   - Which software/apps are being used
+   - Software usage metrics, minutes, sessions
+   - Application utilization data
+   - "What software is being used", "app usage statistics"
+
+4. SOFTWARE_ROI - Questions about software return on investment and effectiveness. Use when asking for:
+   - ROI of software investments
+   - Which software provides best value
+   - Software effectiveness or performance
+   - "What's the ROI", "most effective software"
+
+5. SOFTWARE_INVESTMENT - Questions about software costs and spending. Use when asking for:
+   - How much spent on software
+   - Software costs, budgets, expenses
+   - License costs, pricing
+   - "How much did we spend", "software costs"
+
+6. STUDENT_ANALYSIS - Questions specifically about students. Use when asking for:
+   - Student-specific usage or activity
+   - Top students, student engagement
+   - "Which students are most active"
+
+7. TEACHER_ANALYSIS - Questions specifically about teachers/educators. Use when asking for:
+   - Teacher-specific usage or activity
+   - Educator engagement
+   - "Teacher usage statistics"
+
+8. UNAUTHORIZED_SOFTWARE - Questions about unauthorized/unapproved software. Use when asking for:
+   - What unauthorized apps are being used
+   - Security/compliance concerns
+   - Shadow IT, blocked apps
+   - "What unapproved software", "security risks"
+
+9. SCHOOL_ANALYSIS - Questions comparing or analyzing by school. Use when asking for:
+   - Usage by school, school comparisons
+   - Per-school metrics
+   - "Compare schools", "usage at each school"
+
+10. GRADE_ANALYSIS - Questions about grade levels. Use when asking for:
+    - Usage by grade level
+    - Elementary vs middle vs high school
+    - "Usage by grade", "which grades use it most"
+
+11. USAGE_TRENDS - Questions about trends over time. Use when asking for:
+    - How usage has changed
+    - Daily/weekly/monthly patterns
+    - "Usage over time", "trends"
+
+12. USAGE_RANKINGS - Questions about rankings or comparisons. Use when asking for:
+    - Top/bottom software or users
+    - Rankings, comparisons
+    - "Top 10 apps", "most used"
+
+13. DASHBOARD_OVERVIEW - General overview or summary questions. Use when asking for:
+    - Executive summary, overview
+    - General metrics, KPIs
+    - "Give me an overview", "dashboard"
+
+14. COST_ANALYSIS - Questions about cost efficiency. Use when asking for:
+    - Cost per student, cost effectiveness
+    - Where money is wasted
+    - "Cost analysis", "cost per user"
+
+15. UTILIZATION_ANALYSIS - Questions about utilization rates. Use when asking for:
+    - What's being underutilized
+    - Adoption rates, coverage
+    - "Underutilized software", "adoption rate"
+
+16. REPORT_GENERATION - Requests for formal reports. Use when asking for:
+    - Generate a report, export data
+    - Comprehensive analysis document
+    - "Create a report", "export"
+"""
+
+    classification_prompt = f"""{intent_descriptions}
+
+User Query: "{query}"
+
+Respond with a JSON array of 1-3 intent names that best match this query, ordered by relevance.
+Example response: ["ACTIVE_USERS", "USER_ANALYTICS"]
+
+Only return the JSON array, nothing else."""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are a precise intent classifier. Return only a JSON array of intent names."},
+            {"role": "user", "content": classification_prompt}
+        ],
+        temperature=0,
+        max_tokens=100
+    )
+
+    # Parse the response
+    result_text = response.choices[0].message.content.strip()
+
+    # Clean up the response if needed
+    if result_text.startswith("```"):
+        result_text = result_text.split("```")[1]
+        if result_text.startswith("json"):
+            result_text = result_text[4:]
+    result_text = result_text.strip()
+
+    intent_names = json.loads(result_text)
+
+    # Convert to QueryIntent enum
+    intent_map = {
+        "ACTIVE_USERS": QueryIntent.ACTIVE_USERS,
+        "USER_ANALYTICS": QueryIntent.USER_ANALYTICS,
+        "SOFTWARE_USAGE": QueryIntent.SOFTWARE_USAGE,
+        "SOFTWARE_ROI": QueryIntent.SOFTWARE_ROI,
+        "SOFTWARE_INVESTMENT": QueryIntent.SOFTWARE_INVESTMENT,
+        "STUDENT_ANALYSIS": QueryIntent.STUDENT_ANALYSIS,
+        "TEACHER_ANALYSIS": QueryIntent.TEACHER_ANALYSIS,
+        "UNAUTHORIZED_SOFTWARE": QueryIntent.UNAUTHORIZED_SOFTWARE,
+        "SCHOOL_ANALYSIS": QueryIntent.SCHOOL_ANALYSIS,
+        "GRADE_ANALYSIS": QueryIntent.GRADE_ANALYSIS,
+        "USAGE_TRENDS": QueryIntent.USAGE_TRENDS,
+        "USAGE_RANKINGS": QueryIntent.USAGE_RANKINGS,
+        "DASHBOARD_OVERVIEW": QueryIntent.DASHBOARD_OVERVIEW,
+        "COST_ANALYSIS": QueryIntent.COST_ANALYSIS,
+        "UTILIZATION_ANALYSIS": QueryIntent.UTILIZATION_ANALYSIS,
+        "REPORT_GENERATION": QueryIntent.REPORT_GENERATION,
+    }
+
+    intents = []
+    for name in intent_names:
+        if name in intent_map:
+            intents.append(intent_map[name])
+
+    return intents if intents else [QueryIntent.DASHBOARD_OVERVIEW]
 
 
 def get_best_materialized_view(intents: List[QueryIntent]) -> MaterializedViewInfo:

@@ -115,7 +115,7 @@ class MVQueryRouter:
 
     def get_software_analytics(
         self,
-        limit: int = 20,
+        limit: int = 100,
         order_by: str = "total_minutes",
         roi_status: Optional[str] = None
     ) -> Dict[str, Any]:
@@ -207,7 +207,7 @@ class MVQueryRouter:
         FROM mv_dashboard_software_metrics
         WHERE district_id = %s
         ORDER BY total_minutes_90d DESC
-        LIMIT 10
+        LIMIT 100
         """
 
         top_software = self._execute_query(top_query, (self.district_id,))
@@ -280,7 +280,7 @@ class MVQueryRouter:
             "execution_time": execution_time
         }
 
-    def get_investment_analysis(self, limit: int = 15) -> Dict[str, Any]:
+    def get_investment_analysis(self, limit: int = 100) -> Dict[str, Any]:
         """
         Get investment analysis from mv_software_investment_summary.
         Best for financial reports and budget analysis.
@@ -332,7 +332,7 @@ class MVQueryRouter:
             "execution_time": execution_time
         }
 
-    def get_unauthorized_software(self, limit: int = 20) -> Dict[str, Any]:
+    def get_unauthorized_software(self, limit: int = 100) -> Dict[str, Any]:
         """
         Get unauthorized software analytics from mv_unauthorized_software_analytics_v3.
         Best for security and compliance dashboards.
@@ -383,7 +383,7 @@ class MVQueryRouter:
             "execution_time": execution_time
         }
 
-    def get_top_users(self, limit: int = 20, role: Optional[str] = None) -> Dict[str, Any]:
+    def get_top_users(self, limit: int = 100, role: Optional[str] = None) -> Dict[str, Any]:
         """
         Get top users by usage from mv_user_software_utilization_v2.
         Best for individual user reports.
@@ -428,7 +428,7 @@ class MVQueryRouter:
             "count": len(results)
         }
 
-    def get_school_analysis(self, limit: int = 30) -> Dict[str, Any]:
+    def get_school_analysis(self, limit: int = 100) -> Dict[str, Any]:
         """
         Get software usage by school from mv_software_usage_by_school_v2.
         Best for school-level comparisons.
@@ -486,7 +486,7 @@ class MVQueryRouter:
         self,
         grade_band: Optional[str] = None,
         user_type: Optional[str] = None,
-        limit: int = 20
+        limit: int = 100
     ) -> Dict[str, Any]:
         """
         Get software usage rankings from mv_software_usage_rankings_v4.
@@ -532,7 +532,7 @@ class MVQueryRouter:
             "count": len(results)
         }
 
-    def get_active_users_summary(self, limit: int = 20) -> Dict[str, Any]:
+    def get_active_users_summary(self, limit: int = 100) -> Dict[str, Any]:
         """
         Get active users summary from mv_active_users_summary.
         Best for user activity reports with grade bands.

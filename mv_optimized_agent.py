@@ -76,6 +76,12 @@ class MVOptimizedAgent:
             "You will receive REAL data from optimized materialized view queries.",
             "Your job is to create clear, actionable HTML analysis.",
             "",
+            "CRITICAL - DATA DISPLAY RULES:",
+            "- When user asks for 'all', 'list', 'show all', 'every', or 'complete list' - display ALL records in the data, not just top 5-10",
+            "- NEVER summarize or truncate data when user explicitly asks for all/list/complete data",
+            "- Include EVERY record from the provided data in your table",
+            "- If there are 50 records, show all 50. If there are 100 records, show all 100.",
+            "",
             "RESPONSE GUIDELINES:",
             "- Create clean HTML (no CSS, JavaScript, or styling)",
             "- Use semantic HTML elements: tables, divs, headers, lists",
@@ -171,7 +177,7 @@ class MVOptimizedAgent:
             except Exception as e:
                 tool_results["investment"] = {"error": str(e)}
 
-        elif primary_intent in [QueryIntent.USER_ANALYTICS, QueryIntent.ACTIVE_USERS]:
+        elif primary_intent == QueryIntent.USER_ANALYTICS:
             try:
                 logger.info("   📊 Calling get_user_analytics()...")
                 start = time.time()
@@ -183,6 +189,19 @@ class MVOptimizedAgent:
                 })
             except Exception as e:
                 tool_results["users"] = {"error": str(e)}
+
+        elif primary_intent == QueryIntent.ACTIVE_USERS:
+            try:
+                logger.info("   📊 Calling get_active_users_summary()...")
+                start = time.time()
+                tool_results["active_users"] = self.mv_router.get_active_users_summary()
+                mv_queries.append({
+                    "method": "get_active_users_summary",
+                    "mv_used": "mv_active_users_summary",
+                    "execution_time": time.time() - start
+                })
+            except Exception as e:
+                tool_results["active_users"] = {"error": str(e)}
 
         elif primary_intent == QueryIntent.STUDENT_ANALYSIS:
             try:
@@ -299,7 +318,7 @@ class MVOptimizedAgent:
                         continue
                     if isinstance(sub_value, list):
                         formatted.append(f"\n{sub_key}:")
-                        for item in sub_value[:20]:  # Limit to 20 items
+                        for item in sub_value[:100]:  # Limit to 100 items
                             formatted.append(f"  {json.dumps(item, default=str)}")
                     else:
                         formatted.append(f"{sub_key}: {json.dumps(sub_value, default=str)}")
@@ -343,23 +362,39 @@ class MVOptimizedAgent:
             formatted_data = self._format_data_for_agent(tool_data)
 
             # STEP 3: Generate HTML response using AI
+            # Detect if user wants all/complete data
+            query_lower = user_query.lower()
+            wants_all_data = any(word in query_lower for word in ['all', 'list', 'every', 'complete', 'full', 'entire', 'show me'])
+
+            data_display_instruction = ""
+            if wants_all_data:
+                data_display_instruction = """
+IMPORTANT: The user is asking for ALL/COMPLETE data. You MUST:
+- Display EVERY SINGLE record from the data provided below in your HTML table
+- Do NOT summarize, truncate, or show only "top" items
+- If there are 50 records, show all 50 in the table
+- If there are 100 records, show all 100 in the table
+- The user explicitly wants to see the complete list, not a summary
+"""
+
             analysis_prompt = f"""
 User Question: {user_query}
-
+{data_display_instruction}
 {formatted_data}
 
 Based on this REAL data from the database, create a comprehensive HTML response that:
 1. Directly answers the user's question
-2. Highlights key insights from the data
-3. Provides actionable recommendations
-4. Uses clear visualizations (tables, lists)
-5. Includes relevant metrics and trends
+2. Shows ALL records in tables (do not truncate or summarize if user asked for all/list)
+3. Highlights key insights from the data
+4. Provides actionable recommendations
+5. Uses clear visualizations (tables, lists)
 
 Remember to:
 - Use clean HTML without CSS or JavaScript
 - Use user-friendly language
 - Focus on insights that matter to educators
 - Include both positive findings and areas for improvement
+- SHOW ALL DATA RECORDS IN TABLES - never truncate when user asks for list/all
 """
 
             response = self.analysis_agent.run(analysis_prompt)

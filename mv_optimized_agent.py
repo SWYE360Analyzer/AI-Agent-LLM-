@@ -3,16 +3,19 @@ Materialized View Optimized Educational Agent
 
 This agent uses materialized views as the primary data source for all queries,
 resulting in 10-100x faster response times compared to querying raw tables.
+
+Supports both regular responses and SSE streaming with markdown format.
 """
 
 import json
 import logging
 import os
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, AsyncGenerator, Dict, List, Optional
 
 from phi.agent import Agent
 from phi.model.openai import OpenAIChat
+from openai import OpenAI
 
 from mv_knowledge_registry import (
     MATERIALIZED_VIEW_REGISTRY,
@@ -47,6 +50,7 @@ class MVOptimizedAgent:
         self.district_id = district_id
         self.postgres_config = postgres_config
         self.verbose = verbose
+        self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
 
         if self.verbose:
             logger.setLevel(logging.DEBUG)
@@ -56,12 +60,15 @@ class MVOptimizedAgent:
         # Initialize MV Query Router
         self.mv_router = create_mv_router(postgres_config, district_id)
 
-        # Create the AI agent for response generation
+        # Initialize OpenAI client for streaming
+        self.openai_client = OpenAI(api_key=self.openai_api_key)
+
+        # Create the AI agent for response generation (non-streaming fallback)
         self.analysis_agent = Agent(
             name="MV-Optimized Educational Analytics Agent",
             model=OpenAIChat(
                 id="gpt-4o-mini",
-                api_key=openai_api_key or os.getenv("OPENAI_API_KEY")
+                api_key=self.openai_api_key
             ),
             instructions=self._get_agent_instructions(),
             markdown=True,
@@ -70,7 +77,7 @@ class MVOptimizedAgent:
         logger.info(f"MVOptimizedAgent initialized successfully for district: {district_id}")
 
     def _get_agent_instructions(self) -> List[str]:
-        """Get comprehensive instructions for the agent."""
+        """Get comprehensive instructions for the agent (HTML format)."""
         return [
             "You are an educational software analytics specialist.",
             "You will receive REAL data from optimized materialized view queries.",
@@ -111,6 +118,57 @@ class MVOptimizedAgent:
             "- Comparison with benchmarks where applicable",
             "- Actionable next steps",
         ]
+
+    def _get_markdown_instructions(self) -> str:
+        """Get instructions for markdown format (streaming responses)."""
+        return """You are an educational software analytics specialist.
+You will receive REAL data from optimized materialized view queries.
+Your job is to create clear, actionable analysis in MARKDOWN format.
+
+CRITICAL - DATA DISPLAY RULES:
+- When user asks for 'all', 'list', 'show all', 'every', or 'complete list' - display ALL records, not just top 5-10
+- NEVER summarize or truncate data when user explicitly asks for all/list/complete data
+- Include EVERY record from the provided data in your table
+- If there are 50 records, show all 50. If there are 100 records, show all 100.
+
+RESPONSE FORMAT (MARKDOWN):
+- Use ## for main section headers
+- Use ### for sub-section headers
+- Use markdown tables with | column | headers |
+- Use **bold** for emphasis on key metrics
+- Use bullet points (- item) for lists
+- Use > blockquotes for insights/recommendations
+- Use emojis sparingly for visual appeal (📊 📈 ✅ ⚠️ 💡)
+
+MARKDOWN STRUCTURE EXAMPLE:
+## 📊 Software Analytics Summary
+
+### Key Metrics
+| Metric | Value |
+|--------|-------|
+| Total Software | 25 |
+| Total Cost | $50,000 |
+
+### 💡 Key Insights
+> Your top-performing software is achieving 85% ROI
+
+### ⚠️ Areas of Concern
+- Software X has low utilization (15%)
+
+### ✅ Recommendations
+1. Review underutilized software
+2. Consider consolidation opportunities
+
+ROI STATUS INTERPRETATION:
+- 'high' = Good investment, well utilized
+- 'moderate' = Acceptable, room for improvement
+- 'low' = Underutilized, consider action
+
+IMPORTANT:
+- Be concise but comprehensive
+- Focus on actionable insights
+- Never include UUIDs or district IDs
+- Use user-friendly language"""
 
     def _call_mv_tools(self, user_query: str) -> Dict[str, Any]:
         """
@@ -326,6 +384,126 @@ class MVOptimizedAgent:
                 formatted.append(str(value))
 
         return "\n".join(formatted)
+
+    async def process_query_stream(self, user_query: str) -> AsyncGenerator[str, None]:
+        """
+        Process a user query with SSE streaming, returning markdown chunks.
+
+        This method yields chunks of markdown as they are generated,
+        providing much faster perceived response times.
+        """
+        execution_log = {
+            "district_id": self.district_id,
+            "user_query": user_query,
+            "mv_queries": [],
+            "intents": [],
+            "execution_time": None,
+            "error": None,
+        }
+
+        start_time = time.time()
+
+        try:
+            logger.info(f"=== MV OPTIMIZED STREAMING FOR DISTRICT {self.district_id} ===")
+            logger.info(f"User Query: {user_query}")
+
+            # STEP 1: Call MV tools based on query analysis
+            logger.info("🔧 STEP 1: Calling materialized view tools...")
+            tool_data = self._call_mv_tools(user_query)
+
+            execution_log["mv_queries"] = tool_data["mv_queries"]
+            execution_log["intents"] = tool_data["intents"]
+            execution_log["primary_intent"] = tool_data["primary_intent"]
+            execution_log["best_mv"] = tool_data["best_mv"]
+
+            # Yield metadata event first
+            metadata = {
+                "type": "metadata",
+                "primary_intent": tool_data["primary_intent"],
+                "best_mv": tool_data["best_mv"],
+                "mv_queries_count": len(tool_data["mv_queries"]),
+                "data_fetch_time": tool_data["total_time"]
+            }
+            yield f"data: {json.dumps(metadata)}\n\n"
+
+            # STEP 2: Format data for AI agent
+            logger.info("🎨 STEP 2: Streaming markdown analysis...")
+            formatted_data = self._format_data_for_agent(tool_data)
+
+            # Detect if user wants all/complete data
+            query_lower = user_query.lower()
+            wants_all_data = any(word in query_lower for word in ['all', 'list', 'every', 'complete', 'full', 'entire', 'show me'])
+
+            data_display_instruction = ""
+            if wants_all_data:
+                data_display_instruction = """
+IMPORTANT: The user is asking for ALL/COMPLETE data. You MUST:
+- Display EVERY SINGLE record from the data provided below in your markdown table
+- Do NOT summarize, truncate, or show only "top" items
+- If there are 50 records, show all 50 in the table
+- If there are 100 records, show all 100 in the table
+- The user explicitly wants to see the complete list, not a summary
+"""
+
+            # Build the prompt for streaming
+            system_prompt = self._get_markdown_instructions()
+            user_prompt = f"""User Question: {user_query}
+{data_display_instruction}
+{formatted_data}
+
+Based on this REAL data from the database, create a comprehensive MARKDOWN response that:
+1. Directly answers the user's question
+2. Shows ALL records in tables (do not truncate or summarize if user asked for all/list)
+3. Highlights key insights from the data
+4. Provides actionable recommendations
+5. Uses clear markdown formatting (tables, headers, bullet points)
+
+Remember to:
+- Use proper markdown syntax
+- Be concise but comprehensive
+- Focus on insights that matter to educators
+- SHOW ALL DATA RECORDS IN TABLES - never truncate when user asks for list/all"""
+
+            # STEP 3: Stream response using OpenAI
+            stream = self.openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                stream=True,
+                temperature=0.3,
+                max_tokens=4096
+            )
+
+            # Yield content chunks
+            for chunk in stream:
+                if chunk.choices[0].delta.content:
+                    content = chunk.choices[0].delta.content
+                    yield f"data: {json.dumps({'type': 'content', 'text': content})}\n\n"
+
+            # Yield completion event
+            execution_log["execution_time"] = time.time() - start_time
+            completion_data = {
+                "type": "done",
+                "execution_time": execution_log["execution_time"],
+                "mv_queries_count": len(execution_log["mv_queries"])
+            }
+            yield f"data: {json.dumps(completion_data)}\n\n"
+
+            logger.info(f"✅ MV STREAMING COMPLETED in {execution_log['execution_time']:.2f}s")
+
+        except Exception as e:
+            execution_log["error"] = str(e)
+            execution_log["execution_time"] = time.time() - start_time
+            logger.error(f"❌ MV STREAMING FAILED: {e}")
+
+            error_data = {
+                "type": "error",
+                "error": str(e),
+                "execution_time": execution_log["execution_time"]
+            }
+            yield f"data: {json.dumps(error_data)}\n\n"
 
     def process_query(self, user_query: str) -> Dict[str, Any]:
         """

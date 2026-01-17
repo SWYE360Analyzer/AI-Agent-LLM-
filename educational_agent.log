@@ -974,3 +974,194 @@
 2026-01-16 12:27:00,009 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
 2026-01-16 12:27:00,009 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
 2026-01-16 12:27:00,078 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://preview--roi-bright-future.lovable.app']
+2026-01-16 12:38:20,350 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://preview--roi-bright-future.lovable.app']
+2026-01-16 12:38:20,354 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-01-16 12:38:20,354 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-01-16 12:38:20,386 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://preview--roi-bright-future.lovable.app']
+2026-01-16 12:39:30,136 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2026-01-16 12:39:30,137 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2026-01-16 12:39:30,160 - main - INFO - Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325, verbose: True, mv_optimized: True, intercepting: False, intelligent: False, phi: False
+2026-01-16 12:39:30,161 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-01-16 12:39:30,166 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-01-16 12:39:30,166 - main - INFO - Created MV-optimized agent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-01-16 12:39:30,166 - main - INFO - 🚀 Using MV-Optimized Agent (10-100x faster using materialized views)
+2026-01-16 12:39:30,166 - mv_optimized_agent - INFO - === MV OPTIMIZED PROCESSING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-01-16 12:39:30,166 - mv_optimized_agent - INFO - User Query: Show me all the paid software list
+2026-01-16 12:39:30,166 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-01-16 12:39:31,916 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-16 12:39:31,949 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_investment']
+2026-01-16 12:39:31,949 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-01-16 12:39:31,949 - mv_optimized_agent - INFO -    Primary Intent: software_investment
+2026-01-16 12:39:31,949 - mv_optimized_agent - INFO -    All Intents: ['software_investment']
+2026-01-16 12:39:31,949 - mv_optimized_agent - INFO -    Best MV: mv_software_investment_summary
+2026-01-16 12:39:31,949 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-01-16 12:39:35,025 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.075s
+2026-01-16 12:39:35,026 - mv_optimized_agent - INFO -    📊 Calling get_investment_analysis()...
+2026-01-16 12:39:35,971 - mv_optimized_agent - INFO - 🎨 STEP 2: Generating HTML analysis...
+2026-01-16 12:43:04,416 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-16 12:43:06,847 - httpx - INFO - HTTP Request: POST https://api.phidata.com/v1/telemetry/agent/run/create "HTTP/1.1 200 OK"
+2026-01-16 12:43:06,919 - mv_optimized_agent - INFO - ✅ MV OPTIMIZED PROCESSING COMPLETED in 216.75s
+2026-01-16 12:43:06,921 - mv_optimized_agent - INFO - 📊 MV Queries Executed: 2
+2026-01-16 12:43:06,921 - mv_optimized_agent - INFO - 🧠 Primary Intent: software_investment
+2026-01-16 12:43:06,921 - mv_optimized_agent - INFO - 📁 Best MV: mv_software_investment_summary
+2026-01-16 12:43:06,931 - mv_optimized_agent - DEBUG - 📋 Full Execution Log: {
+  "district_id": "3ef51192-1070-4090-908d-ef3ab03b4325",
+  "user_query": "Show me all the paid software list",
+  "mv_queries": [
+    {
+      "method": "get_dashboard_metrics",
+      "mv_used": "mv_dashboard_software_metrics",
+      "execution_time": 3.074826955795288
+    },
+    {
+      "method": "get_investment_analysis",
+      "mv_used": "mv_software_investment_summary",
+      "execution_time": 0.9445450305938721
+    }
+  ],
+  "intents": [
+    "software_investment"
+  ],
+  "execution_time": 216.752454996109,
+  "error": null,
+  "primary_intent": "software_investment",
+  "best_mv": "mv_software_investment_summary"
+}
+2026-01-16 12:43:06,933 - main - INFO - 📊 Execution Summary (mv_optimized): 2 MV queries, 216.75s, intent: software_investment, best_mv: mv_software_investment_summary
+2026-01-16 13:16:00,627 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/ask/stream
+2026-01-16 13:16:00,740 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2026-01-16 13:16:07,106 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://preview--roi-bright-future.lovable.app']
+2026-01-16 13:16:07,118 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-01-16 13:16:07,118 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-01-16 13:16:07,224 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://preview--roi-bright-future.lovable.app']
+2026-01-16 13:16:10,111 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/ask/stream
+2026-01-16 13:16:10,111 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2026-01-16 13:16:10,114 - main - INFO - [STREAM] Received request for district your-district-id
+2026-01-16 13:16:10,114 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: your-district-id
+2026-01-16 13:16:10,152 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: your-district-id
+2026-01-16 13:16:10,152 - main - INFO - Created MV-optimized agent for district: your-district-id
+2026-01-16 13:16:10,152 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-01-16 13:16:10,153 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT your-district-id ===
+2026-01-16 13:16:10,153 - mv_optimized_agent - INFO - User Query: Show me all the paid software list
+2026-01-16 13:16:10,153 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-01-16 13:16:11,279 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-16 13:16:11,311 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_investment']
+2026-01-16 13:16:11,313 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-01-16 13:16:11,313 - mv_optimized_agent - INFO -    Primary Intent: software_investment
+2026-01-16 13:16:11,313 - mv_optimized_agent - INFO -    All Intents: ['software_investment']
+2026-01-16 13:16:11,313 - mv_optimized_agent - INFO -    Best MV: mv_software_investment_summary
+2026-01-16 13:16:11,313 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-01-16 13:16:13,745 - mv_query_router - ERROR - Query execution error: invalid input syntax for type uuid: "your-district-id"
+LINE 14:         WHERE district_id = 'your-district-id'
+                                     ^
+
+2026-01-16 13:16:13,745 - mv_query_router - ERROR - Query failed after 2 attempts: invalid input syntax for type uuid: "your-district-id"
+LINE 14:         WHERE district_id = 'your-district-id'
+                                     ^
+
+2026-01-16 13:16:13,746 - mv_optimized_agent - ERROR -    ❌ Dashboard metrics failed: invalid input syntax for type uuid: "your-district-id"
+LINE 14:         WHERE district_id = 'your-district-id'
+                                     ^
+
+2026-01-16 13:16:13,746 - mv_optimized_agent - INFO -    📊 Calling get_investment_analysis()...
+2026-01-16 13:16:14,005 - mv_query_router - ERROR - Query execution error: invalid input syntax for type uuid: "your-district-id"
+LINE 17:         WHERE district_id = 'your-district-id' AND total_inv...
+                                     ^
+
+2026-01-16 13:16:14,006 - mv_query_router - ERROR - Query failed after 2 attempts: invalid input syntax for type uuid: "your-district-id"
+LINE 17:         WHERE district_id = 'your-district-id' AND total_inv...
+                                     ^
+
+2026-01-16 13:16:14,008 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-01-16 13:16:15,303 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-16 13:16:39,555 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/ask
+2026-01-16 13:16:39,557 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2026-01-16 13:16:39,563 - main - INFO - Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325, verbose: True, mv_optimized: True, intercepting: False, intelligent: False, phi: False
+2026-01-16 13:16:39,564 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-01-16 13:16:39,921 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-01-16 13:16:39,925 - main - INFO - Created MV-optimized agent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-01-16 13:16:39,925 - main - INFO - 🚀 Using MV-Optimized Agent (10-100x faster using materialized views)
+2026-01-16 13:16:39,925 - mv_optimized_agent - INFO - === MV OPTIMIZED PROCESSING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-01-16 13:16:39,925 - mv_optimized_agent - INFO - User Query: Show me all the paid software list
+2026-01-16 13:16:39,925 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-01-16 13:16:41,884 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-16 13:16:41,891 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_investment']
+2026-01-16 13:16:41,891 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-01-16 13:16:41,891 - mv_optimized_agent - INFO -    Primary Intent: software_investment
+2026-01-16 13:16:41,891 - mv_optimized_agent - INFO -    All Intents: ['software_investment']
+2026-01-16 13:16:41,891 - mv_optimized_agent - INFO -    Best MV: mv_software_investment_summary
+2026-01-16 13:16:41,891 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-01-16 13:16:44,489 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 2.597s
+2026-01-16 13:16:44,490 - mv_optimized_agent - INFO -    📊 Calling get_investment_analysis()...
+2026-01-16 13:16:45,284 - mv_optimized_agent - INFO - 🎨 STEP 2: Generating HTML analysis...
+2026-01-16 13:19:07,565 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-16 13:19:08,861 - httpx - INFO - HTTP Request: POST https://api.phidata.com/v1/telemetry/agent/run/create "HTTP/1.1 200 OK"
+2026-01-16 13:19:08,862 - mv_optimized_agent - INFO - ✅ MV OPTIMIZED PROCESSING COMPLETED in 148.94s
+2026-01-16 13:19:08,862 - mv_optimized_agent - INFO - 📊 MV Queries Executed: 2
+2026-01-16 13:19:08,862 - mv_optimized_agent - INFO - 🧠 Primary Intent: software_investment
+2026-01-16 13:19:08,862 - mv_optimized_agent - INFO - 📁 Best MV: mv_software_investment_summary
+2026-01-16 13:19:08,862 - mv_optimized_agent - DEBUG - 📋 Full Execution Log: {
+  "district_id": "3ef51192-1070-4090-908d-ef3ab03b4325",
+  "user_query": "Show me all the paid software list",
+  "mv_queries": [
+    {
+      "method": "get_dashboard_metrics",
+      "mv_used": "mv_dashboard_software_metrics",
+      "execution_time": 2.597203016281128
+    },
+    {
+      "method": "get_investment_analysis",
+      "mv_used": "mv_software_investment_summary",
+      "execution_time": 0.7940061092376709
+    }
+  ],
+  "intents": [
+    "software_investment"
+  ],
+  "execution_time": 148.93638706207275,
+  "error": null,
+  "primary_intent": "software_investment",
+  "best_mv": "mv_software_investment_summary"
+}
+2026-01-16 13:19:08,864 - main - INFO - 📊 Execution Summary (mv_optimized): 2 MV queries, 148.94s, intent: software_investment, best_mv: mv_software_investment_summary
+2026-01-16 13:19:40,624 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/ask/stream
+2026-01-16 13:19:40,626 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2026-01-16 13:19:40,635 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-01-16 13:19:40,636 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-01-16 13:19:40,669 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-01-16 13:19:40,669 - main - INFO - Created MV-optimized agent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-01-16 13:19:40,669 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-01-16 13:19:40,669 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-01-16 13:19:40,669 - mv_optimized_agent - INFO - User Query: Show me all the paid software list
+2026-01-16 13:19:40,670 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-01-16 13:19:42,384 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-16 13:19:42,389 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_investment']
+2026-01-16 13:19:42,389 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-01-16 13:19:42,390 - mv_optimized_agent - INFO -    Primary Intent: software_investment
+2026-01-16 13:19:42,390 - mv_optimized_agent - INFO -    All Intents: ['software_investment']
+2026-01-16 13:19:42,390 - mv_optimized_agent - INFO -    Best MV: mv_software_investment_summary
+2026-01-16 13:19:42,390 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-01-16 13:19:46,279 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.889s
+2026-01-16 13:19:46,280 - mv_optimized_agent - INFO -    📊 Calling get_investment_analysis()...
+2026-01-16 13:19:47,069 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-01-16 13:19:48,245 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-16 13:21:00,735 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 80.06s
+2026-01-16 13:22:33,865 - main - INFO - 📨 Incoming Request - Origin: https://classsight.ai | Referer: No Referer | Host: localhost:8000 | Path: /api/ask/stream
+2026-01-16 13:22:33,870 - main - INFO - ✅ Origin ALLOWED: https://classsight.ai
+2026-01-16 13:22:33,874 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-01-16 13:22:33,874 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-01-16 13:22:33,875 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-01-16 13:22:33,875 - mv_optimized_agent - INFO - User Query: Show we all the active users list
+2026-01-16 13:22:33,875 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-01-16 13:22:34,568 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-16 13:22:34,575 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users', 'user_analytics']
+2026-01-16 13:22:34,575 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-01-16 13:22:34,575 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-01-16 13:22:34,575 - mv_optimized_agent - INFO -    All Intents: ['active_users', 'user_analytics']
+2026-01-16 13:22:34,575 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-01-16 13:22:34,575 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-01-16 13:22:35,334 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.759s
+2026-01-16 13:22:35,334 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-01-16 13:22:35,974 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-01-16 13:22:36,978 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-16 13:23:47,229 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 73.35s

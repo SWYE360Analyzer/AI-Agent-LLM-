@@ -13,7 +13,7 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 # Import all agent types
@@ -419,6 +419,78 @@ async def ask_analytics_question(request: AnalyticsRequest):
         )
 
 
+class StreamingRequest(BaseModel):
+    """Request model for streaming analytics queries."""
+
+    message: str = Field(
+        ..., description="Natural language query about educational software analytics"
+    )
+    district_id: str = Field(
+        ..., description="District identifier for data access control"
+    )
+
+
+@app.post("/api/ask/stream")
+async def ask_analytics_question_stream(request: StreamingRequest):
+    """
+    Process natural language questions with SSE streaming response.
+    Returns markdown-formatted response in real-time chunks.
+
+    This endpoint is much faster as it streams the response as it's generated,
+    rather than waiting for the entire HTML response to complete.
+
+    Response format (SSE):
+    - data: {"type": "metadata", "primary_intent": "...", "best_mv": "...", ...}
+    - data: {"type": "content", "text": "markdown chunk..."}
+    - data: {"type": "done", "execution_time": 1.23, ...}
+    - data: {"type": "error", "error": "...", ...} (if error occurs)
+    """
+    try:
+        logger.info(
+            f"[STREAM] Received request for district {request.district_id}"
+        )
+
+        # Validate required fields
+        if not request.message.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Message cannot be empty",
+            )
+        if not request.district_id.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="District ID is required",
+            )
+
+        # Use MV-optimized agent for streaming
+        agent = get_mv_optimized_agent(request.district_id, verbose=False)
+        logger.info("🚀 [STREAM] Using MV-Optimized Agent with SSE streaming")
+
+        async def event_generator():
+            """Generate SSE events from the agent's streaming response."""
+            async for chunk in agent.process_query_stream(request.message):
+                yield chunk
+
+        return StreamingResponse(
+            event_generator(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",  # Disable nginx buffering
+            }
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[STREAM] Error processing request: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
 @app.get("/api/dashboard/{district_id}", response_model=AnalyticsResponse)
 async def get_district_dashboard(
     district_id: str, verbose: bool = False, use_intercepting: bool = True
@@ -537,7 +609,7 @@ async def root():
 
         <div class="endpoint">
             <h3><span class="method">POST</span> /api/ask</h3>
-            <p>Ask questions with guaranteed database tool calling</p>
+            <p>Ask questions with guaranteed database tool calling (returns HTML)</p>
             <p><strong>Payload:</strong></p>
             <code>{
   "message": "Tell me the top software investments",
@@ -549,6 +621,29 @@ async def root():
             <ul>
                 <li><code>use_intercepting_agent</code>: true = guaranteed database calls, false = original agent</li>
                 <li><code>agent_type</code> in response shows which agent was used</li>
+            </ul>
+        </div>
+
+        <div class="endpoint" style="border-left: 4px solid #28a745;">
+            <h3><span class="method" style="color: #28a745;">POST</span> /api/ask/stream ⚡ NEW - RECOMMENDED</h3>
+            <p>Ask questions with SSE streaming response (returns Markdown in real-time)</p>
+            <p><strong>Benefits:</strong></p>
+            <ul>
+                <li>✅ Much faster perceived response time (streaming)</li>
+                <li>✅ Returns Markdown format (lighter than HTML)</li>
+                <li>✅ Real-time response chunks as they're generated</li>
+                <li>✅ Better user experience</li>
+            </ul>
+            <p><strong>Payload:</strong></p>
+            <code>{
+  "message": "Show me all the paid software list",
+  "district_id": "district123"
+}</code>
+            <p><strong>SSE Response Events:</strong></p>
+            <ul>
+                <li><code>{"type": "metadata", ...}</code> - Query metadata (intent, MV used)</li>
+                <li><code>{"type": "content", "text": "..."}</code> - Markdown content chunks</li>
+                <li><code>{"type": "done", ...}</code> - Completion with timing</li>
             </ul>
         </div>
 

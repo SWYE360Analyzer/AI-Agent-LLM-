@@ -1165,3 +1165,39 @@ LINE 17:         WHERE district_id = 'your-district-id' AND total_inv...
 2026-01-16 13:22:35,974 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
 2026-01-16 13:22:36,978 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 2026-01-16 13:23:47,229 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 73.35s
+2026-01-30 12:52:21,740 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app']
+2026-01-30 12:52:21,750 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-01-30 12:52:21,750 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-01-30 12:52:21,914 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app']
+2026-01-30 12:58:11,597 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-01-30 12:58:11,598 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: http://localhost:8080
+2026-01-30 12:58:21,432 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-01-30 12:58:21,442 - main - ERROR - 🚫 BLOCKED - Origin NOT in allowed list: http://localhost:8080
+2026-01-30 12:59:24,216 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080']
+2026-01-30 12:59:24,223 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-01-30 12:59:24,223 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-01-30 12:59:24,263 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080']
+2026-01-30 12:59:28,658 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-01-30 12:59:28,658 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-01-30 12:59:28,660 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-01-30 12:59:28,660 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-01-30 12:59:28,660 - main - INFO - [STREAM] Received request for district 440134ca-1070-4090-908d-4ccecf934325
+2026-01-30 12:59:28,661 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 440134ca-1070-4090-908d-4ccecf934325
+2026-01-30 12:59:28,707 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 440134ca-1070-4090-908d-4ccecf934325
+2026-01-30 12:59:28,707 - main - INFO - Created MV-optimized agent for district: 440134ca-1070-4090-908d-4ccecf934325
+2026-01-30 12:59:28,707 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-01-30 12:59:28,708 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 440134ca-1070-4090-908d-4ccecf934325 ===
+2026-01-30 12:59:28,708 - mv_optimized_agent - INFO - User Query: provide Peer District Benchmarking insights
+2026-01-30 12:59:28,708 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-01-30 12:59:30,593 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-30 12:59:30,625 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['school_analysis', 'user_analytics']
+2026-01-30 12:59:30,626 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-01-30 12:59:30,626 - mv_optimized_agent - INFO -    Primary Intent: school_analysis
+2026-01-30 12:59:30,626 - mv_optimized_agent - INFO -    All Intents: ['school_analysis', 'user_analytics']
+2026-01-30 12:59:30,626 - mv_optimized_agent - INFO -    Best MV: mv_report_data_unified_v4
+2026-01-30 12:59:30,626 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-01-30 12:59:35,420 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 4.792s
+2026-01-30 12:59:35,424 - mv_optimized_agent - INFO -    📊 Calling get_school_analysis()...
+2026-01-30 12:59:36,331 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-01-30 12:59:39,663 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-01-30 13:00:03,225 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 34.51s

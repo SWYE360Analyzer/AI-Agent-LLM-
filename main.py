@@ -50,7 +50,10 @@ allowed_origins = [
     "https://www.classsight.ai",
     "https://swye360.ai",
     "https://www.swye360.ai",
+    "https://www.swye360.com",
+    "https://swye360.com",
     "https://preview--roi-bright-future.lovable.app",
+    "http://localhost:8080"
 ]
 
 logger.info(f"🔒 CORS allowed origins: {allowed_origins}")

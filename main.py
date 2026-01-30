@@ -53,7 +53,8 @@ allowed_origins = [
     "https://www.swye360.com",
     "https://swye360.com",
     "https://preview--roi-bright-future.lovable.app",
-    "http://localhost:8080"
+    "http://localhost:8080",
+    "https://swye360.web.app"
 ]
 
 logger.info(f"🔒 CORS allowed origins: {allowed_origins}")

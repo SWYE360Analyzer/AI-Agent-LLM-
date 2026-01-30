@@ -1,1 +1,3 @@
 .env
+__pycache__
+educational_agent.log

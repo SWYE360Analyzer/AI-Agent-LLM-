@@ -193,20 +193,21 @@ IMPORTANT:
         tool_results = {}
         mv_queries = []
 
-        # Always get basic dashboard metrics for context
-        try:
-            logger.info("   📊 Calling get_dashboard_metrics()...")
-            metrics_start = time.time()
-            tool_results["dashboard_metrics"] = self.mv_router.get_dashboard_metrics()
-            mv_queries.append({
-                "method": "get_dashboard_metrics",
-                "mv_used": "mv_dashboard_software_metrics",
-                "execution_time": time.time() - metrics_start
-            })
-            logger.info(f"   ✅ Dashboard metrics retrieved in {time.time() - metrics_start:.3f}s")
-        except Exception as e:
-            logger.error(f"   ❌ Dashboard metrics failed: {e}")
-            tool_results["dashboard_metrics"] = {"error": str(e)}
+        # Get basic dashboard metrics for context (skip for self-contained intents)
+        if primary_intent != QueryIntent.PEER_BENCHMARKING:
+            try:
+                logger.info("   📊 Calling get_dashboard_metrics()...")
+                metrics_start = time.time()
+                tool_results["dashboard_metrics"] = self.mv_router.get_dashboard_metrics()
+                mv_queries.append({
+                    "method": "get_dashboard_metrics",
+                    "mv_used": "mv_dashboard_software_metrics",
+                    "execution_time": time.time() - metrics_start
+                })
+                logger.info(f"   ✅ Dashboard metrics retrieved in {time.time() - metrics_start:.3f}s")
+            except Exception as e:
+                logger.error(f"   ❌ Dashboard metrics failed: {e}")
+                tool_results["dashboard_metrics"] = {"error": str(e)}
 
         # Route to specific data based on intent
         if primary_intent == QueryIntent.UNAUTHORIZED_SOFTWARE:
@@ -327,6 +328,19 @@ IMPORTANT:
                 })
             except Exception as e:
                 tool_results["roi_analysis"] = {"error": str(e)}
+
+        elif primary_intent == QueryIntent.PEER_BENCHMARKING:
+            try:
+                logger.info("   📊 Calling get_peer_benchmarking_summary()...")
+                start = time.time()
+                tool_results["peer_benchmarking"] = self.mv_router.get_peer_benchmarking_summary()
+                mv_queries.append({
+                    "method": "get_peer_benchmarking_summary",
+                    "mv_used": "peer_district_metrics + peer_comparisons",
+                    "execution_time": time.time() - start
+                })
+            except Exception as e:
+                tool_results["peer_benchmarking"] = {"error": str(e)}
 
         else:
             # Default: get comprehensive software analytics

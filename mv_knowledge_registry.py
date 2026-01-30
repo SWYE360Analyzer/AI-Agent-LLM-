@@ -34,6 +34,7 @@ class QueryIntent(Enum):
     ACTIVE_USERS = "active_users"
     COST_ANALYSIS = "cost_analysis"
     UTILIZATION_ANALYSIS = "utilization_analysis"
+    PEER_BENCHMARKING = "peer_benchmarking"
 
 
 @dataclass
@@ -487,6 +488,53 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
         ],
         priority=1
     ),
+
+    # ============================================================================
+    # 17. peer_district_metrics - Peer district benchmarking metrics
+    # ============================================================================
+    "peer_district_metrics": MaterializedViewInfo(
+        name="peer_district_metrics",
+        description="Per-metric benchmarking rows for a district including metric value, percentile ranking, peer average, and category (financial/usage/performance/adoption)",
+        primary_intents=[
+            QueryIntent.PEER_BENCHMARKING,
+            QueryIntent.DASHBOARD_OVERVIEW
+        ],
+        key_columns=[
+            "id", "district_id", "metric_name", "metric_value", "percentile",
+            "peer_average", "unit", "category", "ranking", "matching_tier",
+            "peer_count", "created_at", "updated_at"
+        ],
+        aggregations=["metric_value", "percentile", "peer_average", "ranking"],
+        filters_available=["district_id", "category", "metric_name"],
+        performance_notes="Best for peer district benchmarking dashboards. Each row is one metric for one district. Categories: financial, usage, performance.",
+        sample_queries=[
+            "SELECT metric_name, metric_value, percentile, peer_average, unit, category, ranking FROM peer_district_metrics WHERE district_id = '{district_id}' ORDER BY category, metric_name",
+        ],
+        priority=1
+    ),
+
+    # ============================================================================
+    # 18. peer_comparisons - Peer district metric comparisons
+    # ============================================================================
+    "peer_comparisons": MaterializedViewInfo(
+        name="peer_comparisons",
+        description="Per-metric comparisons of a district against its peer group with the district's value, peer average, percentile, ranking, and interpretation (excellent/good/average/needs_improvement/critical)",
+        primary_intents=[
+            QueryIntent.PEER_BENCHMARKING
+        ],
+        key_columns=[
+            "id", "district_id", "metric", "your_value", "peer_average",
+            "percentile", "ranking", "total_districts", "unit",
+            "interpretation", "matching_tier", "peer_count", "created_at"
+        ],
+        aggregations=["your_value", "peer_average", "percentile", "ranking"],
+        filters_available=["district_id", "interpretation", "metric"],
+        performance_notes="Best for detailed peer comparison reports. Each row is one metric comparison. Interpretation values: excellent, good, average, needs_improvement, critical.",
+        sample_queries=[
+            "SELECT metric, your_value, peer_average, percentile, ranking, total_districts, unit, interpretation FROM peer_comparisons WHERE district_id = '{district_id}' ORDER BY percentile DESC"
+        ],
+        priority=1
+    ),
 }
 
 
@@ -567,6 +615,11 @@ INTENT_KEYWORDS: Dict[QueryIntent, Set[str]] = {
     QueryIntent.UTILIZATION_ANALYSIS: {
         "utilization", "utilized", "underutilized", "overutilized", "unused",
         "adoption", "penetration", "coverage", "compliance"
+    },
+    QueryIntent.PEER_BENCHMARKING: {
+        "peer", "benchmark", "benchmarking", "peer district", "compare districts",
+        "district comparison", "similar districts", "peer comparison",
+        "how do we compare", "compared to peers", "peer metrics"
     }
 }
 
@@ -709,6 +762,12 @@ You are an intent classifier for an educational software analytics system. Class
     - Generate a report, export data
     - Comprehensive analysis document
     - "Create a report", "export"
+
+17. PEER_BENCHMARKING - Questions about peer district benchmarking and comparisons. Use when asking for:
+    - How the district compares to peers/similar districts
+    - Peer district benchmarking insights or metrics
+    - District-level comparisons on spending, usage, ROI
+    - "Peer benchmarking", "compare to similar districts", "how do we compare"
 """
 
     classification_prompt = f"""{intent_descriptions}
@@ -760,6 +819,7 @@ Only return the JSON array, nothing else."""
         "COST_ANALYSIS": QueryIntent.COST_ANALYSIS,
         "UTILIZATION_ANALYSIS": QueryIntent.UTILIZATION_ANALYSIS,
         "REPORT_GENERATION": QueryIntent.REPORT_GENERATION,
+        "PEER_BENCHMARKING": QueryIntent.PEER_BENCHMARKING,
     }
 
     intents = []
@@ -876,6 +936,12 @@ WHERE district_id = '{district_id}'
 ORDER BY total_minutes DESC
 LIMIT 20"""
 
+    elif QueryIntent.PEER_BENCHMARKING in intents:
+        return f"""SELECT metric, your_value, peer_average, percentile, ranking, total_districts, unit, interpretation
+FROM peer_comparisons
+WHERE district_id = '{district_id}'
+ORDER BY percentile DESC"""
+
     elif QueryIntent.SOFTWARE_ROI in intents:
         return f"""SELECT name, total_cost, total_minutes, active_users, avg_roi_percentage, roi_status
 FROM {best_view.name}
@@ -944,6 +1010,11 @@ def get_mv_aware_instructions(district_id: str) -> List[str]:
         "   - Use for: Top software lists, usage percentage, grade band comparisons",
         "   - Contains: usage_percentage, supports grade_band filtering",
         "",
+        "9. peer_district_metrics + peer_comparisons - PEER BENCHMARKING",
+        "   - Use for: Comparing the district against peer/similar districts",
+        "   - peer_district_metrics: metric_name, metric_value, percentile, peer_average, unit, category, ranking",
+        "   - peer_comparisons: metric, your_value, peer_average, percentile, ranking, total_districts, interpretation",
+        "",
         "=" * 80,
         "QUERY MAPPING RULES",
         "=" * 80,
@@ -960,6 +1031,7 @@ def get_mv_aware_instructions(district_id: str) -> List[str]:
         "• 'Software rankings/top software' → mv_software_usage_rankings_v4",
         "• 'Investment/cost analysis' → mv_software_investment_summary",
         "• 'Grade-level breakdown' → mv_dashboard_user_analytics or mv_software_usage_rankings_v4",
+        "• 'Peer benchmarking/compare districts' → peer_district_metrics + peer_comparisons",
         "",
         "=" * 80,
         "SAMPLE OPTIMIZED QUERIES",

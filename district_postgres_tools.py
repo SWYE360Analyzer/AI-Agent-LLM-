@@ -590,3 +590,125 @@ class DistrictAwarePostgresTools(Toolkit):
         except Exception as e:
             logger.error(f"Error getting investment analysis: {e}")
             return f"Error retrieving investment analysis: {str(e)}"
+
+    def get_peer_benchmarking_summary(self) -> str:
+        """Get peer district benchmarking insights comparing the district to similar peers."""
+        metrics_query = """
+        SELECT
+            metric_name, metric_value, percentile, peer_average,
+            unit, category, ranking, peer_count
+        FROM peer_district_metrics
+        WHERE district_id = %s
+        ORDER BY category, metric_name
+        """
+
+        comparisons_query = """
+        SELECT
+            metric, your_value, peer_average, percentile,
+            ranking, total_districts, unit, interpretation
+        FROM peer_comparisons
+        WHERE district_id = %s
+        ORDER BY percentile DESC
+        """
+
+        try:
+            conn = self._get_connection()
+            with conn.cursor() as cursor:
+                cursor.execute(metrics_query, (self.district_id,))
+                metrics = cursor.fetchall()
+
+                cursor.execute(comparisons_query, (self.district_id,))
+                comparisons = cursor.fetchall()
+
+                if not metrics and not comparisons:
+                    return "No peer benchmarking data found for your district."
+
+                html = "<div class='peer-benchmarking'>\n"
+                html += "<h3>Peer District Benchmarking</h3>\n"
+
+                if metrics:
+                    html += "<h4>District Metrics vs Peers</h4>\n"
+                    html += "<table class='table table-striped'>\n"
+                    html += "<thead><tr><th>Metric</th><th>Your Value</th><th>Peer Average</th><th>Percentile</th><th>Ranking</th><th>Category</th></tr></thead>\n"
+                    html += "<tbody>\n"
+                    for m in metrics:
+                        unit = m['unit'] or ''
+                        html += "<tr>\n"
+                        html += f"<td>{m['metric_name']}</td>\n"
+                        html += f"<td>{m['metric_value']} {unit}</td>\n"
+                        html += f"<td>{m['peer_average']} {unit}</td>\n"
+                        html += f"<td>{m['percentile']}%</td>\n"
+                        html += f"<td>{m['ranking'] or 'N/A'}</td>\n"
+                        html += f"<td>{m['category']}</td>\n"
+                        html += "</tr>\n"
+                    html += "</tbody>\n</table>\n"
+
+                if comparisons:
+                    html += "<h4>Peer Comparisons</h4>\n"
+                    html += "<table class='table table-striped'>\n"
+                    html += "<thead><tr><th>Metric</th><th>Your Value</th><th>Peer Avg</th><th>Percentile</th><th>Rank</th><th>Total Districts</th><th>Interpretation</th></tr></thead>\n"
+                    html += "<tbody>\n"
+                    for c in comparisons:
+                        unit = c['unit'] or ''
+                        html += "<tr>\n"
+                        html += f"<td>{c['metric']}</td>\n"
+                        html += f"<td>{c['your_value']} {unit}</td>\n"
+                        html += f"<td>{c['peer_average']} {unit}</td>\n"
+                        html += f"<td>{c['percentile']}%</td>\n"
+                        html += f"<td>{c['ranking']}</td>\n"
+                        html += f"<td>{c['total_districts']}</td>\n"
+                        html += f"<td>{c['interpretation']}</td>\n"
+                        html += "</tr>\n"
+                    html += "</tbody>\n</table>\n"
+
+                html += "</div>\n"
+                return html
+
+        except Exception as e:
+            logger.error(f"Error getting peer benchmarking summary: {e}")
+            return f"Error retrieving peer benchmarking data: {str(e)}"
+
+    def get_peer_comparisons(self) -> str:
+        """Get peer comparison data showing metric-by-metric analysis against peer group."""
+        query = """
+        SELECT
+            metric, your_value, peer_average, percentile,
+            ranking, total_districts, unit, interpretation
+        FROM peer_comparisons
+        WHERE district_id = %s
+        ORDER BY percentile DESC
+        """
+
+        try:
+            conn = self._get_connection()
+            with conn.cursor() as cursor:
+                cursor.execute(query, (self.district_id,))
+                results = cursor.fetchall()
+
+                if not results:
+                    return "No peer comparison data found for your district."
+
+                html = "<div class='peer-comparisons'>\n"
+                html += "<h3>Peer District Comparisons</h3>\n"
+                html += "<table class='table table-striped'>\n"
+                html += "<thead><tr><th>Metric</th><th>Your Value</th><th>Peer Avg</th><th>Percentile</th><th>Rank</th><th>Total</th><th>Interpretation</th></tr></thead>\n"
+                html += "<tbody>\n"
+
+                for row in results:
+                    unit = row['unit'] or ''
+                    html += "<tr>\n"
+                    html += f"<td>{row['metric']}</td>\n"
+                    html += f"<td>{row['your_value']} {unit}</td>\n"
+                    html += f"<td>{row['peer_average']} {unit}</td>\n"
+                    html += f"<td>{row['percentile']}%</td>\n"
+                    html += f"<td>{row['ranking']}</td>\n"
+                    html += f"<td>{row['total_districts']}</td>\n"
+                    html += f"<td>{row['interpretation']}</td>\n"
+                    html += "</tr>\n"
+
+                html += "</tbody>\n</table>\n</div>\n"
+                return html
+
+        except Exception as e:
+            logger.error(f"Error getting peer comparisons: {e}")
+            return f"Error retrieving peer comparisons: {str(e)}"

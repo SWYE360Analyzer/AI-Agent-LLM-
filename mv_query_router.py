@@ -174,24 +174,41 @@ class MVQueryRouter:
         """
         start_time = time.time()
 
-        # Summary statistics
+        # Summary statistics (software metrics + accurate distinct active user count)
         summary_query = """
         SELECT
-            COUNT(*) as total_software,
-            COUNT(*) FILTER (WHERE roi_status = 'high') as high_roi_count,
-            COUNT(*) FILTER (WHERE roi_status = 'moderate') as moderate_roi_count,
-            COUNT(*) FILTER (WHERE roi_status = 'low') as low_roi_count,
-            COALESCE(SUM(total_cost), 0) as total_investment,
-            COALESCE(SUM(students_licensed), 0) as total_licensed,
-            COALESCE(SUM(active_users_all_time), 0) as total_active_users,
-            COALESCE(SUM(total_minutes_90d), 0) as total_minutes_90d,
-            COALESCE(AVG(utilization), 0) as avg_utilization,
-            COALESCE(AVG(roi_percentage), 0) as avg_roi_percentage
-        FROM mv_dashboard_software_metrics
-        WHERE district_id = %s
+            sw.total_software,
+            sw.high_roi_count,
+            sw.moderate_roi_count,
+            sw.low_roi_count,
+            sw.total_investment,
+            sw.total_licensed,
+            COALESCE(au.total_active_users, 0) as total_active_users,
+            sw.total_minutes_90d,
+            sw.avg_utilization,
+            sw.avg_roi_percentage
+        FROM (
+            SELECT
+                COUNT(*) as total_software,
+                COUNT(*) FILTER (WHERE roi_status = 'high') as high_roi_count,
+                COUNT(*) FILTER (WHERE roi_status = 'moderate') as moderate_roi_count,
+                COUNT(*) FILTER (WHERE roi_status = 'low') as low_roi_count,
+                COALESCE(SUM(total_cost), 0) as total_investment,
+                COALESCE(SUM(students_licensed), 0) as total_licensed,
+                COALESCE(SUM(total_minutes_90d), 0) as total_minutes_90d,
+                COALESCE(AVG(utilization), 0) as avg_utilization,
+                COALESCE(AVG(roi_percentage), 0) as avg_roi_percentage
+            FROM mv_dashboard_software_metrics
+            WHERE district_id = %s
+        ) sw
+        CROSS JOIN (
+            SELECT COUNT(*) as total_active_users
+            FROM mv_active_users_summary
+            WHERE district_id = %s AND total_usage_minutes > 0
+        ) au
         """
 
-        summary = self._execute_query(summary_query, (self.district_id,))
+        summary = self._execute_query(summary_query, (self.district_id, self.district_id))
 
         # Top software by usage
         top_query = """
@@ -242,31 +259,37 @@ class MVQueryRouter:
 
         by_role = self._execute_query(role_query, (self.district_id,))
 
-        # By grade (students only)
+        # By grade (students only, aggregated across schools)
         grade_query = """
         SELECT
             grade,
-            total_users,
-            active_users_30d,
-            total_usage_minutes_90d
+            SUM(total_users) as total_users,
+            SUM(active_users_all_time) as active_users_all_time,
+            SUM(active_users_30d) as active_users_30d,
+            SUM(total_usage_minutes_90d) as total_usage_minutes_90d
         FROM mv_dashboard_user_analytics
         WHERE district_id = %s AND user_type = 'student' AND grade IS NOT NULL
+        GROUP BY grade
         ORDER BY grade
         """
 
         by_grade = self._execute_query(grade_query, (self.district_id,))
 
-        # By school
+        # By school (one row per school, all user types combined)
         school_query = """
         SELECT
             school_name,
-            user_type,
             SUM(total_users) as total_users,
-            SUM(active_users_30d) as active_users_30d
+            SUM(active_users_all_time) as active_users_all_time,
+            SUM(active_users_30d) as active_users_30d,
+            SUM(CASE WHEN user_type = 'student' THEN total_users ELSE 0 END) as total_students,
+            SUM(CASE WHEN user_type = 'student' THEN active_users_all_time ELSE 0 END) as active_students_all_time,
+            SUM(CASE WHEN user_type = 'teacher' THEN total_users ELSE 0 END) as total_teachers,
+            SUM(CASE WHEN user_type = 'teacher' THEN active_users_all_time ELSE 0 END) as active_teachers_all_time
         FROM mv_dashboard_user_analytics
         WHERE district_id = %s AND school_name IS NOT NULL
-        GROUP BY school_name, user_type
-        ORDER BY school_name, user_type
+        GROUP BY school_name
+        ORDER BY school_name
         """
 
         by_school = self._execute_query(school_query, (self.district_id,))
@@ -539,7 +562,7 @@ class MVQueryRouter:
         """
         start_time = time.time()
 
-        # Summary by grade band
+        # Summary by grade band (only users with actual usage)
         summary_query = """
         SELECT
             grade_band,
@@ -548,14 +571,14 @@ class MVQueryRouter:
             SUM(total_usage_minutes) as total_minutes,
             AVG(total_usage_minutes) as avg_minutes_per_user
         FROM mv_active_users_summary
-        WHERE district_id = %s
+        WHERE district_id = %s AND total_usage_minutes > 0
         GROUP BY grade_band, role
         ORDER BY grade_band, role
         """
 
         summary = self._execute_query(summary_query, (self.district_id,))
 
-        # Top active users
+        # Top active users (only users with actual usage)
         top_users_query = """
         SELECT
             full_name,
@@ -566,7 +589,7 @@ class MVQueryRouter:
             total_sessions,
             last_active_date
         FROM mv_active_users_summary
-        WHERE district_id = %s
+        WHERE district_id = %s AND total_usage_minutes > 0
         ORDER BY total_usage_minutes DESC
         LIMIT %s
         """
@@ -579,6 +602,74 @@ class MVQueryRouter:
             "top_users": top_users,
             "mv_used": "mv_active_users_summary",
             "execution_time": execution_time
+        }
+
+    def get_peer_benchmarking_summary(self) -> Dict[str, Any]:
+        """
+        Get peer district benchmarking data from peer_district_metrics and peer_comparisons.
+        Best for comparing the district against similar peer districts.
+        """
+        start_time = time.time()
+
+        # District's own metrics from peer_district_metrics
+        metrics_query = """
+        SELECT
+            metric_name, metric_value, percentile, peer_average,
+            unit, category, ranking, matching_tier, peer_count
+        FROM peer_district_metrics
+        WHERE district_id = %s
+        ORDER BY category, metric_name
+        """
+
+        metrics = self._execute_query(metrics_query, (self.district_id,))
+
+        # Peer comparisons
+        comparisons_query = """
+        SELECT
+            metric, your_value, peer_average, percentile,
+            ranking, total_districts, unit, interpretation,
+            matching_tier, peer_count
+        FROM peer_comparisons
+        WHERE district_id = %s
+        ORDER BY percentile DESC
+        """
+
+        comparisons = self._execute_query(comparisons_query, (self.district_id,))
+        execution_time = time.time() - start_time
+
+        return {
+            "metrics": metrics,
+            "comparisons": comparisons,
+            "mv_used": "peer_district_metrics + peer_comparisons",
+            "execution_time": execution_time,
+            "metrics_count": len(metrics),
+            "comparisons_count": len(comparisons)
+        }
+
+    def get_peer_comparisons(self) -> Dict[str, Any]:
+        """
+        Get peer comparison data from peer_comparisons.
+        Best for detailed metric-by-metric comparison against peer group.
+        """
+        start_time = time.time()
+
+        query = """
+        SELECT
+            metric, your_value, peer_average, percentile,
+            ranking, total_districts, unit, interpretation
+        FROM peer_comparisons
+        WHERE district_id = %s
+        ORDER BY percentile DESC
+        """
+
+        results = self._execute_query(query, (self.district_id,))
+        execution_time = time.time() - start_time
+
+        return {
+            "comparisons": results,
+            "mv_used": "peer_comparisons",
+            "execution_time": execution_time,
+            "count": len(results)
         }
 
     # =========================================================================
@@ -628,6 +719,8 @@ class MVQueryRouter:
             data = self.get_active_users_summary()
         elif primary_intent == QueryIntent.COST_ANALYSIS:
             data = self.get_investment_analysis()
+        elif primary_intent == QueryIntent.PEER_BENCHMARKING:
+            data = self.get_peer_benchmarking_summary()
         elif primary_intent == QueryIntent.SOFTWARE_ROI:
             data = self.get_software_analytics(order_by="avg_roi_percentage")
         elif primary_intent == QueryIntent.DASHBOARD_OVERVIEW:

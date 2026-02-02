@@ -111,6 +111,14 @@ class MVOptimizedAgent:
             "- 'moderate' = Acceptable, room for improvement",
             "- 'low' = Underutilized, consider action",
             "",
+            "OS/DATA SOURCE LABELS:",
+            "- 'Chrome OS' = Chromebook devices",
+            "- 'Windows' = Windows PCs/laptops",
+            "- 'iOS' = iPad/iPhone devices",
+            "- 'Other' = Other platforms",
+            "- 'Unknown' = No usage data or unidentified platform",
+            "- When referring to OS data, also use the term 'data source' or 'platform'",
+            "",
             "INSIGHT TYPES TO PROVIDE:",
             "- Usage patterns and trends",
             "- Cost effectiveness analysis",
@@ -164,11 +172,20 @@ ROI STATUS INTERPRETATION:
 - 'moderate' = Acceptable, room for improvement
 - 'low' = Underutilized, consider action
 
+OS/DATA SOURCE LABELS:
+- 'Chrome OS' = Chromebook devices
+- 'Windows' = Windows PCs/laptops
+- 'iOS' = iPad/iPhone devices
+- 'Other' = Other platforms
+- 'Unknown' = No usage data or unidentified platform
+- When referring to OS data, you may also use the term "data source" or "platform"
+
 IMPORTANT:
 - Be concise but comprehensive
 - Focus on actionable insights
 - Never include UUIDs or district IDs
-- Use user-friendly language"""
+- Use user-friendly language
+- When showing OS/platform/data source data, display all available types even if count is 0"""
 
     def _call_mv_tools(self, user_query: str) -> Dict[str, Any]:
         """
@@ -248,6 +265,23 @@ IMPORTANT:
                 })
             except Exception as e:
                 tool_results["users"] = {"error": str(e)}
+
+            # Also fetch active users summary (all roles + OS data) when
+            # ACTIVE_USERS is a secondary intent, or when the query mentions
+            # roles/active users — mv_dashboard_user_analytics only has
+            # student/teacher, but mv_active_users_summary has ALL roles.
+            if QueryIntent.ACTIVE_USERS in intents:
+                try:
+                    logger.info("   📊 Also calling get_active_users_summary() (all roles + OS)...")
+                    start = time.time()
+                    tool_results["active_users"] = self.mv_router.get_active_users_summary()
+                    mv_queries.append({
+                        "method": "get_active_users_summary",
+                        "mv_used": "mv_active_users_summary",
+                        "execution_time": time.time() - start
+                    })
+                except Exception as e:
+                    tool_results["active_users"] = {"error": str(e)}
 
         elif primary_intent == QueryIntent.ACTIVE_USERS:
             try:

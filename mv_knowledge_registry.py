@@ -259,7 +259,7 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
     # ============================================================================
     "mv_active_users_summary": MaterializedViewInfo(
         name="mv_active_users_summary",
-        description="Summary of active users with total usage, session counts, and grade band classification",
+        description="Summary of ALL users (all roles including students, teachers, admins, etc.) with total usage, session counts, grade band classification, and OS/platform breakdown (Chrome OS, Windows, iOS, Other). Use for user activity reports, OS/data source analysis, and role-based breakdowns.",
         primary_intents=[
             QueryIntent.ACTIVE_USERS,
             QueryIntent.USER_ANALYTICS,
@@ -269,14 +269,18 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
             "user_id", "email", "first_name", "last_name", "role", "grade",
             "school_id", "district_id", "school_name", "district_name",
             "total_usage_minutes", "total_sessions", "first_active_date",
-            "last_active_date", "grade_band", "full_name"
+            "last_active_date", "grade_band", "full_name",
+            "chrome_os_minutes", "windows_minutes", "ios_minutes",
+            "other_os_minutes", "primary_os"
         ],
-        aggregations=["total_usage_minutes", "total_sessions"],
-        filters_available=["district_id", "school_id", "role", "grade", "grade_band"],
-        performance_notes="Best for user activity reports, grade band analysis, last-active tracking. Includes computed grade_band field.",
+        aggregations=["total_usage_minutes", "total_sessions", "chrome_os_minutes", "windows_minutes", "ios_minutes", "other_os_minutes"],
+        filters_available=["district_id", "school_id", "role", "grade", "grade_band", "primary_os"],
+        performance_notes="Best for user activity reports, grade band analysis, last-active tracking, OS/platform/data source analysis. Includes ALL roles (not just students/teachers). Includes computed grade_band field and OS-specific usage columns (chrome_os_minutes, windows_minutes, ios_minutes, other_os_minutes, primary_os).",
         sample_queries=[
             "SELECT grade_band, COUNT(*) as users, SUM(total_usage_minutes) as minutes FROM mv_active_users_summary WHERE district_id = '{district_id}' GROUP BY grade_band",
-            "SELECT full_name, role, total_usage_minutes, last_active_date FROM mv_active_users_summary WHERE district_id = '{district_id}' ORDER BY total_usage_minutes DESC LIMIT 20"
+            "SELECT full_name, role, total_usage_minutes, primary_os, last_active_date FROM mv_active_users_summary WHERE district_id = '{district_id}' ORDER BY total_usage_minutes DESC LIMIT 20",
+            "SELECT primary_os, COUNT(*) as user_count, SUM(total_usage_minutes) as total_minutes FROM mv_active_users_summary WHERE district_id = '{district_id}' AND total_usage_minutes > 0 GROUP BY primary_os ORDER BY user_count DESC",
+            "SELECT role, COUNT(*) as total_users, COUNT(*) FILTER (WHERE total_usage_minutes > 0) as active_users FROM mv_active_users_summary WHERE district_id = '{district_id}' GROUP BY role ORDER BY total_users DESC"
         ],
         priority=1
     ),
@@ -606,7 +610,12 @@ INTENT_KEYWORDS: Dict[QueryIntent, Set[str]] = {
         "engagement", "engaged", "participating", "logged in",
         "last active", "recently active", "most active",
         "each user", "each profile", "per user", "per profile",
-        "user data", "user details", "user information"
+        "user data", "user details", "user information",
+        "data source", "data sources", "os", "operating system", "platform",
+        "platforms", "chrome os", "chromeos", "chromebook", "windows",
+        "ios", "ipad", "device", "devices", "device type", "device types",
+        "primary os", "by os", "by platform", "by data source",
+        "group by data source", "group by os", "group by platform"
     },
     QueryIntent.COST_ANALYSIS: {
         "cost", "price", "expensive", "cheap", "cost per student", "cost per user",
@@ -676,12 +685,16 @@ def _detect_intents_with_llm(query: str) -> List[QueryIntent]:
     intent_descriptions = """
 You are an intent classifier for an educational software analytics system. Classify the user's query into one or more of these intents (return the most relevant first):
 
-1. ACTIVE_USERS - Questions about individual users/profiles and their usage data. Use when asking for:
+1. ACTIVE_USERS - Questions about individual users/profiles, their usage data, OS/platform/data source breakdown. Use when asking for:
    - List of users/profiles with their usage time/hours/minutes
    - Individual user activity or engagement
    - Who is using the system and how much
    - Active profiles, user details, per-person usage
+   - OS/platform/data source analysis (Chrome OS, Windows, iOS usage)
+   - Device type or data source grouping/breakdown
+   - Users grouped by role (all roles: students, teachers, admins, etc.)
    - "Show me all users", "list of active profiles", "usage for each person"
+   - "Group active users by data source", "how many data sources", "users by OS/platform"
 
 2. USER_ANALYTICS - Questions about aggregate user statistics (counts, totals by group). Use when asking for:
    - How many users/students/teachers total
@@ -1015,6 +1028,13 @@ def get_mv_aware_instructions(district_id: str) -> List[str]:
         "   - peer_district_metrics: metric_name, metric_value, percentile, peer_average, unit, category, ranking",
         "   - peer_comparisons: metric, your_value, peer_average, percentile, ranking, total_districts, interpretation",
         "",
+        "10. mv_active_users_summary - ALL USERS WITH OS/PLATFORM DATA",
+        "   - Use for: Active user reports, OS/platform/data source analysis, role-based breakdowns",
+        "   - Contains ALL roles (students, teachers, admins, etc.)",
+        "   - Contains: total_usage_minutes, total_sessions, grade_band, primary_os",
+        "   - OS columns: chrome_os_minutes, windows_minutes, ios_minutes, other_os_minutes",
+        "   - Use for: 'group by data source', 'users by OS', 'platform breakdown'",
+        "",
         "=" * 80,
         "QUERY MAPPING RULES",
         "=" * 80,
@@ -1032,6 +1052,8 @@ def get_mv_aware_instructions(district_id: str) -> List[str]:
         "• 'Investment/cost analysis' → mv_software_investment_summary",
         "• 'Grade-level breakdown' → mv_dashboard_user_analytics or mv_software_usage_rankings_v4",
         "• 'Peer benchmarking/compare districts' → peer_district_metrics + peer_comparisons",
+        "• 'Data source/OS/platform breakdown' → mv_active_users_summary",
+        "• 'Users by role (all roles)' → mv_active_users_summary",
         "",
         "=" * 80,
         "SAMPLE OPTIMIZED QUERIES",

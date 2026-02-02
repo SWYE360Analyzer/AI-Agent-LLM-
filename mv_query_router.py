@@ -558,11 +558,12 @@ class MVQueryRouter:
     def get_active_users_summary(self, limit: int = 100) -> Dict[str, Any]:
         """
         Get active users summary from mv_active_users_summary.
-        Best for user activity reports with grade bands.
+        Best for user activity reports with grade bands, role breakdowns, and OS/platform analysis.
+        Now includes ALL roles and OS/data source information.
         """
         start_time = time.time()
 
-        # Summary by grade band (only users with actual usage)
+        # Summary by grade band and role (only users with actual usage)
         summary_query = """
         SELECT
             grade_band,
@@ -578,7 +579,44 @@ class MVQueryRouter:
 
         summary = self._execute_query(summary_query, (self.district_id,))
 
-        # Top active users (only users with actual usage)
+        # Summary by role (all roles, including users with 0 usage)
+        role_summary_query = """
+        SELECT
+            role,
+            COUNT(*) as total_users,
+            COUNT(*) FILTER (WHERE total_usage_minutes > 0) as active_users,
+            SUM(total_usage_minutes) as total_minutes,
+            SUM(chrome_os_minutes) as chrome_os_minutes,
+            SUM(windows_minutes) as windows_minutes,
+            SUM(ios_minutes) as ios_minutes,
+            SUM(other_os_minutes) as other_os_minutes
+        FROM mv_active_users_summary
+        WHERE district_id = %s
+        GROUP BY role
+        ORDER BY total_users DESC
+        """
+
+        by_role = self._execute_query(role_summary_query, (self.district_id,))
+
+        # Summary by OS/data source (only users with actual usage)
+        os_summary_query = """
+        SELECT
+            primary_os as data_source,
+            COUNT(*) as user_count,
+            SUM(total_usage_minutes) as total_minutes,
+            SUM(chrome_os_minutes) as chrome_os_minutes,
+            SUM(windows_minutes) as windows_minutes,
+            SUM(ios_minutes) as ios_minutes,
+            SUM(other_os_minutes) as other_os_minutes
+        FROM mv_active_users_summary
+        WHERE district_id = %s AND total_usage_minutes > 0
+        GROUP BY primary_os
+        ORDER BY user_count DESC
+        """
+
+        by_os = self._execute_query(os_summary_query, (self.district_id,))
+
+        # Top active users (only users with actual usage, includes OS info)
         top_users_query = """
         SELECT
             full_name,
@@ -587,6 +625,10 @@ class MVQueryRouter:
             school_name,
             total_usage_minutes,
             total_sessions,
+            primary_os,
+            chrome_os_minutes,
+            windows_minutes,
+            ios_minutes,
             last_active_date
         FROM mv_active_users_summary
         WHERE district_id = %s AND total_usage_minutes > 0
@@ -599,6 +641,8 @@ class MVQueryRouter:
 
         return {
             "by_grade_band": summary,
+            "by_role": by_role,
+            "by_os": by_os,
             "top_users": top_users,
             "mv_used": "mv_active_users_summary",
             "execution_time": execution_time

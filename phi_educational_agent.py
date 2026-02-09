@@ -100,10 +100,14 @@ class PhiEducationalAgent:
             "         total_minutes, active_users, usage_days, first_use_date, last_use_date,",
             "         active_students, active_teachers, expected_daily_minutes, cost_per_student,",
             "         days_since_start, expected_minutes_to_date, usage_ratio, avg_minutes_per_day,",
-            "         avg_roi_percentage, roi_status, engagement_rate, usage_compliance",
+            "         roi_status, engagement_rate, usage_compliance",
             "",
-            "USE THIS FOR: Software usage, ROI analysis, top software",
-            f"EXAMPLE: SELECT name, total_cost, total_minutes, active_users, avg_roi_percentage, roi_status FROM mv_software_usage_analytics_v4 WHERE district_id = '{self.district_id}' ORDER BY avg_roi_percentage DESC LIMIT 20",
+            "USE THIS FOR: Software usage, investment return analysis, top software",
+            "INVESTMENT METRICS (computed by agent from total_cost and usage_compliance):",
+            "  investment_return = (total_cost * usage_compliance) / 100  — show as dollar amount",
+            "  unrealized_value  = total_cost - investment_return         — show as dollar amount",
+            "NEVER show avg_roi_percentage. Always show Investment Return and Unrealized Value.",
+            f"EXAMPLE: SELECT name, total_cost, total_minutes, active_users, usage_compliance, roi_status FROM mv_software_usage_analytics_v4 WHERE district_id = '{self.district_id}' ORDER BY usage_compliance DESC LIMIT 20",
             "",
             "### 2. mv_software_investment_summary (Use for investment/cost analysis)",
             "Columns: software_id, software_name, display_name, district_id, school_name,",
@@ -113,7 +117,7 @@ class PhiEducationalAgent:
             "         avg_roi_percentage, roi_status, roi_status_priority, authorized, district_purchased",
             "",
             "USE THIS FOR: Investment analysis, budget reports, cost-per-student",
-            f"EXAMPLE: SELECT software_name, total_investment, active_users, avg_roi_percentage, roi_status FROM mv_software_investment_summary WHERE district_id = '{self.district_id}' AND total_investment > 0 ORDER BY avg_roi_percentage DESC LIMIT 20",
+            f"EXAMPLE: SELECT software_name, total_investment, active_users, roi_status FROM mv_software_investment_summary WHERE district_id = '{self.district_id}' AND total_investment > 0 ORDER BY total_investment DESC LIMIT 20",
             "",
             "### 3. mv_dashboard_software_metrics (Use for dashboard overview)",
             "Columns: software_id, name, district_id, school_name, category, funding_source,",
@@ -158,8 +162,8 @@ class PhiEducationalAgent:
             "         first_use_date, last_use_date, days_since_start, expected_daily_minutes,",
             "         category_type, avg_roi_percentage, roi_status, usage_compliance",
             "",
-            "USE THIS FOR: School comparisons, per-school ROI",
-            f"EXAMPLE: SELECT school_name, software_name, total_minutes, avg_roi_percentage, roi_status FROM mv_software_usage_by_school_v2 WHERE district_id = '{self.district_id}' ORDER BY total_minutes DESC",
+            "USE THIS FOR: School comparisons, per-school investment return",
+            f"EXAMPLE: SELECT school_name, software_name, total_minutes, usage_compliance, roi_status FROM mv_software_usage_by_school_v2 WHERE district_id = '{self.district_id}' ORDER BY total_minutes DESC",
             "",
             "### 8. mv_software_usage_rankings_v4 (Use for rankings/top lists)",
             "Columns: id, name, category, district_id, user_type, school_name,",
@@ -182,7 +186,7 @@ class PhiEducationalAgent:
             "=" * 80,
             "",
             "• 'ROI', 'return on investment', 'best value' → mv_software_usage_analytics_v4 or mv_software_investment_summary",
-            "  COLUMN: avg_roi_percentage (NOT 'roi') and roi_status ('high', 'moderate', 'low')",
+            "  Show investment_return and unrealized_value (computed from total_cost & usage_compliance). roi_status for categorization only.",
             "",
             "• 'paid software', 'investment', 'cost' → mv_software_investment_summary",
             "  COLUMN: total_investment, avg_cost_per_student",
@@ -206,9 +210,11 @@ class PhiEducationalAgent:
             "=" * 80,
             "",
             f"1. ALWAYS filter by district_id = '{self.district_id}'",
-            "2. ROI column is called 'avg_roi_percentage' NOT 'roi'",
+            "2. Show Investment Return and Unrealized Value (dollar amounts), NOT avg_roi_percentage",
+            "   investment_return = (total_cost * usage_compliance) / 100",
+            "   unrealized_value  = total_cost - investment_return",
             "3. Cost column is called 'total_investment' or 'total_cost' NOT 'cost'",
-            "4. NEVER calculate ROI manually - it's pre-calculated in the views",
+            "4. NEVER show avg_roi_percentage or roi_percentage to the user",
             "5. NEVER join raw tables when a materialized view has the data",
             "6. Use LIMIT for large result sets",
             "7. For paid software with ROI: total_investment > 0",
@@ -217,14 +223,14 @@ class PhiEducationalAgent:
             "COMMON QUERY EXAMPLES",
             "=" * 80,
             "",
-            "### Paid software sorted by ROI:",
-            f"SELECT software_name, total_investment, active_users, avg_roi_percentage, roi_status",
+            "### Paid software sorted by investment value:",
+            f"SELECT software_name, total_investment, active_users, roi_status",
             f"FROM mv_software_investment_summary",
             f"WHERE district_id = '{self.district_id}' AND total_investment > 0",
-            f"ORDER BY avg_roi_percentage DESC LIMIT 20;",
+            f"ORDER BY total_investment DESC LIMIT 20;",
             "",
             "### Top software by usage:",
-            f"SELECT name, primary_category, total_cost, total_minutes, active_users, roi_status",
+            f"SELECT name, primary_category, total_cost, total_minutes, active_users, usage_compliance, roi_status",
             f"FROM mv_software_usage_analytics_v4",
             f"WHERE district_id = '{self.district_id}'",
             f"ORDER BY total_minutes DESC LIMIT 20;",
@@ -249,7 +255,8 @@ class PhiEducationalAgent:
             "- Use <table>, <div>, <h3>, <h4> for structure",
             "- Use user-friendly language (no UUIDs or technical jargon)",
             "- Focus on actionable insights for educators",
-            "- Present ROI status as: High = Good, Moderate = OK, Low = Needs attention",
+            "- Show Investment Return and Unrealized Value as dollar amounts, NOT ROI percentages",
+            "- roi_status is for categorization only: High = Good, Moderate = OK, Low = Needs attention",
         ]
 
     def process_query(self, user_query: str) -> dict:
@@ -323,16 +330,17 @@ Remember: avg_roi_percentage (not roi), total_investment (not cost), roi_status 
         """Generate a comprehensive district dashboard using MVs."""
         return self.process_query(
             "Generate a comprehensive executive dashboard showing overall software usage metrics, "
-            "top software by ROI (use avg_roi_percentage from mv_software_usage_analytics_v4), "
+            "investment summary with investment return and unrealized value for each software, "
             "and key insights for district decision making"
         )
 
     def analyze_software_roi(self) -> dict:
-        """Analyze software ROI using MVs."""
+        """Analyze software investment return using MVs."""
         return self.process_query(
-            "Analyze the ROI of our educational software investments. "
-            "Use mv_software_investment_summary with avg_roi_percentage and roi_status columns. "
-            "Show paid software (total_investment > 0) sorted by best ROI first."
+            "Analyze the investment return and unrealized value of our educational software investments. "
+            "Use mv_software_usage_analytics_v4 with usage_compliance and total_cost columns. "
+            "Show paid software (total_cost > 0) sorted by usage_compliance DESC. "
+            "Compute investment_return = (total_cost * usage_compliance) / 100 and unrealized_value = total_cost - investment_return."
         )
 
     def get_security_insights(self) -> dict:

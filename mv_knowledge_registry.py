@@ -59,11 +59,9 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
     # ============================================================================
     "mv_dashboard_software_metrics": MaterializedViewInfo(
         name="mv_dashboard_software_metrics",
-        description="Pre-computed dashboard metrics for authorized/district-purchased software including ROI, costs, and usage statistics",
+        description="Pre-computed dashboard metrics for authorized/district-purchased software including costs and usage statistics. Prefer mv_software_usage_analytics_v4 for dashboard and ROI queries.",
         primary_intents=[
-            QueryIntent.DASHBOARD_OVERVIEW,
             QueryIntent.SOFTWARE_USAGE,
-            QueryIntent.SOFTWARE_ROI,
             QueryIntent.COST_ANALYSIS
         ],
         key_columns=[
@@ -76,12 +74,12 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
         ],
         aggregations=["active_users_30d", "active_users_all_time", "total_minutes_90d", "utilization", "roi_percentage"],
         filters_available=["district_id", "school_name", "category", "roi_status", "authorized"],
-        performance_notes="Best for dashboard cards, software overview, ROI status checks. Pre-joined with software_metrics and software_usage.",
+        performance_notes="Legacy dashboard view. Prefer mv_software_usage_analytics_v4 for dashboard and ROI queries.",
         sample_queries=[
             "SELECT * FROM mv_dashboard_software_metrics WHERE district_id = '{district_id}' AND roi_status = 'high'",
             "SELECT name, total_cost, roi_percentage, utilization FROM mv_dashboard_software_metrics WHERE district_id = '{district_id}' ORDER BY total_cost DESC LIMIT 10"
         ],
-        priority=1
+        priority=2
     ),
 
     # ============================================================================
@@ -141,7 +139,7 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
         filters_available=["district_id", "authorized", "district_purchased", "roi_status", "category_type"],
         performance_notes="MOST COMPREHENSIVE VIEW - use for detailed analytics, ROI analysis, engagement metrics. Groups by software name so multiple software records are consolidated.",
         sample_queries=[
-            "SELECT name, total_minutes, active_users, roi_status, avg_roi_percentage FROM mv_software_usage_analytics_v4 WHERE district_id = '{district_id}' ORDER BY total_minutes DESC",
+            "SELECT name, total_cost, total_minutes, active_users, usage_compliance, roi_status FROM mv_software_usage_analytics_v4 WHERE district_id = '{district_id}' ORDER BY total_minutes DESC",
             "SELECT roi_status, COUNT(*) as count, SUM(total_cost) as investment FROM mv_software_usage_analytics_v4 WHERE district_id = '{district_id}' GROUP BY roi_status"
         ],
         priority=1
@@ -956,15 +954,15 @@ WHERE district_id = '{district_id}'
 ORDER BY percentile DESC"""
 
     elif QueryIntent.SOFTWARE_ROI in intents:
-        return f"""SELECT name, total_cost, total_minutes, active_users, avg_roi_percentage, roi_status
+        return f"""SELECT name, total_cost, total_minutes, active_users, usage_compliance, roi_status
 FROM {best_view.name}
 WHERE district_id = '{district_id}'
-ORDER BY avg_roi_percentage DESC
+ORDER BY usage_compliance DESC
 LIMIT 20"""
 
     else:
         # Default comprehensive query
-        return f"""SELECT name, primary_category, total_cost, total_minutes, active_users, roi_status, avg_roi_percentage
+        return f"""SELECT name, primary_category, total_cost, total_minutes, active_users, roi_status, usage_compliance
 FROM mv_software_usage_analytics_v4
 WHERE district_id = '{district_id}'
 ORDER BY total_minutes DESC
@@ -990,13 +988,15 @@ def get_mv_aware_instructions(district_id: str) -> List[str]:
         "",
         "PRIMARY MATERIALIZED VIEWS TO USE:",
         "",
-        "1. mv_software_usage_analytics_v4 - MOST COMPREHENSIVE",
-        "   - Use for: Software usage, ROI analysis, engagement metrics",
-        "   - Contains: total_minutes, active_users, roi_status, avg_roi_percentage, usage_compliance",
+        "1. mv_software_usage_analytics_v4 - MOST COMPREHENSIVE (PRIMARY for dashboard & ROI)",
+        "   - Use for: Software usage, ROI/investment analysis, engagement metrics, dashboard overview",
+        "   - Contains: total_cost, total_minutes, active_users, roi_status, usage_compliance",
+        "   - Agent computes: investment_return = (total_cost * usage_compliance) / 100",
+        "   -                  unrealized_value = total_cost - investment_return",
         "   - Groups software by name (consolidates multiple records)",
         "",
-        "2. mv_dashboard_software_metrics - DASHBOARD METRICS",
-        "   - Use for: Dashboard cards, quick overview, utilization rates",
+        "2. mv_dashboard_software_metrics - LEGACY DASHBOARD METRICS (prefer v4 above)",
+        "   - Use for: Fallback only; prefer mv_software_usage_analytics_v4",
         "   - Contains: roi_percentage, cost_per_student, active_users_30d, utilization",
         "",
         "3. mv_software_investment_summary - FINANCIAL ANALYSIS",
@@ -1042,8 +1042,8 @@ def get_mv_aware_instructions(district_id: str) -> List[str]:
         "QUESTION → MATERIALIZED VIEW:",
         "",
         "• 'Show me software usage/analytics' → mv_software_usage_analytics_v4",
-        "• 'What is the ROI of our software?' → mv_software_usage_analytics_v4 or mv_software_investment_summary",
-        "• 'Dashboard/overview/summary' → mv_dashboard_software_metrics",
+        "• 'What is the ROI of our software?' → mv_software_usage_analytics_v4 (show investment_return & unrealized_value)",
+        "• 'Dashboard/overview/summary' → mv_software_usage_analytics_v4",
         "• 'How many students/teachers?' → mv_dashboard_user_analytics",
         "• 'Top users by usage' → mv_user_software_utilization_v2",
         "• 'Unauthorized/unapproved software' → mv_unauthorized_software_analytics_v3",
@@ -1072,7 +1072,7 @@ def get_mv_aware_instructions(district_id: str) -> List[str]:
         f"GROUP BY user_type;",
         "",
         "-- Investment analysis (USE THIS for financial reports)",
-        f"SELECT software_name, total_investment, active_users, avg_roi_percentage, roi_status",
+        f"SELECT software_name, total_investment, active_users, roi_status",
         f"FROM mv_software_investment_summary",
         f"WHERE district_id = '{district_id}'",
         f"ORDER BY total_investment DESC LIMIT 15;",

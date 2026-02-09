@@ -1567,3 +1567,745 @@ LINE 3:             district_id, district_name, state, enrollment,
 2026-01-30 15:49:28,174 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
 2026-01-30 15:49:30,202 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 2026-01-30 15:49:43,893 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 18.24s
+2026-02-02 13:00:05,666 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 13:00:05,670 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-02 13:00:05,671 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-02 13:00:05,734 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 13:02:29,307 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:02:29,311 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:02:29,319 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:02:29,319 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:02:29,331 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 13:02:29,332 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 13:02:29,371 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 13:02:29,371 - main - INFO - Created MV-optimized agent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 13:02:29,371 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 13:02:29,371 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 13:02:29,371 - mv_optimized_agent - INFO - User Query: provide me all the active users list grouped by role and what is the total active users we have
+2026-02-02 13:02:29,371 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 13:02:31,209 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:02:31,224 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users', 'user_analytics']
+2026-02-02 13:02:31,224 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 13:02:31,224 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 13:02:31,224 - mv_optimized_agent - INFO -    All Intents: ['active_users', 'user_analytics']
+2026-02-02 13:02:31,224 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 13:02:31,224 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 13:02:34,619 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.394s
+2026-02-02 13:02:34,620 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 13:02:35,250 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 13:02:43,695 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:03:38,801 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 69.43s
+2026-02-02 13:09:24,281 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:09:24,285 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:09:24,303 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 13:09:24,303 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 13:09:24,304 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 13:09:24,304 - mv_optimized_agent - INFO - User Query: provide me all the active users count grouped by role and what is the total active users we have
+2026-02-02 13:09:24,304 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 13:09:25,763 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:09:25,776 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics', 'active_users']
+2026-02-02 13:09:25,777 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 13:09:25,777 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-02 13:09:25,777 - mv_optimized_agent - INFO -    All Intents: ['user_analytics', 'active_users']
+2026-02-02 13:09:25,777 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 13:09:25,777 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 13:09:26,402 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.624s
+2026-02-02 13:09:26,402 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-02 13:09:27,288 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 13:09:34,375 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:09:45,470 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 21.16s
+2026-02-02 13:22:33,963 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 13:22:33,968 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-02 13:22:33,968 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-02 13:22:34,002 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 13:22:48,067 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:22:48,067 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:22:48,070 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:22:48,070 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:22:48,071 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 13:22:48,071 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 13:22:48,152 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 13:22:48,152 - main - INFO - Created MV-optimized agent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 13:22:48,152 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 13:22:48,152 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 13:22:48,152 - mv_optimized_agent - INFO - User Query: provide me all the active users count grouped by role and what is the total active users we have
+2026-02-02 13:22:48,152 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 13:22:49,288 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:22:49,320 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users', 'user_analytics']
+2026-02-02 13:22:49,320 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 13:22:49,320 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 13:22:49,320 - mv_optimized_agent - INFO -    All Intents: ['active_users', 'user_analytics']
+2026-02-02 13:22:49,321 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 13:22:49,321 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 13:22:52,149 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 2.829s
+2026-02-02 13:22:52,150 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 13:22:53,409 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 13:22:59,803 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:23:27,616 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 39.46s
+2026-02-02 13:24:09,103 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:24:09,103 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:24:09,109 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 13:24:09,109 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 13:24:09,110 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 13:24:09,110 - mv_optimized_agent - INFO - User Query: provide me the active users count grouped by os 
+2026-02-02 13:24:09,110 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 13:24:10,230 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:24:10,232 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users', 'user_analytics']
+2026-02-02 13:24:10,232 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 13:24:10,232 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 13:24:10,232 - mv_optimized_agent - INFO -    All Intents: ['active_users', 'user_analytics']
+2026-02-02 13:24:10,233 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 13:24:10,233 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 13:24:10,839 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.606s
+2026-02-02 13:24:10,839 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 13:24:12,091 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 13:24:18,690 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:24:31,831 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 22.72s
+2026-02-02 13:25:01,307 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:25:01,309 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:25:01,312 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 13:25:01,312 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 13:25:01,349 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 13:25:01,349 - main - INFO - Created MV-optimized agent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 13:25:01,349 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 13:25:01,350 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-02 13:25:01,350 - mv_optimized_agent - INFO - User Query: provide me the active users count grouped by os 
+2026-02-02 13:25:01,350 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 13:25:02,133 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:25:02,137 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users', 'user_analytics']
+2026-02-02 13:25:02,137 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 13:25:02,138 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 13:25:02,138 - mv_optimized_agent - INFO -    All Intents: ['active_users', 'user_analytics']
+2026-02-02 13:25:02,138 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 13:25:02,138 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 13:25:05,504 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.366s
+2026-02-02 13:25:05,504 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 13:25:06,717 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 13:25:15,107 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:25:28,770 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 27.41s
+2026-02-02 13:26:07,950 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:26:07,951 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:26:07,954 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 13:26:07,955 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 13:26:07,955 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-02 13:26:07,955 - mv_optimized_agent - INFO - User Query: provide me the users list that is using iOS data source
+2026-02-02 13:26:07,955 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 13:26:08,752 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:26:08,758 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users']
+2026-02-02 13:26:08,758 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 13:26:08,758 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 13:26:08,758 - mv_optimized_agent - INFO -    All Intents: ['active_users']
+2026-02-02 13:26:08,758 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 13:26:08,759 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 13:26:09,642 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.884s
+2026-02-02 13:26:09,643 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 13:26:10,834 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 13:26:12,761 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:26:20,141 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 12.19s
+2026-02-02 13:26:37,697 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:26:37,699 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:26:37,702 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 13:26:37,703 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 13:26:37,703 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-02 13:26:37,703 - mv_optimized_agent - INFO - User Query: provide me the users list that is using windows data source
+2026-02-02 13:26:37,704 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 13:26:38,677 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:26:38,679 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users']
+2026-02-02 13:26:38,679 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 13:26:38,679 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 13:26:38,679 - mv_optimized_agent - INFO -    All Intents: ['active_users']
+2026-02-02 13:26:38,680 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 13:26:38,680 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 13:26:39,566 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.886s
+2026-02-02 13:26:39,566 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 13:26:40,769 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 13:26:44,358 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:26:51,717 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 14.01s
+2026-02-02 13:26:59,792 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:26:59,792 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:26:59,794 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 13:26:59,795 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 13:26:59,795 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-02 13:26:59,795 - mv_optimized_agent - INFO - User Query: provide me the active users count grouped by os 
+2026-02-02 13:26:59,795 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 13:27:00,984 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:27:00,989 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users', 'user_analytics']
+2026-02-02 13:27:00,989 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 13:27:00,989 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 13:27:00,990 - mv_optimized_agent - INFO -    All Intents: ['active_users', 'user_analytics']
+2026-02-02 13:27:00,990 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 13:27:00,990 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 13:27:01,874 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.884s
+2026-02-02 13:27:01,875 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 13:27:03,081 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 13:27:06,181 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:27:18,461 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 18.67s
+2026-02-02 13:27:43,418 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:27:43,419 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:27:43,430 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 13:27:43,430 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 13:27:43,431 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-02 13:27:43,431 - mv_optimized_agent - INFO - User Query: provide me user list those are using Chrome OS
+2026-02-02 13:27:43,432 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 13:27:44,322 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:27:44,329 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users', 'user_analytics']
+2026-02-02 13:27:44,329 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 13:27:44,329 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 13:27:44,329 - mv_optimized_agent - INFO -    All Intents: ['active_users', 'user_analytics']
+2026-02-02 13:27:44,329 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 13:27:44,329 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 13:27:45,218 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.889s
+2026-02-02 13:27:45,219 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 13:27:46,420 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 13:27:51,934 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:29:19,899 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 13:29:19,901 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 13:29:19,904 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 13:29:19,904 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 13:29:19,905 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-02 13:29:19,905 - mv_optimized_agent - INFO - User Query: How many types of data Source we have for usage data. Group the active users count by data source.
+2026-02-02 13:29:19,905 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 13:29:21,990 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:29:21,993 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users', 'user_analytics']
+2026-02-02 13:29:21,993 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 13:29:21,993 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 13:29:21,993 - mv_optimized_agent - INFO -    All Intents: ['active_users', 'user_analytics']
+2026-02-02 13:29:21,994 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 13:29:21,994 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 13:29:22,882 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.889s
+2026-02-02 13:29:22,883 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 13:29:24,088 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 13:29:33,321 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 13:29:45,846 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 25.94s
+2026-02-02 20:08:48,999 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:08:49,019 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:08:49,056 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:08:49,057 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:08:49,084 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 20:08:49,085 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:08:49,088 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-02 20:08:49,088 - mv_optimized_agent - INFO - User Query: Provide the active users count grouped by role 
+2026-02-02 20:08:49,089 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:08:50,736 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:08:50,746 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics', 'active_users']
+2026-02-02 20:08:50,747 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:08:50,747 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-02 20:08:50,747 - mv_optimized_agent - INFO -    All Intents: ['user_analytics', 'active_users']
+2026-02-02 20:08:50,748 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:08:50,748 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:08:50,763 - mv_query_router - ERROR - Query execution error: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-02-02 20:08:50,763 - mv_query_router - ERROR - Query failed after 2 attempts: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-02-02 20:08:50,763 - mv_optimized_agent - ERROR -    ❌ Dashboard metrics failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-02-02 20:08:50,763 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-02 20:08:50,764 - mv_query_router - ERROR - Query execution error: error with status PGRES_FATAL_ERROR and no message from the libpq
+2026-02-02 20:08:50,764 - mv_query_router - ERROR - Query failed after 2 attempts: error with status PGRES_FATAL_ERROR and no message from the libpq
+2026-02-02 20:08:50,765 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:08:53,769 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:09:01,357 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 12.25s
+2026-02-02 20:09:17,954 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 20:09:17,959 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-02 20:09:17,959 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-02 20:09:17,989 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 20:09:26,116 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:09:26,116 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:09:26,118 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 20:09:26,118 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 20:09:26,161 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 20:09:26,162 - main - INFO - Created MV-optimized agent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-02 20:09:26,162 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:09:26,165 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-02 20:09:26,165 - mv_optimized_agent - INFO - User Query: Provide the active users count grouped by role 
+2026-02-02 20:09:26,165 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:09:29,642 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:09:29,671 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics', 'active_users']
+2026-02-02 20:09:29,672 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:09:29,672 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-02 20:09:29,672 - mv_optimized_agent - INFO -    All Intents: ['user_analytics', 'active_users']
+2026-02-02 20:09:29,672 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:09:29,672 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:09:33,117 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.445s
+2026-02-02 20:09:33,117 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-02 20:09:34,002 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:09:41,453 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:09:53,873 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 27.71s
+2026-02-02 20:10:09,394 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:10:09,395 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:10:09,400 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:10:09,400 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:10:09,437 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:10:09,438 - main - INFO - Created MV-optimized agent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:10:09,438 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:10:09,438 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:10:09,438 - mv_optimized_agent - INFO - User Query: Provide the active users count grouped by role 
+2026-02-02 20:10:09,438 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:10:13,331 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:10:13,333 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics', 'active_users']
+2026-02-02 20:10:13,333 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:10:13,333 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-02 20:10:13,334 - mv_optimized_agent - INFO -    All Intents: ['user_analytics', 'active_users']
+2026-02-02 20:10:13,334 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:10:13,334 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:10:16,259 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 2.925s
+2026-02-02 20:10:16,261 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-02 20:10:17,175 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:10:24,292 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:10:37,374 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 27.94s
+2026-02-02 20:10:52,506 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 20:10:52,514 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-02 20:10:52,514 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-02 20:10:52,544 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 20:11:02,163 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:11:02,163 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:11:02,165 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:11:02,165 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:11:02,203 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:11:02,203 - main - INFO - Created MV-optimized agent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:11:02,203 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:11:02,204 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:11:02,205 - mv_optimized_agent - INFO - User Query: Provide the active users count grouped by role 
+2026-02-02 20:11:02,205 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:11:04,102 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:11:04,136 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics', 'active_users']
+2026-02-02 20:11:04,136 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:11:04,136 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-02 20:11:04,136 - mv_optimized_agent - INFO -    All Intents: ['user_analytics', 'active_users']
+2026-02-02 20:11:04,136 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:11:04,136 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:11:08,079 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.942s
+2026-02-02 20:11:08,079 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-02 20:11:09,079 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:11:17,247 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:11:29,697 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 27.49s
+2026-02-02 20:12:13,323 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:12:13,324 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:12:13,328 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:12:13,328 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:12:13,329 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:12:13,329 - mv_optimized_agent - INFO - User Query: Provide the active users count grouped by all roles
+2026-02-02 20:12:13,329 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:12:14,623 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:12:14,636 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics', 'active_users']
+2026-02-02 20:12:14,636 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:12:14,636 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-02 20:12:14,636 - mv_optimized_agent - INFO -    All Intents: ['user_analytics', 'active_users']
+2026-02-02 20:12:14,637 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:12:14,637 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:12:15,606 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.969s
+2026-02-02 20:12:15,606 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-02 20:12:16,516 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:12:26,009 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:12:38,040 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 24.71s
+2026-02-02 20:13:04,520 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:13:04,521 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:13:04,524 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:13:04,524 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:13:04,525 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:13:04,525 - mv_optimized_agent - INFO - User Query: can you provide the active users count grouped by os 
+2026-02-02 20:13:04,525 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:13:06,604 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:13:06,609 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users', 'user_analytics']
+2026-02-02 20:13:06,610 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:13:06,610 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 20:13:06,610 - mv_optimized_agent - INFO -    All Intents: ['active_users', 'user_analytics']
+2026-02-02 20:13:06,610 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:13:06,610 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:13:07,246 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.635s
+2026-02-02 20:13:07,246 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 20:13:08,556 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:13:15,550 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:13:27,623 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 23.10s
+2026-02-02 20:13:55,340 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:13:55,341 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:13:55,343 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:13:55,343 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:13:55,344 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:13:55,344 - mv_optimized_agent - INFO - User Query: CAn you provide the list of users that is using chrome OS
+2026-02-02 20:13:55,344 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:13:56,628 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:13:56,630 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users']
+2026-02-02 20:13:56,631 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:13:56,631 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 20:13:56,631 - mv_optimized_agent - INFO -    All Intents: ['active_users']
+2026-02-02 20:13:56,631 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:13:56,631 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:13:57,564 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.933s
+2026-02-02 20:13:57,564 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 20:13:58,870 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:14:07,099 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:15:08,635 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 73.29s
+2026-02-02 20:21:19,304 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 20:21:19,308 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-02 20:21:19,308 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-02 20:21:19,335 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 20:21:44,842 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:21:44,842 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:21:44,844 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:21:44,844 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:21:44,849 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:21:44,849 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:21:44,897 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:21:44,897 - main - INFO - Created MV-optimized agent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:21:44,897 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:21:44,897 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:21:44,897 - mv_optimized_agent - INFO - User Query: provide me all the active users count grouped by role 
+2026-02-02 20:21:44,897 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:21:46,850 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:21:46,881 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics', 'active_users']
+2026-02-02 20:21:46,881 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:21:46,882 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-02 20:21:46,882 - mv_optimized_agent - INFO -    All Intents: ['user_analytics', 'active_users']
+2026-02-02 20:21:46,882 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:21:46,882 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:21:50,481 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.599s
+2026-02-02 20:21:50,482 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-02 20:21:51,406 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:21:59,492 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:22:12,193 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 27.30s
+2026-02-02 20:22:18,115 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:22:18,116 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:22:18,117 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:22:18,118 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:22:18,118 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:22:18,118 - mv_optimized_agent - INFO - User Query: provide me all the active users list
+2026-02-02 20:22:18,119 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:22:19,073 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:22:19,075 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users']
+2026-02-02 20:22:19,075 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:22:19,076 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 20:22:19,076 - mv_optimized_agent - INFO -    All Intents: ['active_users']
+2026-02-02 20:22:19,076 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:22:19,076 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:22:20,019 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.943s
+2026-02-02 20:22:20,019 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 20:22:21,340 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:22:30,229 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:23:25,975 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:23:25,978 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:23:25,981 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:23:25,981 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:23:25,982 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:23:25,982 - mv_optimized_agent - INFO - User Query: can you provide the active users count grouped by the role 
+2026-02-02 20:23:25,982 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:23:27,129 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:23:27,139 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics', 'active_users']
+2026-02-02 20:23:27,139 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:23:27,139 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-02 20:23:27,140 - mv_optimized_agent - INFO -    All Intents: ['user_analytics', 'active_users']
+2026-02-02 20:23:27,140 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:23:27,140 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:23:28,080 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.940s
+2026-02-02 20:23:28,081 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-02 20:23:29,005 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:23:37,288 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:23:50,988 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 25.00s
+2026-02-02 20:25:51,616 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 20:25:51,621 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-02 20:25:51,621 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-02 20:25:51,645 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 20:25:58,827 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:25:58,828 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:25:58,829 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:25:58,830 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:25:58,875 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:25:58,875 - main - INFO - Created MV-optimized agent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:25:58,875 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:25:58,878 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:25:58,878 - mv_optimized_agent - INFO - User Query: can you provide the active users count grouped by the role 
+2026-02-02 20:25:58,878 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:26:03,190 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:26:03,219 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics', 'active_users']
+2026-02-02 20:26:03,219 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:26:03,219 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-02 20:26:03,219 - mv_optimized_agent - INFO -    All Intents: ['user_analytics', 'active_users']
+2026-02-02 20:26:03,219 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:26:03,219 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:26:06,513 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.293s
+2026-02-02 20:26:06,513 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-02 20:26:07,445 - mv_optimized_agent - INFO -    📊 Also calling get_active_users_summary() (all roles + OS)...
+2026-02-02 20:26:08,731 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:26:17,831 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:26:41,703 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 42.82s
+2026-02-02 20:28:10,225 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:28:10,227 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:28:10,230 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:28:10,231 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:28:10,232 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:28:10,232 - mv_optimized_agent - INFO - User Query: can you provide the active users count grouped by os 
+2026-02-02 20:28:10,232 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:28:11,546 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:28:11,556 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users', 'user_analytics']
+2026-02-02 20:28:11,557 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:28:11,557 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 20:28:11,557 - mv_optimized_agent - INFO -    All Intents: ['active_users', 'user_analytics']
+2026-02-02 20:28:11,557 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:28:11,558 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:28:12,176 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.619s
+2026-02-02 20:28:12,176 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 20:28:13,466 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:28:21,057 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:28:33,004 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 22.77s
+2026-02-02 20:31:56,113 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:31:56,115 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:31:56,131 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:31:56,132 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:31:56,133 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:31:56,134 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:31:56,134 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:31:56,134 - mv_optimized_agent - INFO - User Query: can you provide the active users count grouped by os 
+2026-02-02 20:31:56,134 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:31:59,049 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:31:59,051 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users', 'user_analytics']
+2026-02-02 20:31:59,051 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:31:59,052 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 20:31:59,052 - mv_optimized_agent - INFO -    All Intents: ['active_users', 'user_analytics']
+2026-02-02 20:31:59,052 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:31:59,052 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:31:59,960 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.908s
+2026-02-02 20:31:59,961 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 20:32:01,300 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:32:02,563 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:32:19,987 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 23.85s
+2026-02-02 20:32:26,874 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:32:26,875 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:32:26,877 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:32:26,877 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:32:26,877 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:32:26,878 - mv_optimized_agent - INFO - User Query: can you provide the active users count grouped by role
+2026-02-02 20:32:26,878 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:32:30,606 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:32:30,609 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics', 'active_users']
+2026-02-02 20:32:30,609 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:32:30,609 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-02 20:32:30,610 - mv_optimized_agent - INFO -    All Intents: ['user_analytics', 'active_users']
+2026-02-02 20:32:30,610 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:32:30,610 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:32:31,225 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.615s
+2026-02-02 20:32:31,226 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-02 20:32:32,116 - mv_optimized_agent - INFO -    📊 Also calling get_active_users_summary() (all roles + OS)...
+2026-02-02 20:32:33,403 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:32:39,434 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:32:59,606 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 32.73s
+2026-02-02 20:40:02,576 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:40:02,577 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:40:02,580 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:40:02,580 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:40:02,581 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:40:02,581 - mv_optimized_agent - INFO - User Query: can you provide the active users list those are using windows os
+2026-02-02 20:40:02,581 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:40:04,641 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:40:04,648 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users']
+2026-02-02 20:40:04,648 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:40:04,648 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-02 20:40:04,648 - mv_optimized_agent - INFO -    All Intents: ['active_users']
+2026-02-02 20:40:04,648 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-02 20:40:04,648 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:40:05,263 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.614s
+2026-02-02 20:40:05,263 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-02 20:40:06,539 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:40:07,742 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:40:20,899 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 18.32s
+2026-02-02 20:56:51,148 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 20:56:51,154 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-02 20:56:51,154 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-02 20:56:51,193 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-02 20:56:57,566 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:56:57,566 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:56:57,569 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-02 20:56:57,570 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-02 20:56:57,573 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:56:57,573 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:56:57,609 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:56:57,609 - main - INFO - Created MV-optimized agent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-02 20:56:57,609 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-02 20:56:57,609 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-02 20:56:57,609 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-02 20:56:57,609 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-02 20:57:00,010 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:57:00,044 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-02 20:57:00,044 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-02 20:57:00,044 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-02 20:57:00,044 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-02 20:57:00,044 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_software_metrics
+2026-02-02 20:57:00,044 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-02 20:57:03,298 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.254s
+2026-02-02 20:57:03,298 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-02 20:57:03,613 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-02 20:57:05,914 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-02 20:57:45,924 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 48.31s
+2026-02-04 12:42:54,297 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-04 12:42:54,304 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-04 12:42:54,305 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-04 12:42:54,380 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-04 12:48:11,680 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-04 12:48:11,684 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-04 12:48:11,693 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-04 12:48:11,693 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-04 12:48:11,697 - main - INFO - [STREAM] Received request for district 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-04 12:48:11,698 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-04 12:48:11,748 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-04 12:48:11,749 - main - INFO - Created MV-optimized agent for district: 54a70914-4697-49de-9c7f-3a97bb36346c
+2026-02-04 12:48:11,749 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-04 12:48:11,749 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 54a70914-4697-49de-9c7f-3a97bb36346c ===
+2026-02-04 12:48:11,749 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-04 12:48:11,749 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-04 12:48:12,995 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 12:48:13,023 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-04 12:48:13,024 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-04 12:48:13,024 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-04 12:48:13,024 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-04 12:48:13,024 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_software_metrics
+2026-02-04 12:48:13,024 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-04 12:48:17,052 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 4.028s
+2026-02-04 12:48:17,053 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-04 12:48:17,365 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-04 12:48:23,341 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 12:49:03,654 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 51.90s
+2026-02-04 12:56:09,142 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-04 12:56:09,145 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-04 12:56:09,148 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 12:56:09,148 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 12:56:09,184 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 12:56:09,184 - main - INFO - Created MV-optimized agent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 12:56:09,184 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-04 12:56:09,185 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-04 12:56:09,185 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-04 12:56:09,185 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-04 12:56:10,898 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 12:56:10,901 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-04 12:56:10,901 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-04 12:56:10,901 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-04 12:56:10,901 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-04 12:56:10,901 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_software_metrics
+2026-02-04 12:56:10,901 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-04 12:56:14,242 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.341s
+2026-02-04 12:56:14,242 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-04 12:56:14,881 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-04 12:56:19,024 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 12:57:27,247 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 78.06s
+2026-02-04 13:13:23,007 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-04 13:13:23,015 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-04 13:13:23,016 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-04 13:13:23,058 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-04 13:15:12,175 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-04 13:15:12,176 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-04 13:15:12,182 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-04 13:15:12,182 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-04 13:15:12,199 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 13:15:12,199 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 13:15:12,236 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 13:15:12,236 - main - INFO - Created MV-optimized agent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 13:15:12,236 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-04 13:15:12,236 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-04 13:15:12,236 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-04 13:15:12,236 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-04 13:15:13,813 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 13:15:13,857 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-04 13:15:13,857 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-04 13:15:13,857 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-04 13:15:13,857 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-04 13:15:13,857 - mv_optimized_agent - INFO -    Best MV: mv_software_usage_analytics_v4
+2026-02-04 13:15:13,857 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-04 13:15:17,890 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 4.033s
+2026-02-04 13:15:17,890 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-04 13:15:18,497 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-04 13:15:23,325 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 13:16:38,288 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 86.05s
+2026-02-04 13:31:24,462 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-04 13:31:24,464 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-04 13:31:24,468 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-04 13:31:24,468 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-04 13:31:24,470 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 13:31:24,470 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-04 13:31:24,470 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-04 13:31:24,470 - mv_optimized_agent - INFO - User Query: Show me the list of authorized paid softwares with investment amount
+2026-02-04 13:31:24,470 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-04 13:31:27,803 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 13:31:27,809 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_investment', 'software_usage', 'dashboard_overview']
+2026-02-04 13:31:27,809 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-04 13:31:27,809 - mv_optimized_agent - INFO -    Primary Intent: software_investment
+2026-02-04 13:31:27,809 - mv_optimized_agent - INFO -    All Intents: ['software_investment', 'software_usage', 'dashboard_overview']
+2026-02-04 13:31:27,810 - mv_optimized_agent - INFO -    Best MV: mv_software_investment_summary
+2026-02-04 13:31:27,810 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-04 13:31:31,308 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.498s
+2026-02-04 13:31:31,308 - mv_optimized_agent - INFO -    📊 Calling get_investment_analysis()...
+2026-02-04 13:34:42,712 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-04 13:34:52,331 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 13:37:45,923 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 381.45s
+2026-02-04 13:40:11,214 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-04 13:40:11,215 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-04 13:40:11,219 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 13:40:11,219 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-04 13:40:11,220 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-04 13:40:11,220 - mv_optimized_agent - INFO - User Query: What is our total software investment this year?
+2026-02-04 13:40:11,220 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-04 13:40:12,613 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 13:40:12,617 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_investment', 'cost_analysis', 'user_analytics']
+2026-02-04 13:40:12,618 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-04 13:40:12,618 - mv_optimized_agent - INFO -    Primary Intent: software_investment
+2026-02-04 13:40:12,618 - mv_optimized_agent - INFO -    All Intents: ['software_investment', 'cost_analysis', 'user_analytics']
+2026-02-04 13:40:12,618 - mv_optimized_agent - INFO -    Best MV: mv_software_investment_summary
+2026-02-04 13:40:12,618 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-04 13:40:14,022 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 1.403s
+2026-02-04 13:40:14,022 - mv_optimized_agent - INFO -    📊 Calling get_investment_analysis()...
+2026-02-04 13:40:14,903 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-04 13:40:20,966 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 13:42:27,436 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 136.21s
+2026-02-04 13:50:16,922 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-04 13:50:16,924 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-04 13:50:16,929 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-04 13:50:16,929 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-04 13:50:16,931 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 13:50:16,931 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-04 13:50:16,932 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-04 13:50:16,932 - mv_optimized_agent - INFO - User Query: provide me active users count goruped by role
+2026-02-04 13:50:16,932 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-04 13:50:18,164 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 13:50:18,177 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics', 'active_users']
+2026-02-04 13:50:18,177 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-04 13:50:18,177 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-04 13:50:18,177 - mv_optimized_agent - INFO -    All Intents: ['user_analytics', 'active_users']
+2026-02-04 13:50:18,178 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-04 13:50:18,178 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-04 13:50:19,099 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.921s
+2026-02-04 13:50:19,099 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-04 13:50:19,976 - mv_optimized_agent - INFO -    📊 Also calling get_active_users_summary() (all roles + OS)...
+2026-02-04 13:50:21,176 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-04 13:50:29,184 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 13:50:46,873 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 29.94s
+2026-02-04 13:51:46,516 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-04 13:51:46,518 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-04 13:51:46,521 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-04 13:51:46,521 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-04 13:51:46,521 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-04 13:51:46,521 - mv_optimized_agent - INFO - User Query: What software is underutilized?
+2026-02-04 13:51:46,521 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-04 13:51:48,437 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 13:51:48,442 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['utilization_analysis', 'software_usage']
+2026-02-04 13:51:48,442 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-04 13:51:48,442 - mv_optimized_agent - INFO -    Primary Intent: utilization_analysis
+2026-02-04 13:51:48,442 - mv_optimized_agent - INFO -    All Intents: ['utilization_analysis', 'software_usage']
+2026-02-04 13:51:48,442 - mv_optimized_agent - INFO -    Best MV: mv_software_usage_analytics_v4
+2026-02-04 13:51:48,442 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-04 13:51:49,351 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.909s
+2026-02-04 13:51:49,351 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics()...
+2026-02-04 13:51:49,960 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-04 13:51:55,598 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-04 13:53:26,281 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 99.76s

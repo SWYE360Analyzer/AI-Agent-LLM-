@@ -106,10 +106,11 @@ class MVOptimizedAgent:
             "- Use <div class='alert alert-warning'> for concerns",
             "- Use <div class='alert alert-success'> for positive findings",
             "",
-            "ROI STATUS INTERPRETATION:",
-            "- 'high' = Good investment, well utilized",
-            "- 'moderate' = Acceptable, room for improvement",
-            "- 'low' = Underutilized, consider action",
+            "INVESTMENT METRICS:",
+            "- 'investment_return' = Dollar amount of realized value (total_cost * usage_compliance / 100). Display as a dollar amount.",
+            "- 'unrealized_value' = Dollar amount of value NOT yet realized (total_cost - investment_return). Display as a dollar amount.",
+            "- 'roi_status' = Category label only ('high', 'moderate', 'low') for quick sorting/filtering.",
+            "- NEVER show avg_roi_percentage or roi_percentage. Always show Investment Return and Unrealized Value as dollar amounts.",
             "",
             "OS/DATA SOURCE LABELS:",
             "- 'Chrome OS' = Chromebook devices",
@@ -158,19 +159,20 @@ MARKDOWN STRUCTURE EXAMPLE:
 | Total Cost | $50,000 |
 
 ### 💡 Key Insights
-> Your top-performing software is achieving 85% ROI
+> Your top-performing software has an Investment Return of $12,500 out of $15,000 total cost (Unrealized Value: $2,500)
 
 ### ⚠️ Areas of Concern
-- Software X has low utilization (15%)
+- Software X has low utilization with $8,000 unrealized value
 
 ### ✅ Recommendations
-1. Review underutilized software
+1. Review software with high unrealized value
 2. Consider consolidation opportunities
 
-ROI STATUS INTERPRETATION:
-- 'high' = Good investment, well utilized
-- 'moderate' = Acceptable, room for improvement
-- 'low' = Underutilized, consider action
+INVESTMENT METRICS:
+- 'investment_return' = Dollar amount of realized value (total_cost * usage_compliance / 100). Display as a dollar amount.
+- 'unrealized_value' = Dollar amount of value NOT yet realized (total_cost - investment_return). Display as a dollar amount.
+- 'roi_status' = Category label only ('high', 'moderate', 'low') for quick sorting/filtering.
+- NEVER show avg_roi_percentage or roi_percentage. Always show Investment Return and Unrealized Value as dollar amounts.
 
 OS/DATA SOURCE LABELS:
 - 'Chrome OS' = Chromebook devices
@@ -218,7 +220,7 @@ IMPORTANT:
                 tool_results["dashboard_metrics"] = self.mv_router.get_dashboard_metrics()
                 mv_queries.append({
                     "method": "get_dashboard_metrics",
-                    "mv_used": "mv_dashboard_software_metrics",
+                    "mv_used": "mv_software_usage_analytics_v4",
                     "execution_time": time.time() - metrics_start
                 })
                 logger.info(f"   ✅ Dashboard metrics retrieved in {time.time() - metrics_start:.3f}s")
@@ -664,14 +666,15 @@ Remember to:
         """Generate a comprehensive district dashboard using MVs."""
         return self.process_query(
             "Generate a comprehensive executive dashboard showing overall software usage metrics, "
-            "investment summary, top software by ROI, and key insights for district decision making"
+            "investment summary with investment return and unrealized value for each software, "
+            "and key insights for district decision making"
         )
 
     def analyze_software_roi(self) -> Dict[str, Any]:
         """Analyze software return on investment using MVs."""
         return self.process_query(
-            "Analyze the ROI and cost-effectiveness of our educational software investments, "
-            "showing which software provides the best value and identifying underutilized applications"
+            "Analyze the investment return and unrealized value of our educational software investments, "
+            "showing which software provides the best value and identifying applications with high unrealized value"
         )
 
     def get_security_insights(self) -> Dict[str, Any]:

@@ -110,6 +110,30 @@ class MVQueryRouter:
         raise last_error
 
     # =========================================================================
+    # HELPER METHODS
+    # =========================================================================
+
+    @staticmethod
+    def _enrich_with_investment_fields(rows: List[Dict]) -> List[Dict]:
+        """
+        Compute investment_return and unrealized_value for each row,
+        then remove avg_roi_percentage from the output.
+
+        investment_return  = (total_cost * usage_compliance) / 100
+        unrealized_value   = total_cost - investment_return
+        """
+        for row in rows:
+            total_cost = float(row.get("total_cost") or 0)
+            usage_compliance = float(row.get("usage_compliance") or 0)
+            investment_return = round((total_cost * usage_compliance) / 100, 2)
+            unrealized_value = round(total_cost - investment_return, 2)
+            row["investment_return"] = investment_return
+            row["unrealized_value"] = unrealized_value
+            row.pop("avg_roi_percentage", None)
+            row.pop("roi_percentage", None)
+        return rows
+
+    # =========================================================================
     # PRIMARY MV QUERY METHODS - These should be used by the agent
     # =========================================================================
 
@@ -134,6 +158,8 @@ class MVQueryRouter:
             active_users,
             active_students,
             active_teachers,
+            students_licensed,
+            school_names,
             usage_days,
             first_use_date,
             last_use_date,
@@ -158,6 +184,7 @@ class MVQueryRouter:
         params.append(limit)
 
         results = self._execute_query(query, tuple(params))
+        self._enrich_with_investment_fields(results)
         execution_time = time.time() - start_time
 
         return {
@@ -169,12 +196,12 @@ class MVQueryRouter:
 
     def get_dashboard_metrics(self) -> Dict[str, Any]:
         """
-        Get dashboard-ready software metrics from mv_dashboard_software_metrics.
+        Get dashboard-ready software metrics from mv_software_usage_analytics_v4.
         Best for dashboard cards and overview stats.
         """
         start_time = time.time()
 
-        # Summary statistics (software metrics + accurate distinct active user count)
+        # Summary statistics from v4 + accurate distinct active user count
         summary_query = """
         SELECT
             sw.total_software,
@@ -184,9 +211,8 @@ class MVQueryRouter:
             sw.total_investment,
             sw.total_licensed,
             COALESCE(au.total_active_users, 0) as total_active_users,
-            sw.total_minutes_90d,
-            sw.avg_utilization,
-            sw.avg_roi_percentage
+            sw.total_minutes,
+            sw.avg_usage_compliance
         FROM (
             SELECT
                 COUNT(*) as total_software,
@@ -195,10 +221,9 @@ class MVQueryRouter:
                 COUNT(*) FILTER (WHERE roi_status = 'low') as low_roi_count,
                 COALESCE(SUM(total_cost), 0) as total_investment,
                 COALESCE(SUM(students_licensed), 0) as total_licensed,
-                COALESCE(SUM(total_minutes_90d), 0) as total_minutes_90d,
-                COALESCE(AVG(utilization), 0) as avg_utilization,
-                COALESCE(AVG(roi_percentage), 0) as avg_roi_percentage
-            FROM mv_dashboard_software_metrics
+                COALESCE(SUM(total_minutes), 0) as total_minutes,
+                COALESCE(AVG(usage_compliance), 0) as avg_usage_compliance
+            FROM mv_software_usage_analytics_v4
             WHERE district_id = %s
         ) sw
         CROSS JOIN (
@@ -210,30 +235,30 @@ class MVQueryRouter:
 
         summary = self._execute_query(summary_query, (self.district_id, self.district_id))
 
-        # Top software by usage
+        # Top software by usage from v4
         top_query = """
         SELECT
             name,
-            category,
+            primary_category,
             total_cost,
-            active_users_30d,
-            total_minutes_90d,
-            utilization,
-            roi_percentage,
+            active_users,
+            total_minutes,
+            usage_compliance,
             roi_status
-        FROM mv_dashboard_software_metrics
+        FROM mv_software_usage_analytics_v4
         WHERE district_id = %s
-        ORDER BY total_minutes_90d DESC
+        ORDER BY total_minutes DESC
         LIMIT 100
         """
 
         top_software = self._execute_query(top_query, (self.district_id,))
+        self._enrich_with_investment_fields(top_software)
         execution_time = time.time() - start_time
 
         return {
             "summary": summary[0] if summary else {},
             "top_software": top_software,
-            "mv_used": "mv_dashboard_software_metrics",
+            "mv_used": "mv_software_usage_analytics_v4",
             "execution_time": execution_time
         }
 

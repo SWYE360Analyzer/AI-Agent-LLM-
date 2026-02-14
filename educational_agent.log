@@ -2309,3 +2309,296 @@ server closed the connection unexpectedly
 2026-02-04 13:51:49,960 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
 2026-02-04 13:51:55,598 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 2026-02-04 13:53:26,281 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 99.76s
+2026-02-09 12:53:01,632 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-09 12:53:01,636 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-09 12:53:01,636 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-09 12:53:01,741 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-09 12:58:53,635 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 12:58:53,637 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 12:58:53,639 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 12:58:53,639 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 12:58:53,645 - main - INFO - [STREAM] Received request for district 440134ca-1070-4090-908d-4ccecf934325
+2026-02-09 12:58:53,645 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 440134ca-1070-4090-908d-4ccecf934325
+2026-02-09 12:58:53,732 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 440134ca-1070-4090-908d-4ccecf934325
+2026-02-09 12:58:53,732 - main - INFO - Created MV-optimized agent for district: 440134ca-1070-4090-908d-4ccecf934325
+2026-02-09 12:58:53,732 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-09 12:58:53,733 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 440134ca-1070-4090-908d-4ccecf934325 ===
+2026-02-09 12:58:53,733 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-09 12:58:53,733 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-09 12:58:55,628 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 12:58:55,640 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 12:58:55,641 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-09 12:58:55,641 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-09 12:58:55,641 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 12:58:55,641 - mv_optimized_agent - INFO -    Best MV: mv_software_usage_analytics_v4
+2026-02-09 12:58:55,641 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-09 12:59:00,210 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 4.569s
+2026-02-09 12:59:00,213 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-09 12:59:00,811 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-09 12:59:02,764 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 12:59:07,557 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 12:59:07,559 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 12:59:07,570 - main - INFO - [STREAM] Received request for district 440134ca-1070-4090-908d-4ccecf934325
+2026-02-09 12:59:07,570 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-09 12:59:07,580 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 440134ca-1070-4090-908d-4ccecf934325 ===
+2026-02-09 12:59:07,581 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-09 12:59:07,581 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-09 12:59:08,333 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 12:59:08,336 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 12:59:08,337 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-09 12:59:08,337 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-09 12:59:08,337 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 12:59:08,337 - mv_optimized_agent - INFO -    Best MV: mv_software_usage_analytics_v4
+2026-02-09 12:59:08,337 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-09 12:59:09,232 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.895s
+2026-02-09 12:59:09,232 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-09 12:59:09,826 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-09 12:59:11,594 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 12:59:15,901 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 22.16s
+2026-02-09 12:59:20,213 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 12.63s
+2026-02-09 13:06:05,840 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 13:06:05,847 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 13:06:05,870 - main - INFO - [STREAM] Received request for district 440134ca-1070-4090-908d-4ccecf934325
+2026-02-09 13:06:05,871 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-09 13:06:05,871 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 440134ca-1070-4090-908d-4ccecf934325 ===
+2026-02-09 13:06:05,871 - mv_optimized_agent - INFO - User Query: Provide me active users list
+2026-02-09 13:06:05,871 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-09 13:06:07,443 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:06:07,453 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['active_users']
+2026-02-09 13:06:07,454 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-09 13:06:07,454 - mv_optimized_agent - INFO -    Primary Intent: active_users
+2026-02-09 13:06:07,454 - mv_optimized_agent - INFO -    All Intents: ['active_users']
+2026-02-09 13:06:07,454 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-09 13:06:07,454 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-09 13:06:08,357 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.903s
+2026-02-09 13:06:08,357 - mv_optimized_agent - INFO -    📊 Calling get_active_users_summary()...
+2026-02-09 13:06:09,575 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-09 13:06:11,270 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:06:20,762 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 14.89s
+2026-02-09 13:06:32,063 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 13:06:32,064 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 13:06:32,068 - main - INFO - [STREAM] Received request for district 440134ca-1070-4090-908d-4ccecf934325
+2026-02-09 13:06:32,069 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-09 13:06:32,069 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 440134ca-1070-4090-908d-4ccecf934325 ===
+2026-02-09 13:06:32,070 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-09 13:06:32,070 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-09 13:06:32,839 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:06:32,845 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 13:06:32,845 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-09 13:06:32,845 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-09 13:06:32,845 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 13:06:32,845 - mv_optimized_agent - INFO -    Best MV: mv_software_usage_analytics_v4
+2026-02-09 13:06:32,845 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-09 13:06:33,738 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.893s
+2026-02-09 13:06:33,738 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-09 13:06:34,334 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-09 13:06:35,471 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:06:45,230 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 13.16s
+2026-02-09 13:06:46,398 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-09 13:07:37,973 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-09 13:07:37,976 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-09 13:07:37,976 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-09 13:07:38,005 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-09 13:07:51,124 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 13:07:51,125 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 13:07:51,130 - main - INFO - [STREAM] Received request for district 440134ca-1070-4090-908d-4ccecf934325, school: 65769e5b-1f85-4cd1-8ee2-509b23975be0
+2026-02-09 13:07:51,130 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 440134ca-1070-4090-908d-4ccecf934325 (school: 65769e5b-1f85-4cd1-8ee2-509b23975be0)
+2026-02-09 13:07:51,203 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 440134ca-1070-4090-908d-4ccecf934325
+2026-02-09 13:07:51,203 - main - INFO - Created MV-optimized agent for district: 440134ca-1070-4090-908d-4ccecf934325 (school: 65769e5b-1f85-4cd1-8ee2-509b23975be0)
+2026-02-09 13:07:51,203 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-09 13:07:51,204 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 440134ca-1070-4090-908d-4ccecf934325 ===
+2026-02-09 13:07:51,204 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-09 13:07:51,204 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-09 13:07:52,371 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:07:52,468 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 13:07:52,473 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-09 13:07:52,473 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-09 13:07:52,473 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 13:07:52,473 - mv_optimized_agent - INFO -    Best MV: mv_software_usage_analytics_v4
+2026-02-09 13:07:52,473 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-09 13:07:55,803 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.329s
+2026-02-09 13:07:55,804 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-09 13:07:56,408 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-09 13:07:58,263 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:08:12,209 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 21.01s
+2026-02-09 13:08:34,497 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 13:08:34,498 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 13:08:34,501 - main - INFO - [STREAM] Received request for district 440134ca-1070-4090-908d-4ccecf934325, school: 65769e5b-1f85-4cd1-8ee2-509b23975be0
+2026-02-09 13:08:34,502 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-09 13:08:34,503 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 440134ca-1070-4090-908d-4ccecf934325 ===
+2026-02-09 13:08:34,503 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-09 13:08:34,503 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-09 13:08:35,226 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:08:35,228 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 13:08:35,229 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-09 13:08:35,229 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-09 13:08:35,229 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 13:08:35,229 - mv_optimized_agent - INFO -    Best MV: mv_software_usage_analytics_v4
+2026-02-09 13:08:35,229 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-09 13:08:36,117 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 0.888s
+2026-02-09 13:08:36,117 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-09 13:08:36,718 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-09 13:08:38,723 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:08:55,933 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 21.43s
+2026-02-09 13:36:21,837 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-09 13:37:08,021 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-09 13:50:40,080 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-09 13:50:40,083 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-09 13:50:40,083 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-09 13:50:40,220 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-09 13:50:57,772 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 13:50:57,772 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 13:50:57,776 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 13:50:57,776 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 13:50:57,782 - main - INFO - [STREAM] Received request for district 440134ca-1070-4090-908d-4ccecf934325, school: 65769e5b-1f85-4cd1-8ee2-509b23975be0
+2026-02-09 13:50:57,783 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 440134ca-1070-4090-908d-4ccecf934325 (school: 65769e5b-1f85-4cd1-8ee2-509b23975be0)
+2026-02-09 13:50:57,856 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 440134ca-1070-4090-908d-4ccecf934325
+2026-02-09 13:50:57,856 - main - INFO - Created MV-optimized agent for district: 440134ca-1070-4090-908d-4ccecf934325 (school: 65769e5b-1f85-4cd1-8ee2-509b23975be0)
+2026-02-09 13:50:57,856 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-09 13:50:57,856 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 440134ca-1070-4090-908d-4ccecf934325 ===
+2026-02-09 13:50:57,856 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-09 13:50:57,856 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-09 13:50:59,528 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:50:59,547 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 13:50:59,547 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-09 13:50:59,547 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-09 13:50:59,548 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 13:50:59,548 - mv_optimized_agent - INFO -    Best MV: mv_software_usage_analytics_v4
+2026-02-09 13:50:59,548 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-09 13:51:02,783 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.235s
+2026-02-09 13:51:02,801 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-09 13:51:03,151 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-09 13:51:04,071 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:51:19,605 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 21.74s
+2026-02-09 13:52:53,401 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 13:52:53,402 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 13:52:53,408 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-09 13:52:53,408 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-09 13:52:53,437 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-09 13:52:53,437 - main - INFO - Created MV-optimized agent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-09 13:52:53,437 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-09 13:52:53,438 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-09 13:52:53,439 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-09 13:52:53,439 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-09 13:52:54,551 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:52:54,558 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'usage_trends', 'dashboard_overview']
+2026-02-09 13:52:54,558 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-09 13:52:54,558 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-09 13:52:54,558 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'usage_trends', 'dashboard_overview']
+2026-02-09 13:52:54,558 - mv_optimized_agent - INFO -    Best MV: mv_software_usage_analytics_v4
+2026-02-09 13:52:54,558 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-09 13:52:57,951 - mv_optimized_agent - INFO -    ✅ Dashboard metrics retrieved in 3.393s
+2026-02-09 13:52:57,960 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-09 13:52:58,678 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-09 13:53:00,035 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 13:53:23,307 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 29.87s
+2026-02-09 14:44:41,141 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 14:44:41,147 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 14:44:41,160 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 14:44:41,161 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 14:44:41,181 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-09 14:44:41,181 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-09 14:44:41,185 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-09 14:44:41,185 - mv_optimized_agent - INFO - User Query: how many active users we have 
+2026-02-09 14:44:41,185 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-09 14:44:42,068 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 14:44:42,081 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics']
+2026-02-09 14:44:42,082 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-09 14:44:42,082 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-09 14:44:42,082 - mv_optimized_agent - INFO -    All Intents: ['user_analytics']
+2026-02-09 14:44:42,084 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-09 14:44:42,084 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-09 14:44:42,389 - mv_query_router - WARNING - Connection error (attempt 1): server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-02-09 14:44:44,422 - mv_query_router - WARNING - Connection error (attempt 2): could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:44:44,422 - mv_query_router - ERROR - Query failed after 2 attempts: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:44:44,422 - mv_optimized_agent - ERROR -    ❌ Dashboard metrics failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:44:44,422 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-09 14:44:44,425 - mv_query_router - WARNING - Connection error (attempt 1): could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:44:44,427 - mv_query_router - WARNING - Connection error (attempt 2): could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:44:44,427 - mv_query_router - ERROR - Query failed after 2 attempts: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:44:44,429 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-09 14:44:45,356 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 14:44:47,571 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 6.39s
+2026-02-09 14:44:55,857 - __main__ - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-09 14:44:55,860 - __main__ - INFO - Starting FIXED Educational Analytics API on 0.0.0.0:8000
+2026-02-09 14:44:55,860 - __main__ - INFO - 🔧 Tool Intercepting Agent available for guaranteed database calls!
+2026-02-09 14:44:55,890 - main - INFO - 🔒 CORS allowed origins: ['https://classsight.ai', 'https://www.classsight.ai', 'https://swye360.ai', 'https://www.swye360.ai', 'https://www.swye360.com', 'https://swye360.com', 'https://preview--roi-bright-future.lovable.app', 'http://localhost:8080', 'https://swye360.web.app']
+2026-02-09 14:45:05,361 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 14:45:05,361 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 14:45:05,363 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-09 14:45:05,364 - mv_optimized_agent - INFO - Initializing MVOptimizedAgent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-09 14:45:05,417 - mv_optimized_agent - INFO - MVOptimizedAgent initialized successfully for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-09 14:45:05,417 - main - INFO - Created MV-optimized agent for district: 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-09 14:45:05,417 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-09 14:45:05,417 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-09 14:45:05,417 - mv_optimized_agent - INFO - User Query: how many active users we have 
+2026-02-09 14:45:05,417 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-09 14:45:06,432 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 14:45:06,448 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['user_analytics']
+2026-02-09 14:45:06,448 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-09 14:45:06,448 - mv_optimized_agent - INFO -    Primary Intent: user_analytics
+2026-02-09 14:45:06,448 - mv_optimized_agent - INFO -    All Intents: ['user_analytics']
+2026-02-09 14:45:06,449 - mv_optimized_agent - INFO -    Best MV: mv_dashboard_user_analytics
+2026-02-09 14:45:06,449 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-09 14:45:06,452 - mv_query_router - WARNING - Connection error (attempt 1): could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:06,453 - mv_query_router - WARNING - Connection error (attempt 2): could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:06,453 - mv_query_router - ERROR - Query failed after 2 attempts: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:06,453 - mv_optimized_agent - ERROR -    ❌ Dashboard metrics failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:06,454 - mv_optimized_agent - INFO -    📊 Calling get_user_analytics()...
+2026-02-09 14:45:06,455 - mv_query_router - WARNING - Connection error (attempt 1): could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:06,456 - mv_query_router - WARNING - Connection error (attempt 2): could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:06,456 - mv_query_router - ERROR - Query failed after 2 attempts: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:06,457 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-09 14:45:07,030 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 14:45:09,178 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 3.76s
+2026-02-09 14:45:21,468 - main - INFO - 📨 Incoming Request - Origin: http://localhost:8080 | Referer: http://localhost:8080/ | Host: 0.0.0.0:8000 | Path: /api/ask/stream
+2026-02-09 14:45:21,469 - main - INFO - ✅ Origin ALLOWED: http://localhost:8080
+2026-02-09 14:45:21,470 - main - INFO - [STREAM] Received request for district 3ef51192-1070-4090-908d-ef3ab03b4325
+2026-02-09 14:45:21,470 - main - INFO - 🚀 [STREAM] Using MV-Optimized Agent with SSE streaming
+2026-02-09 14:45:21,471 - mv_optimized_agent - INFO - === MV OPTIMIZED STREAMING FOR DISTRICT 3ef51192-1070-4090-908d-ef3ab03b4325 ===
+2026-02-09 14:45:21,471 - mv_optimized_agent - INFO - User Query: Generate an executive summary of our district's software ROI and usage patterns
+2026-02-09 14:45:21,471 - mv_optimized_agent - INFO - 🔧 STEP 1: Calling materialized view tools...
+2026-02-09 14:45:22,820 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 14:45:22,827 - mv_knowledge_registry - INFO - 🤖 LLM Intent Classification: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 14:45:22,827 - mv_optimized_agent - INFO - 🧠 Query Intent Analysis:
+2026-02-09 14:45:22,827 - mv_optimized_agent - INFO -    Primary Intent: software_roi
+2026-02-09 14:45:22,827 - mv_optimized_agent - INFO -    All Intents: ['software_roi', 'software_usage', 'dashboard_overview']
+2026-02-09 14:45:22,828 - mv_optimized_agent - INFO -    Best MV: mv_software_usage_analytics_v4
+2026-02-09 14:45:22,828 - mv_optimized_agent - INFO -    📊 Calling get_dashboard_metrics()...
+2026-02-09 14:45:22,831 - mv_query_router - WARNING - Connection error (attempt 1): could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:22,832 - mv_query_router - WARNING - Connection error (attempt 2): could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:22,832 - mv_query_router - ERROR - Query failed after 2 attempts: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:22,832 - mv_optimized_agent - ERROR -    ❌ Dashboard metrics failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:22,832 - mv_optimized_agent - INFO -    📊 Calling get_software_analytics(order_by='avg_roi_percentage')...
+2026-02-09 14:45:22,833 - mv_query_router - WARNING - Connection error (attempt 1): could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:22,834 - mv_query_router - WARNING - Connection error (attempt 2): could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:22,835 - mv_query_router - ERROR - Query failed after 2 attempts: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-02-09 14:45:22,836 - mv_optimized_agent - INFO - 🎨 STEP 2: Streaming markdown analysis...
+2026-02-09 14:45:24,170 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-09 14:45:26,875 - mv_optimized_agent - INFO - ✅ MV STREAMING COMPLETED in 5.40s

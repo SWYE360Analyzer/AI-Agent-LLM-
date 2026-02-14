@@ -415,7 +415,7 @@ class DistrictAwarePostgresTools(Toolkit):
                 ELSE '🔴 Low'
             END as roi_indicator,
             COALESCE(avg_roi_percentage, 0) as roi_percentage
-        FROM mv_software_usage_analytics_v3
+        FROM mv_software_usage_analytics_v4
         WHERE district_id = %s
             AND total_minutes > 0
         ORDER BY total_minutes DESC

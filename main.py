@@ -138,6 +138,9 @@ class AnalyticsRequest(BaseModel):
     district_id: str = Field(
         ..., description="District identifier for data access control"
     )
+    school_id: Optional[str] = Field(
+        None, description="Optional school identifier to filter data to a specific school"
+    )
     verbose: bool = Field(
         False, description="Enable verbose logging and detailed execution tracking"
     )
@@ -166,6 +169,7 @@ class AnalyticsResponse(BaseModel):
         description="HTML-formatted response with analytics insights"
     )
     district_id: str = Field(description="District identifier that was used")
+    school_id: Optional[str] = Field(None, description="School identifier if filtering by school")
     execution_log: Optional[dict] = Field(
         None, description="Detailed execution log including SQL queries and tool calls"
     )
@@ -270,18 +274,21 @@ def get_intelligent_agent(
     return intelligent_agent_cache[cache_key]
 
 
-def get_phi_agent(district_id: str, verbose: bool = False) -> PhiEducationalAgent:
+def get_phi_agent(
+    district_id: str, verbose: bool = False, school_id: Optional[str] = None
+) -> PhiEducationalAgent:
     """Get or create phi-based educational agent."""
-    cache_key = f"{district_id}_{verbose}"
+    cache_key = f"{district_id}_{school_id or 'all'}_{verbose}"
 
     if cache_key not in phi_agent_cache:
         try:
             postgres_config = get_postgres_config()
             agent = create_phi_educational_agent(
-                district_id, postgres_config, verbose=verbose
+                district_id, postgres_config, verbose=verbose, school_id=school_id
             )
             phi_agent_cache[cache_key] = agent
-            logger.info(f"Created phi agent for district: {district_id}")
+            school_info = f" (school: {school_id})" if school_id else ""
+            logger.info(f"Created phi agent for district: {district_id}{school_info}")
         except Exception as e:
             logger.error(f"Failed to create phi agent: {e}")
             raise HTTPException(
@@ -291,18 +298,21 @@ def get_phi_agent(district_id: str, verbose: bool = False) -> PhiEducationalAgen
     return phi_agent_cache[cache_key]
 
 
-def get_mv_optimized_agent(district_id: str, verbose: bool = False) -> MVOptimizedAgent:
+def get_mv_optimized_agent(
+    district_id: str, verbose: bool = False, school_id: Optional[str] = None
+) -> MVOptimizedAgent:
     """Get or create MV-optimized educational agent (RECOMMENDED)."""
-    cache_key = f"{district_id}_{verbose}"
+    cache_key = f"{district_id}_{school_id or 'all'}_{verbose}"
 
     if cache_key not in mv_optimized_agent_cache:
         try:
             postgres_config = get_postgres_config()
             agent = create_mv_optimized_agent(
-                district_id, postgres_config, verbose=verbose
+                district_id, postgres_config, verbose=verbose, school_id=school_id
             )
             mv_optimized_agent_cache[cache_key] = agent
-            logger.info(f"Created MV-optimized agent for district: {district_id}")
+            school_info = f" (school: {school_id})" if school_id else ""
+            logger.info(f"Created MV-optimized agent for district: {district_id}{school_info}")
         except Exception as e:
             logger.error(f"Failed to create MV-optimized agent: {e}")
             raise HTTPException(
@@ -320,8 +330,9 @@ async def ask_analytics_question(request: AnalyticsRequest):
     Now with guaranteed database tool calling!
     """
     try:
+        school_info = f", school: {request.school_id}" if request.school_id else ""
         logger.info(
-            f"Received request for district {request.district_id}, "
+            f"Received request for district {request.district_id}{school_info}, "
             f"verbose: {request.verbose}, mv_optimized: {request.use_mv_optimized_agent}, "
             f"intercepting: {request.use_intercepting_agent}, "
             f"intelligent: {request.use_intelligent_agent}, phi: {request.use_phi_agent}"
@@ -341,13 +352,17 @@ async def ask_analytics_question(request: AnalyticsRequest):
 
         # Choose agent type with MV-optimized agent as the default (RECOMMENDED)
         if request.use_mv_optimized_agent:
-            agent = get_mv_optimized_agent(request.district_id, verbose=request.verbose)
+            agent = get_mv_optimized_agent(
+                request.district_id, verbose=request.verbose, school_id=request.school_id
+            )
             agent_type = "mv_optimized"
             logger.info(
                 "🚀 Using MV-Optimized Agent (10-100x faster using materialized views)"
             )
         elif request.use_phi_agent:
-            agent = get_phi_agent(request.district_id, verbose=request.verbose)
+            agent = get_phi_agent(
+                request.district_id, verbose=request.verbose, school_id=request.school_id
+            )
             agent_type = "phi_native"
             logger.info(
                 "🔥 Using Phi Native Agent (dynamic SQL generation from natural language)"
@@ -405,6 +420,7 @@ async def ask_analytics_question(request: AnalyticsRequest):
             success=True,
             html_response=html_response,
             district_id=request.district_id,
+            school_id=request.school_id,
             execution_log=execution_log,
             agent_type=agent_type,
         )
@@ -417,6 +433,7 @@ async def ask_analytics_question(request: AnalyticsRequest):
             success=False,
             html_response=f"<div class='alert alert-danger'>Error: {str(e)}</div>",
             district_id=request.district_id,
+            school_id=request.school_id,
             execution_log=None,
             agent_type="error",
             error=str(e),
@@ -431,6 +448,9 @@ class StreamingRequest(BaseModel):
     )
     district_id: str = Field(
         ..., description="District identifier for data access control"
+    )
+    school_id: Optional[str] = Field(
+        None, description="Optional school identifier to filter data to a specific school"
     )
 
 
@@ -450,8 +470,9 @@ async def ask_analytics_question_stream(request: StreamingRequest):
     - data: {"type": "error", "error": "...", ...} (if error occurs)
     """
     try:
+        school_info = f", school: {request.school_id}" if request.school_id else ""
         logger.info(
-            f"[STREAM] Received request for district {request.district_id}"
+            f"[STREAM] Received request for district {request.district_id}{school_info}"
         )
 
         # Validate required fields
@@ -467,7 +488,9 @@ async def ask_analytics_question_stream(request: StreamingRequest):
             )
 
         # Use MV-optimized agent for streaming
-        agent = get_mv_optimized_agent(request.district_id, verbose=False)
+        agent = get_mv_optimized_agent(
+            request.district_id, verbose=False, school_id=request.school_id
+        )
         logger.info("🚀 [STREAM] Using MV-Optimized Agent with SSE streaming")
 
         async def event_generator():
@@ -522,6 +545,7 @@ async def get_district_dashboard(
             success=True,
             html_response=html_response,
             district_id=district_id,
+            school_id=None,
             execution_log=execution_log,
             agent_type=agent_type,
         )
@@ -532,6 +556,7 @@ async def get_district_dashboard(
             success=False,
             html_response=f"<div class='alert alert-danger'>Dashboard Error: {str(e)}</div>",
             district_id=district_id,
+            school_id=None,
             execution_log=None,
             agent_type="error",
             error=str(e),

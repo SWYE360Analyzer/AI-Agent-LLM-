@@ -46,19 +46,22 @@ class MVOptimizedAgent:
         postgres_config: dict,
         openai_api_key: Optional[str] = None,
         verbose: bool = False,
+        school_id: Optional[str] = None,
     ):
         self.district_id = district_id
         self.postgres_config = postgres_config
         self.verbose = verbose
+        self.school_id = school_id
         self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
 
         if self.verbose:
             logger.setLevel(logging.DEBUG)
 
-        logger.info(f"Initializing MVOptimizedAgent for district: {district_id}")
+        school_info = f" (school: {school_id})" if school_id else ""
+        logger.info(f"Initializing MVOptimizedAgent for district: {district_id}{school_info}")
 
         # Initialize MV Query Router
-        self.mv_router = create_mv_router(postgres_config, district_id)
+        self.mv_router = create_mv_router(postgres_config, district_id, school_id=school_id)
 
         # Initialize OpenAI client for streaming
         self.openai_client = OpenAI(api_key=self.openai_api_key)
@@ -78,9 +81,10 @@ class MVOptimizedAgent:
 
     def _get_agent_instructions(self) -> List[str]:
         """Get comprehensive instructions for the agent (HTML format)."""
-        return [
+        scope_context = f"school-specific data for school ID: {self.school_id}" if self.school_id else "district-wide data"
+        instructions = [
             "You are an educational software analytics specialist.",
-            "You will receive REAL data from optimized materialized view queries.",
+            f"You will receive REAL {scope_context} from optimized materialized view queries.",
             "Your job is to create clear, actionable HTML analysis.",
             "",
             "CRITICAL - DATA DISPLAY RULES:",
@@ -127,6 +131,12 @@ class MVOptimizedAgent:
             "- Comparison with benchmarks where applicable",
             "- Actionable next steps",
         ]
+
+        if self.school_id:
+            instructions.append("")
+            instructions.append("NOTE: Data is filtered to a specific school. Mention this scope in your analysis.")
+
+        return instructions
 
     def _get_markdown_instructions(self) -> str:
         """Get instructions for markdown format (streaming responses)."""
@@ -236,7 +246,7 @@ IMPORTANT:
                 tool_results["unauthorized"] = self.mv_router.get_unauthorized_software()
                 mv_queries.append({
                     "method": "get_unauthorized_software",
-                    "mv_used": "mv_unauthorized_software_analytics_v3",
+                    "mv_used": "mv_unauthorized_software_analytics_v4",
                     "execution_time": time.time() - start
                 })
             except Exception as e:
@@ -410,6 +420,8 @@ IMPORTANT:
         formatted.append("=" * 60)
         formatted.append("REAL DATA FROM MATERIALIZED VIEWS")
         formatted.append("=" * 60)
+        scope = f"School: {self.school_id}" if self.school_id else "District-wide (all schools)"
+        formatted.append(f"Data Scope: {scope}")
         formatted.append(f"Query Intent: {tool_data['primary_intent']}")
         formatted.append(f"Primary MV Used: {tool_data['best_mv']}")
         formatted.append(f"Total Query Time: {tool_data['total_time']:.3f}s")
@@ -702,11 +714,13 @@ Remember to:
 def create_mv_optimized_agent(
     district_id: str,
     postgres_config: dict,
-    verbose: bool = False
+    verbose: bool = False,
+    school_id: Optional[str] = None
 ) -> MVOptimizedAgent:
     """Factory function to create an MV-optimized educational agent."""
     return MVOptimizedAgent(
         district_id=district_id,
         postgres_config=postgres_config,
-        verbose=verbose
+        verbose=verbose,
+        school_id=school_id
     )

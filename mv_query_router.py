@@ -39,6 +39,7 @@ class MVQueryRouter:
         password: str,
         district_id: str,
         schema: str = "public",
+        school_id: Optional[str] = None,
     ):
         self.host = host
         self.port = port
@@ -47,6 +48,7 @@ class MVQueryRouter:
         self.password = password
         self.district_id = district_id
         self.schema = schema
+        self.school_id = school_id
         self._connection: Optional[psycopg2.extensions.connection] = None
 
     def _get_connection(self) -> psycopg2.extensions.connection:
@@ -113,6 +115,18 @@ class MVQueryRouter:
     # HELPER METHODS
     # =========================================================================
 
+    def _build_school_filter(self, column: str = "school_id") -> Tuple[str, List]:
+        """Build conditional school filter clause for views with school_id column."""
+        if self.school_id:
+            return f" AND {column} = %s", [self.school_id]
+        return "", []
+
+    def _build_school_name_filter(self) -> Tuple[str, List]:
+        """Build school filter using school_name lookup from school_id."""
+        if self.school_id:
+            return " AND school_name = (SELECT name FROM schools WHERE id = %s AND district_id = %s)", [self.school_id, self.district_id]
+        return "", []
+
     @staticmethod
     def _enrich_with_investment_fields(rows: List[Dict]) -> List[Dict]:
         """
@@ -144,122 +158,236 @@ class MVQueryRouter:
         roi_status: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Get comprehensive software analytics from mv_software_usage_analytics_v4.
-        This is the PRIMARY view for software usage data.
+        Get comprehensive software analytics.
+        Uses mv_software_usage_by_school_v2 when school_id is provided,
+        otherwise uses mv_software_usage_analytics_v4 for district-wide data.
         """
         start_time = time.time()
 
-        query = """
-        SELECT
-            name,
-            primary_category,
-            total_cost,
-            total_minutes,
-            active_users,
-            active_students,
-            active_teachers,
-            students_licensed,
-            school_names,
-            usage_days,
-            first_use_date,
-            last_use_date,
-            cost_per_student,
-            avg_roi_percentage,
-            roi_status,
-            engagement_rate,
-            usage_compliance,
-            authorized,
-            district_purchased
-        FROM mv_software_usage_analytics_v4
-        WHERE district_id = %s
-        """
+        if self.school_id:
+            # Use school-level MV when school_id is provided
+            school_filter, school_params = self._build_school_filter("school_id")
 
-        params = [self.district_id]
+            query = f"""
+            SELECT
+                software_name as name,
+                category as primary_category,
+                total_cost,
+                total_minutes,
+                active_users,
+                active_students,
+                active_teachers,
+                students_licensed,
+                school_name,
+                usage_days,
+                first_use_date,
+                last_use_date,
+                cost_per_student,
+                avg_roi_percentage,
+                roi_status,
+                engagement_rate,
+                usage_compliance,
+                authorized,
+                district_purchased
+            FROM mv_software_usage_by_school_v2
+            WHERE district_id = %s{school_filter}
+            """
 
-        if roi_status:
-            query += " AND roi_status = %s"
-            params.append(roi_status)
+            params = [self.district_id] + school_params
 
-        query += f" ORDER BY {order_by} DESC LIMIT %s"
-        params.append(limit)
+            if roi_status:
+                query += " AND roi_status = %s"
+                params.append(roi_status)
 
-        results = self._execute_query(query, tuple(params))
-        self._enrich_with_investment_fields(results)
-        execution_time = time.time() - start_time
+            query += f" ORDER BY {order_by} DESC LIMIT %s"
+            params.append(limit)
 
-        return {
-            "data": results,
-            "mv_used": "mv_software_usage_analytics_v4",
-            "execution_time": execution_time,
-            "count": len(results)
-        }
+            results = self._execute_query(query, tuple(params))
+            self._enrich_with_investment_fields(results)
+            execution_time = time.time() - start_time
+
+            return {
+                "data": results,
+                "mv_used": "mv_software_usage_by_school_v2",
+                "execution_time": execution_time,
+                "count": len(results),
+                "school_id": self.school_id
+            }
+        else:
+            # Use district-level MV when no school_id
+            query = """
+            SELECT
+                name,
+                primary_category,
+                total_cost,
+                total_minutes,
+                active_users,
+                active_students,
+                active_teachers,
+                students_licensed,
+                school_names,
+                usage_days,
+                first_use_date,
+                last_use_date,
+                cost_per_student,
+                avg_roi_percentage,
+                roi_status,
+                engagement_rate,
+                usage_compliance,
+                authorized,
+                district_purchased
+            FROM mv_software_usage_analytics_v4
+            WHERE district_id = %s
+            """
+
+            params = [self.district_id]
+
+            if roi_status:
+                query += " AND roi_status = %s"
+                params.append(roi_status)
+
+            query += f" ORDER BY {order_by} DESC LIMIT %s"
+            params.append(limit)
+
+            results = self._execute_query(query, tuple(params))
+            self._enrich_with_investment_fields(results)
+            execution_time = time.time() - start_time
+
+            return {
+                "data": results,
+                "mv_used": "mv_software_usage_analytics_v4",
+                "execution_time": execution_time,
+                "count": len(results)
+            }
 
     def get_dashboard_metrics(self) -> Dict[str, Any]:
         """
-        Get dashboard-ready software metrics from mv_software_usage_analytics_v4.
-        Best for dashboard cards and overview stats.
+        Get dashboard-ready software metrics.
+        Uses mv_software_usage_by_school_v2 when school_id is provided,
+        otherwise uses mv_software_usage_analytics_v4 for district-wide data.
         """
         start_time = time.time()
+        school_filter, school_params = self._build_school_filter("school_id")
 
-        # Summary statistics from v4 + accurate distinct active user count
-        summary_query = """
-        SELECT
-            sw.total_software,
-            sw.high_roi_count,
-            sw.moderate_roi_count,
-            sw.low_roi_count,
-            sw.total_investment,
-            sw.total_licensed,
-            COALESCE(au.total_active_users, 0) as total_active_users,
-            sw.total_minutes,
-            sw.avg_usage_compliance
-        FROM (
+        if self.school_id:
+            # Use school-level MV when school_id is provided
+            summary_query = f"""
             SELECT
-                COUNT(*) as total_software,
-                COUNT(*) FILTER (WHERE roi_status = 'high') as high_roi_count,
-                COUNT(*) FILTER (WHERE roi_status = 'moderate') as moderate_roi_count,
-                COUNT(*) FILTER (WHERE roi_status = 'low') as low_roi_count,
-                COALESCE(SUM(total_cost), 0) as total_investment,
-                COALESCE(SUM(students_licensed), 0) as total_licensed,
-                COALESCE(SUM(total_minutes), 0) as total_minutes,
-                COALESCE(AVG(usage_compliance), 0) as avg_usage_compliance
+                sw.total_software,
+                sw.high_roi_count,
+                sw.moderate_roi_count,
+                sw.low_roi_count,
+                sw.total_investment,
+                sw.total_licensed,
+                COALESCE(au.total_active_users, 0) as total_active_users,
+                sw.total_minutes,
+                sw.avg_usage_compliance
+            FROM (
+                SELECT
+                    COUNT(DISTINCT software_name) as total_software,
+                    COUNT(DISTINCT software_name) FILTER (WHERE roi_status = 'high') as high_roi_count,
+                    COUNT(DISTINCT software_name) FILTER (WHERE roi_status = 'moderate') as moderate_roi_count,
+                    COUNT(DISTINCT software_name) FILTER (WHERE roi_status = 'low') as low_roi_count,
+                    COALESCE(SUM(total_cost), 0) as total_investment,
+                    COALESCE(SUM(students_licensed), 0) as total_licensed,
+                    COALESCE(SUM(total_minutes), 0) as total_minutes,
+                    COALESCE(AVG(usage_compliance), 0) as avg_usage_compliance
+                FROM mv_software_usage_by_school_v2
+                WHERE district_id = %s{school_filter}
+            ) sw
+            CROSS JOIN (
+                SELECT COUNT(*) as total_active_users
+                FROM mv_active_users_summary
+                WHERE district_id = %s AND total_usage_minutes > 0{school_filter}
+            ) au
+            """
+
+            params = [self.district_id] + school_params + [self.district_id] + school_params
+            summary = self._execute_query(summary_query, tuple(params))
+
+            # Top software by usage from school-level MV
+            top_query = f"""
+            SELECT
+                software_name as name,
+                category as primary_category,
+                total_cost,
+                active_users,
+                total_minutes,
+                usage_compliance,
+                roi_status
+            FROM mv_software_usage_by_school_v2
+            WHERE district_id = %s{school_filter}
+            ORDER BY total_minutes DESC
+            LIMIT 100
+            """
+
+            params = [self.district_id] + school_params
+            top_software = self._execute_query(top_query, tuple(params))
+            mv_used = "mv_software_usage_by_school_v2"
+        else:
+            # Use district-level MV when no school_id
+            summary_query = f"""
+            SELECT
+                sw.total_software,
+                sw.high_roi_count,
+                sw.moderate_roi_count,
+                sw.low_roi_count,
+                sw.total_investment,
+                sw.total_licensed,
+                COALESCE(au.total_active_users, 0) as total_active_users,
+                sw.total_minutes,
+                sw.avg_usage_compliance
+            FROM (
+                SELECT
+                    COUNT(*) as total_software,
+                    COUNT(*) FILTER (WHERE roi_status = 'high') as high_roi_count,
+                    COUNT(*) FILTER (WHERE roi_status = 'moderate') as moderate_roi_count,
+                    COUNT(*) FILTER (WHERE roi_status = 'low') as low_roi_count,
+                    COALESCE(SUM(total_cost), 0) as total_investment,
+                    COALESCE(SUM(students_licensed), 0) as total_licensed,
+                    COALESCE(SUM(total_minutes), 0) as total_minutes,
+                    COALESCE(AVG(usage_compliance), 0) as avg_usage_compliance
+                FROM mv_software_usage_analytics_v4
+                WHERE district_id = %s
+            ) sw
+            CROSS JOIN (
+                SELECT COUNT(*) as total_active_users
+                FROM mv_active_users_summary
+                WHERE district_id = %s AND total_usage_minutes > 0
+            ) au
+            """
+
+            params = [self.district_id, self.district_id]
+            summary = self._execute_query(summary_query, tuple(params))
+
+            # Top software by usage from district-level MV
+            top_query = """
+            SELECT
+                name,
+                primary_category,
+                total_cost,
+                active_users,
+                total_minutes,
+                usage_compliance,
+                roi_status
             FROM mv_software_usage_analytics_v4
             WHERE district_id = %s
-        ) sw
-        CROSS JOIN (
-            SELECT COUNT(*) as total_active_users
-            FROM mv_active_users_summary
-            WHERE district_id = %s AND total_usage_minutes > 0
-        ) au
-        """
+            ORDER BY total_minutes DESC
+            LIMIT 100
+            """
 
-        summary = self._execute_query(summary_query, (self.district_id, self.district_id))
+            top_software = self._execute_query(top_query, (self.district_id,))
+            mv_used = "mv_software_usage_analytics_v4"
 
-        # Top software by usage from v4
-        top_query = """
-        SELECT
-            name,
-            primary_category,
-            total_cost,
-            active_users,
-            total_minutes,
-            usage_compliance,
-            roi_status
-        FROM mv_software_usage_analytics_v4
-        WHERE district_id = %s
-        ORDER BY total_minutes DESC
-        LIMIT 100
-        """
-
-        top_software = self._execute_query(top_query, (self.district_id,))
         self._enrich_with_investment_fields(top_software)
         execution_time = time.time() - start_time
 
         return {
             "summary": summary[0] if summary else {},
             "top_software": top_software,
-            "mv_used": "mv_software_usage_analytics_v4",
-            "execution_time": execution_time
+            "mv_used": mv_used,
+            "execution_time": execution_time,
+            "school_id": self.school_id
         }
 
     def get_user_analytics(self) -> Dict[str, Any]:
@@ -268,9 +396,10 @@ class MVQueryRouter:
         Best for user counts by role and grade.
         """
         start_time = time.time()
+        school_filter, school_params = self._build_school_filter("school_id")
 
         # Summary by role
-        role_query = """
+        role_query = f"""
         SELECT
             user_type,
             SUM(total_users) as total_users,
@@ -278,14 +407,15 @@ class MVQueryRouter:
             SUM(active_users_all_time) as active_users_all_time,
             SUM(total_usage_minutes_90d) as total_usage_minutes_90d
         FROM mv_dashboard_user_analytics
-        WHERE district_id = %s
+        WHERE district_id = %s{school_filter}
         GROUP BY user_type
         """
 
-        by_role = self._execute_query(role_query, (self.district_id,))
+        params = [self.district_id] + school_params
+        by_role = self._execute_query(role_query, tuple(params))
 
         # By grade (students only, aggregated across schools)
-        grade_query = """
+        grade_query = f"""
         SELECT
             grade,
             SUM(total_users) as total_users,
@@ -293,15 +423,16 @@ class MVQueryRouter:
             SUM(active_users_30d) as active_users_30d,
             SUM(total_usage_minutes_90d) as total_usage_minutes_90d
         FROM mv_dashboard_user_analytics
-        WHERE district_id = %s AND user_type = 'student' AND grade IS NOT NULL
+        WHERE district_id = %s AND user_type = 'student' AND grade IS NOT NULL{school_filter}
         GROUP BY grade
         ORDER BY grade
         """
 
-        by_grade = self._execute_query(grade_query, (self.district_id,))
+        params = [self.district_id] + school_params
+        by_grade = self._execute_query(grade_query, tuple(params))
 
         # By school (one row per school, all user types combined)
-        school_query = """
+        school_query = f"""
         SELECT
             school_name,
             SUM(total_users) as total_users,
@@ -312,12 +443,13 @@ class MVQueryRouter:
             SUM(CASE WHEN user_type = 'teacher' THEN total_users ELSE 0 END) as total_teachers,
             SUM(CASE WHEN user_type = 'teacher' THEN active_users_all_time ELSE 0 END) as active_teachers_all_time
         FROM mv_dashboard_user_analytics
-        WHERE district_id = %s AND school_name IS NOT NULL
+        WHERE district_id = %s AND school_name IS NOT NULL{school_filter}
         GROUP BY school_name
         ORDER BY school_name
         """
 
-        by_school = self._execute_query(school_query, (self.district_id,))
+        params = [self.district_id] + school_params
+        by_school = self._execute_query(school_query, tuple(params))
         execution_time = time.time() - start_time
 
         return {
@@ -325,7 +457,8 @@ class MVQueryRouter:
             "by_grade": by_grade,
             "by_school": by_school,
             "mv_used": "mv_dashboard_user_analytics",
-            "execution_time": execution_time
+            "execution_time": execution_time,
+            "school_id": self.school_id
         }
 
     def get_investment_analysis(self, limit: int = 100) -> Dict[str, Any]:
@@ -334,8 +467,9 @@ class MVQueryRouter:
         Best for financial reports and budget analysis.
         """
         start_time = time.time()
+        school_name_filter, school_name_params = self._build_school_name_filter()
 
-        query = """
+        query = f"""
         SELECT
             software_name,
             display_name,
@@ -351,15 +485,16 @@ class MVQueryRouter:
             roi_status,
             latest_purchase_date
         FROM mv_software_investment_summary
-        WHERE district_id = %s AND total_investment > 0
+        WHERE district_id = %s AND total_investment > 0{school_name_filter}
         ORDER BY total_investment DESC
         LIMIT %s
         """
 
-        results = self._execute_query(query, (self.district_id, limit))
+        params = [self.district_id] + school_name_params + [limit]
+        results = self._execute_query(query, tuple(params))
 
         # Summary
-        summary_query = """
+        summary_query = f"""
         SELECT
             SUM(total_investment) as total_investment,
             COUNT(*) as software_count,
@@ -367,27 +502,30 @@ class MVQueryRouter:
             COUNT(*) FILTER (WHERE roi_status = 'low') as low_roi_count,
             AVG(avg_roi_percentage) as avg_roi
         FROM mv_software_investment_summary
-        WHERE district_id = %s AND total_investment > 0
+        WHERE district_id = %s AND total_investment > 0{school_name_filter}
         """
 
-        summary = self._execute_query(summary_query, (self.district_id,))
+        params = [self.district_id] + school_name_params
+        summary = self._execute_query(summary_query, tuple(params))
         execution_time = time.time() - start_time
 
         return {
             "software": results,
             "summary": summary[0] if summary else {},
             "mv_used": "mv_software_investment_summary",
-            "execution_time": execution_time
+            "execution_time": execution_time,
+            "school_id": self.school_id
         }
 
     def get_unauthorized_software(self, limit: int = 100) -> Dict[str, Any]:
         """
-        Get unauthorized software analytics from mv_unauthorized_software_analytics_v3.
+        Get unauthorized software analytics from mv_unauthorized_software_analytics_v4.
         Best for security and compliance dashboards.
         """
         start_time = time.time()
+        school_name_filter, school_name_params = self._build_school_name_filter()
 
-        query = """
+        query = f"""
         SELECT
             name,
             category,
@@ -395,40 +533,49 @@ class MVQueryRouter:
             school_name,
             district_name,
             total_usage_minutes,
+            student_usage_minutes,
+            teacher_usage_minutes,
             unique_users,
             student_users,
             teacher_users,
             usage_count,
             last_used_date,
-            avg_minutes_per_user
-        FROM mv_unauthorized_software_analytics_v3
-        WHERE district_id = %s
+            avg_minutes_per_user,
+            avg_minutes_per_student,
+            avg_minutes_per_teacher
+        FROM mv_unauthorized_software_analytics_v4
+        WHERE district_id = %s{school_name_filter}
         ORDER BY total_usage_minutes DESC
         LIMIT %s
         """
 
-        results = self._execute_query(query, (self.district_id, limit))
+        params = [self.district_id] + school_name_params + [limit]
+        results = self._execute_query(query, tuple(params))
 
         # Summary
-        summary_query = """
+        summary_query = f"""
         SELECT
             COUNT(DISTINCT name) as total_unauthorized,
             SUM(total_usage_minutes) as total_minutes,
+            SUM(student_usage_minutes) as total_student_minutes,
+            SUM(teacher_usage_minutes) as total_teacher_minutes,
             SUM(unique_users) as total_users,
             SUM(student_users) as total_students,
             SUM(teacher_users) as total_teachers
-        FROM mv_unauthorized_software_analytics_v3
-        WHERE district_id = %s
+        FROM mv_unauthorized_software_analytics_v4
+        WHERE district_id = %s{school_name_filter}
         """
 
-        summary = self._execute_query(summary_query, (self.district_id,))
+        params = [self.district_id] + school_name_params
+        summary = self._execute_query(summary_query, tuple(params))
         execution_time = time.time() - start_time
 
         return {
             "software": results,
             "summary": summary[0] if summary else {},
-            "mv_used": "mv_unauthorized_software_analytics_v3",
-            "execution_time": execution_time
+            "mv_used": "mv_unauthorized_software_analytics_v4",
+            "execution_time": execution_time,
+            "school_id": self.school_id
         }
 
     def get_top_users(self, limit: int = 100, role: Optional[str] = None) -> Dict[str, Any]:
@@ -437,8 +584,9 @@ class MVQueryRouter:
         Best for individual user reports.
         """
         start_time = time.time()
+        school_filter, school_params = self._build_school_filter("school_id")
 
-        query = """
+        query = f"""
         SELECT
             first_name,
             last_name,
@@ -454,10 +602,10 @@ class MVQueryRouter:
             first_active,
             last_active
         FROM mv_user_software_utilization_v2
-        WHERE district_id = %s
+        WHERE district_id = %s{school_filter}
         """
 
-        params = [self.district_id]
+        params = [self.district_id] + school_params
 
         if role:
             query += " AND user_role = %s"
@@ -473,7 +621,8 @@ class MVQueryRouter:
             "users": results,
             "mv_used": "mv_user_software_utilization_v2",
             "execution_time": execution_time,
-            "count": len(results)
+            "count": len(results),
+            "school_id": self.school_id
         }
 
     def get_school_analysis(self, limit: int = 100) -> Dict[str, Any]:
@@ -482,8 +631,9 @@ class MVQueryRouter:
         Best for school-level comparisons.
         """
         start_time = time.time()
+        school_filter, school_params = self._build_school_filter("school_id")
 
-        query = """
+        query = f"""
         SELECT
             school_name,
             software_name,
@@ -498,15 +648,16 @@ class MVQueryRouter:
             roi_status,
             usage_compliance
         FROM mv_software_usage_by_school_v2
-        WHERE district_id = %s
+        WHERE district_id = %s{school_filter}
         ORDER BY total_minutes DESC
         LIMIT %s
         """
 
-        results = self._execute_query(query, (self.district_id, limit))
+        params = [self.district_id] + school_params + [limit]
+        results = self._execute_query(query, tuple(params))
 
         # School summary
-        summary_query = """
+        summary_query = f"""
         SELECT
             school_name,
             COUNT(DISTINCT software_name) as software_count,
@@ -515,19 +666,21 @@ class MVQueryRouter:
             SUM(total_minutes) as total_minutes,
             AVG(avg_roi_percentage) as avg_roi
         FROM mv_software_usage_by_school_v2
-        WHERE district_id = %s
+        WHERE district_id = %s{school_filter}
         GROUP BY school_name
         ORDER BY total_minutes DESC
         """
 
-        school_summary = self._execute_query(summary_query, (self.district_id,))
+        params = [self.district_id] + school_params
+        school_summary = self._execute_query(summary_query, tuple(params))
         execution_time = time.time() - start_time
 
         return {
             "details": results,
             "school_summary": school_summary,
             "mv_used": "mv_software_usage_by_school_v2",
-            "execution_time": execution_time
+            "execution_time": execution_time,
+            "school_id": self.school_id
         }
 
     def get_usage_rankings(
@@ -541,8 +694,9 @@ class MVQueryRouter:
         Best for top software lists with percentage calculations.
         """
         start_time = time.time()
+        school_name_filter, school_name_params = self._build_school_name_filter()
 
-        query = """
+        query = f"""
         SELECT
             name,
             category,
@@ -554,10 +708,10 @@ class MVQueryRouter:
             total_minutes,
             usage_percentage
         FROM mv_software_usage_rankings_v4
-        WHERE district_id = %s
+        WHERE district_id = %s{school_name_filter}
         """
 
-        params = [self.district_id]
+        params = [self.district_id] + school_name_params
 
         if grade_band:
             query += " AND grade_band = %s"
@@ -577,7 +731,8 @@ class MVQueryRouter:
             "rankings": results,
             "mv_used": "mv_software_usage_rankings_v4",
             "execution_time": execution_time,
-            "count": len(results)
+            "count": len(results),
+            "school_id": self.school_id
         }
 
     def get_active_users_summary(self, limit: int = 100) -> Dict[str, Any]:
@@ -587,9 +742,10 @@ class MVQueryRouter:
         Now includes ALL roles and OS/data source information.
         """
         start_time = time.time()
+        school_filter, school_params = self._build_school_filter("school_id")
 
         # Summary by grade band and role (only users with actual usage)
-        summary_query = """
+        summary_query = f"""
         SELECT
             grade_band,
             role,
@@ -597,15 +753,16 @@ class MVQueryRouter:
             SUM(total_usage_minutes) as total_minutes,
             AVG(total_usage_minutes) as avg_minutes_per_user
         FROM mv_active_users_summary
-        WHERE district_id = %s AND total_usage_minutes > 0
+        WHERE district_id = %s AND total_usage_minutes > 0{school_filter}
         GROUP BY grade_band, role
         ORDER BY grade_band, role
         """
 
-        summary = self._execute_query(summary_query, (self.district_id,))
+        params = [self.district_id] + school_params
+        summary = self._execute_query(summary_query, tuple(params))
 
         # Summary by role (all roles, including users with 0 usage)
-        role_summary_query = """
+        role_summary_query = f"""
         SELECT
             role,
             COUNT(*) as total_users,
@@ -616,15 +773,16 @@ class MVQueryRouter:
             SUM(ios_minutes) as ios_minutes,
             SUM(other_os_minutes) as other_os_minutes
         FROM mv_active_users_summary
-        WHERE district_id = %s
+        WHERE district_id = %s{school_filter}
         GROUP BY role
         ORDER BY total_users DESC
         """
 
-        by_role = self._execute_query(role_summary_query, (self.district_id,))
+        params = [self.district_id] + school_params
+        by_role = self._execute_query(role_summary_query, tuple(params))
 
         # Summary by OS/data source (only users with actual usage)
-        os_summary_query = """
+        os_summary_query = f"""
         SELECT
             primary_os as data_source,
             COUNT(*) as user_count,
@@ -634,15 +792,16 @@ class MVQueryRouter:
             SUM(ios_minutes) as ios_minutes,
             SUM(other_os_minutes) as other_os_minutes
         FROM mv_active_users_summary
-        WHERE district_id = %s AND total_usage_minutes > 0
+        WHERE district_id = %s AND total_usage_minutes > 0{school_filter}
         GROUP BY primary_os
         ORDER BY user_count DESC
         """
 
-        by_os = self._execute_query(os_summary_query, (self.district_id,))
+        params = [self.district_id] + school_params
+        by_os = self._execute_query(os_summary_query, tuple(params))
 
         # Top active users (only users with actual usage, includes OS info)
-        top_users_query = """
+        top_users_query = f"""
         SELECT
             full_name,
             role,
@@ -656,12 +815,13 @@ class MVQueryRouter:
             ios_minutes,
             last_active_date
         FROM mv_active_users_summary
-        WHERE district_id = %s AND total_usage_minutes > 0
+        WHERE district_id = %s AND total_usage_minutes > 0{school_filter}
         ORDER BY total_usage_minutes DESC
         LIMIT %s
         """
 
-        top_users = self._execute_query(top_users_query, (self.district_id, limit))
+        params = [self.district_id] + school_params + [limit]
+        top_users = self._execute_query(top_users_query, tuple(params))
         execution_time = time.time() - start_time
 
         return {
@@ -670,7 +830,8 @@ class MVQueryRouter:
             "by_os": by_os,
             "top_users": top_users,
             "mv_used": "mv_active_users_summary",
-            "execution_time": execution_time
+            "execution_time": execution_time,
+            "school_id": self.school_id
         }
 
     def get_peer_benchmarking_summary(self) -> Dict[str, Any]:
@@ -819,7 +980,11 @@ class MVQueryRouter:
         }
 
 
-def create_mv_router(postgres_config: dict, district_id: str) -> MVQueryRouter:
+def create_mv_router(
+    postgres_config: dict,
+    district_id: str,
+    school_id: Optional[str] = None
+) -> MVQueryRouter:
     """Factory function to create an MV Query Router."""
     return MVQueryRouter(
         host=postgres_config.get("host"),
@@ -829,4 +994,5 @@ def create_mv_router(postgres_config: dict, district_id: str) -> MVQueryRouter:
         password=postgres_config.get("password"),
         district_id=district_id,
         schema=postgres_config.get("schema", "public"),
+        school_id=school_id,
     )

@@ -36,15 +36,18 @@ class PhiEducationalAgent:
         postgres_config: dict,
         openai_api_key: Optional[str] = None,
         verbose: bool = False,
+        school_id: Optional[str] = None,
     ):
         self.district_id = district_id
         self.postgres_config = postgres_config
         self.verbose = verbose
+        self.school_id = school_id
 
         if self.verbose:
             logger.setLevel(logging.DEBUG)
 
-        logger.info(f"Initializing PhiEducationalAgent for district: {district_id}")
+        school_info = f" (school: {school_id})" if school_id else ""
+        logger.info(f"Initializing PhiEducationalAgent for district: {district_id}{school_info}")
 
         # Create Robust PostgreSQL tools with autocommit to prevent transaction errors
         # This fixes "current transaction is aborted, commands ignored" errors
@@ -79,8 +82,18 @@ class PhiEducationalAgent:
 
     def _get_mv_aware_instructions(self) -> list:
         """Get comprehensive instructions with complete MV schema knowledge."""
+        scope_info = f" and school {self.school_id}" if self.school_id else ""
+        school_filter_note = ""
+        if self.school_id:
+            school_filter_note = f"""
+SCHOOL FILTERING:
+- Data is filtered to school_id = '{self.school_id}'
+- For views with school_id column: Add AND school_id = '{self.school_id}'
+- For views with school_name column only: Add AND school_name = (SELECT name FROM schools WHERE id = '{self.school_id}' AND district_id = '{self.district_id}')
+"""
+
         return [
-            f"You are an AI assistant specialized in educational software analytics for district {self.district_id}.",
+            f"You are an AI assistant specialized in educational software analytics for district {self.district_id}{scope_info}.",
             "",
             "=" * 80,
             "CRITICAL: ALWAYS USE MATERIALIZED VIEWS - NEVER RAW TABLES",
@@ -88,6 +101,7 @@ class PhiEducationalAgent:
             "",
             "You MUST use materialized views (mv_*) for ALL queries. They are 10-100x faster.",
             "The ROI data is PRE-CALCULATED in the views - do NOT try to calculate ROI yourself.",
+            school_filter_note,
             "",
             "=" * 80,
             "MATERIALIZED VIEW SCHEMA - EXACT COLUMN NAMES",
@@ -146,13 +160,13 @@ class PhiEducationalAgent:
             "USE THIS FOR: Top users, individual usage reports, user-level analysis",
             f"EXAMPLE: SELECT first_name, last_name, software_name, total_minutes FROM mv_user_software_utilization_v2 WHERE district_id = '{self.district_id}' ORDER BY total_minutes DESC LIMIT 20",
             "",
-            "### 6. mv_unauthorized_software_analytics_v3 (Use for security/compliance)",
+            "### 6. mv_unauthorized_software_analytics_v4 (Use for security/compliance)",
             "Columns: id, name, category, url, district_id, school_name, user_type,",
             "         district_name, total_usage_minutes, unique_users, student_users,",
             "         teacher_users, usage_count, last_used_date, avg_minutes_per_user, refreshed_at",
             "",
             "USE THIS FOR: Unauthorized software monitoring, security dashboards",
-            f"EXAMPLE: SELECT name, category, total_usage_minutes, unique_users, student_users FROM mv_unauthorized_software_analytics_v3 WHERE district_id = '{self.district_id}' ORDER BY total_usage_minutes DESC",
+            f"EXAMPLE: SELECT name, category, total_usage_minutes, unique_users, student_users FROM mv_unauthorized_software_analytics_v4 WHERE district_id = '{self.district_id}' ORDER BY total_usage_minutes DESC",
             "",
             "### 7. mv_software_usage_by_school_v2 (Use for school-level analysis)",
             "Columns: software_id, software_name, school_id, school_name, district_id,",
@@ -199,7 +213,7 @@ class PhiEducationalAgent:
             "",
             "• 'top users', 'individual usage' → mv_user_software_utilization_v2",
             "",
-            "• 'unauthorized', 'security', 'compliance' → mv_unauthorized_software_analytics_v3",
+            "• 'unauthorized', 'security', 'compliance' → mv_unauthorized_software_analytics_v4",
             "",
             "• 'by school', 'school comparison' → mv_software_usage_by_school_v2",
             "",
@@ -243,7 +257,7 @@ class PhiEducationalAgent:
             "",
             "### Unauthorized software:",
             f"SELECT name, category, total_usage_minutes, unique_users, student_users",
-            f"FROM mv_unauthorized_software_analytics_v3",
+            f"FROM mv_unauthorized_software_analytics_v4",
             f"WHERE district_id = '{self.district_id}'",
             f"ORDER BY total_usage_minutes DESC LIMIT 20;",
             "",
@@ -281,7 +295,7 @@ RECOMMENDED MVs for this query:
 - For usage analytics: mv_software_usage_analytics_v4
 - For user counts: mv_dashboard_user_analytics
 - For individual users: mv_user_software_utilization_v2
-- For unauthorized: mv_unauthorized_software_analytics_v3
+- For unauthorized: mv_unauthorized_software_analytics_v4
 
 Generate and execute the SQL query, then present results in clean HTML format.
 Remember: avg_roi_percentage (not roi), total_investment (not cost), roi_status values are 'high', 'moderate', 'low'.
@@ -346,15 +360,21 @@ Remember: avg_roi_percentage (not roi), total_investment (not cost), roi_status 
     def get_security_insights(self) -> dict:
         """Get security and compliance insights using MVs."""
         return self.process_query(
-            "Provide security insights using mv_unauthorized_software_analytics_v3. "
+            "Provide security insights using mv_unauthorized_software_analytics_v4. "
             "Show unauthorized software sorted by total_usage_minutes, including student_users and teacher_users counts."
         )
 
 
 def create_phi_educational_agent(
-    district_id: str, postgres_config: dict, verbose: bool = False
+    district_id: str,
+    postgres_config: dict,
+    verbose: bool = False,
+    school_id: Optional[str] = None
 ) -> PhiEducationalAgent:
     """Factory function to create a phi-based educational agent with MV knowledge."""
     return PhiEducationalAgent(
-        district_id=district_id, postgres_config=postgres_config, verbose=verbose
+        district_id=district_id,
+        postgres_config=postgres_config,
+        verbose=verbose,
+        school_id=school_id
     )

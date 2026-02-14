@@ -146,26 +146,55 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
     ),
 
     # ============================================================================
-    # 4. mv_unauthorized_software_analytics_v3 - Unauthorized software tracking
+    # 4. mv_unauthorized_software_analytics_v4 - Unauthorized software tracking
     # ============================================================================
-    "mv_unauthorized_software_analytics_v3": MaterializedViewInfo(
-        name="mv_unauthorized_software_analytics_v3",
-        description="Analytics for unauthorized software including usage metrics, user counts by type, and last usage tracking",
+    "mv_unauthorized_software_analytics_v4": MaterializedViewInfo(
+        name="mv_unauthorized_software_analytics_v4",
+        description="Analytics for unauthorized software including usage metrics, user counts by type, student/teacher usage breakdown, and last usage tracking",
         primary_intents=[
             QueryIntent.UNAUTHORIZED_SOFTWARE
         ],
         key_columns=[
             "id", "name", "category", "url", "district_id", "school_name",
-            "user_type", "district_name", "total_usage_minutes", "unique_users",
-            "student_users", "teacher_users", "usage_count", "last_used_date",
-            "avg_minutes_per_user", "refreshed_at"
+            "user_type", "district_name", "total_usage_minutes", "student_usage_minutes",
+            "teacher_usage_minutes", "unique_users", "student_users", "teacher_users",
+            "usage_count", "last_used_date", "avg_minutes_per_user", "avg_minutes_per_student",
+            "avg_minutes_per_teacher", "refreshed_at"
         ],
-        aggregations=["total_usage_minutes", "unique_users", "student_users", "teacher_users", "usage_count"],
+        aggregations=["total_usage_minutes", "student_usage_minutes", "teacher_usage_minutes", "unique_users", "student_users", "teacher_users", "usage_count"],
         filters_available=["district_id", "category", "school_name"],
-        performance_notes="Best for security/compliance dashboards, unauthorized software monitoring. Automatically filtered to authorized=false.",
+        performance_notes="Best for security/compliance dashboards, unauthorized software monitoring. Automatically filtered to authorized=false. Includes separate student and teacher usage minutes.",
         sample_queries=[
-            "SELECT name, total_usage_minutes, unique_users, student_users FROM mv_unauthorized_software_analytics_v3 WHERE district_id = '{district_id}' ORDER BY total_usage_minutes DESC",
-            "SELECT category, COUNT(*) as apps, SUM(unique_users) as users FROM mv_unauthorized_software_analytics_v3 WHERE district_id = '{district_id}' GROUP BY category"
+            "SELECT name, total_usage_minutes, unique_users, student_users, student_usage_minutes FROM mv_unauthorized_software_analytics_v4 WHERE district_id = '{district_id}' ORDER BY total_usage_minutes DESC",
+            "SELECT category, COUNT(*) as apps, SUM(unique_users) as users FROM mv_unauthorized_software_analytics_v4 WHERE district_id = '{district_id}' GROUP BY category"
+        ],
+        priority=1
+    ),
+
+    # ============================================================================
+    # 4b. mv_unauthorized_software_analytics_v4_by_school - Unauthorized by school
+    # ============================================================================
+    "mv_unauthorized_software_analytics_v4_by_school": MaterializedViewInfo(
+        name="mv_unauthorized_software_analytics_v4_by_school",
+        description="School-level breakdown of unauthorized software usage with in-school/at-home minutes and student/teacher breakdown",
+        primary_intents=[
+            QueryIntent.UNAUTHORIZED_SOFTWARE,
+            QueryIntent.SCHOOL_ANALYSIS
+        ],
+        key_columns=[
+            "id", "name", "category", "url", "district_id", "district_name",
+            "school_id", "school_name", "total_usage_minutes", "in_school_minutes",
+            "at_home_minutes", "student_usage_minutes", "teacher_usage_minutes",
+            "unique_users", "student_users", "teacher_users", "usage_count",
+            "last_used_date", "avg_minutes_per_user", "avg_minutes_per_student",
+            "avg_minutes_per_teacher", "refreshed_at"
+        ],
+        aggregations=["total_usage_minutes", "in_school_minutes", "at_home_minutes", "student_usage_minutes", "teacher_usage_minutes", "unique_users", "student_users", "teacher_users"],
+        filters_available=["district_id", "school_id", "school_name", "category"],
+        performance_notes="Best for school-level unauthorized software analysis. Has school_id column for direct filtering. Includes location breakdown (in-school vs at-home).",
+        sample_queries=[
+            "SELECT name, school_name, total_usage_minutes, in_school_minutes, student_users FROM mv_unauthorized_software_analytics_v4_by_school WHERE district_id = '{district_id}' ORDER BY total_usage_minutes DESC",
+            "SELECT school_name, COUNT(DISTINCT name) as apps, SUM(unique_users) as users FROM mv_unauthorized_software_analytics_v4_by_school WHERE district_id = '{district_id}' GROUP BY school_name"
         ],
         priority=1
     ),
@@ -317,15 +346,16 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
     ),
 
     # ============================================================================
-    # 10. mv_report_data_unified_v4 - Unified report data by school
+    # 10. mv_report_data_unified_v5 - Unified report data by school
     # ============================================================================
-    "mv_report_data_unified_v4": MaterializedViewInfo(
-        name="mv_report_data_unified_v4",
-        description="Unified report data for authorized software grouped by software name and school, with comprehensive metrics",
+    "mv_report_data_unified_v5": MaterializedViewInfo(
+        name="mv_report_data_unified_v5",
+        description="Unified report data for authorized software grouped by software name and school, with comprehensive metrics including ROI, budget utilization, and engagement scores",
         primary_intents=[
             QueryIntent.REPORT_GENERATION,
             QueryIntent.SCHOOL_ANALYSIS,
-            QueryIntent.SOFTWARE_USAGE
+            QueryIntent.SOFTWARE_USAGE,
+            QueryIntent.SOFTWARE_ROI
         ],
         key_columns=[
             "software_name", "software_ids", "software_record_count", "school_id",
@@ -333,15 +363,17 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
             "authorized", "approval_status", "purchase_date", "url", "total_cost",
             "students_licensed", "cost_per_student", "active_students", "active_teachers",
             "total_minutes", "total_usage_hours", "usage_days", "average_session_time",
-            "usage_frequency", "avg_weekly_usage_hours", "first_use_date", "last_use_date",
+            "usage_frequency", "avg_weekly_usage_hours", "roi", "roi_status",
+            "budget_utilization", "active_user_percentage", "cost_efficiency_score",
+            "engagement_score", "performance_tier", "first_use_date", "last_use_date",
             "user_satisfaction", "technical_metrics", "expected_daily_minutes", "usage_compliance"
         ],
-        aggregations=["total_minutes", "total_usage_hours", "active_students", "active_teachers", "avg_weekly_usage_hours"],
-        filters_available=["district_id", "school_id", "school_name", "category", "funding_source"],
-        performance_notes="Best for generating school-level reports, comparing software across schools. Authorized software only.",
+        aggregations=["total_minutes", "total_usage_hours", "active_students", "active_teachers", "avg_weekly_usage_hours", "budget_utilization", "engagement_score"],
+        filters_available=["district_id", "school_id", "school_name", "category", "funding_source", "roi_status"],
+        performance_notes="Best for generating school-level reports, comparing software across schools. Authorized software only. Includes ROI status, budget utilization, and engagement scores.",
         sample_queries=[
-            "SELECT software_name, school_name, total_usage_hours, active_students FROM mv_report_data_unified_v4 WHERE district_id = '{district_id}' ORDER BY total_usage_hours DESC",
-            "SELECT school_name, COUNT(DISTINCT software_name) as apps, SUM(total_cost) as investment FROM mv_report_data_unified_v4 WHERE district_id = '{district_id}' GROUP BY school_name"
+            "SELECT software_name, school_name, total_usage_hours, active_students, roi_status FROM mv_report_data_unified_v5 WHERE district_id = '{district_id}' ORDER BY total_usage_hours DESC",
+            "SELECT school_name, COUNT(DISTINCT software_name) as apps, SUM(total_cost) as investment, AVG(budget_utilization) as avg_utilization FROM mv_report_data_unified_v5 WHERE district_id = '{district_id}' GROUP BY school_name"
         ],
         priority=1
     ),
@@ -492,11 +524,11 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
     ),
 
     # ============================================================================
-    # 17. peer_district_metrics - Peer district benchmarking metrics
+    # 17. peer_district_metrics - Peer district benchmarking metrics (TABLE, not MV)
     # ============================================================================
     "peer_district_metrics": MaterializedViewInfo(
         name="peer_district_metrics",
-        description="Per-metric benchmarking rows for a district including metric value, percentile ranking, peer average, and category (financial/usage/performance/adoption)",
+        description="Per-metric benchmarking rows for a district including metric value, percentile ranking, peer average, and category (financial/usage/performance/adoption). NOTE: This is a table, not a materialized view.",
         primary_intents=[
             QueryIntent.PEER_BENCHMARKING,
             QueryIntent.DASHBOARD_OVERVIEW
@@ -508,7 +540,7 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
         ],
         aggregations=["metric_value", "percentile", "peer_average", "ranking"],
         filters_available=["district_id", "category", "metric_name"],
-        performance_notes="Best for peer district benchmarking dashboards. Each row is one metric for one district. Categories: financial, usage, performance.",
+        performance_notes="Best for peer district benchmarking dashboards. Each row is one metric for one district. Categories: financial, usage, performance. NOTE: This is a table, not a materialized view.",
         sample_queries=[
             "SELECT metric_name, metric_value, percentile, peer_average, unit, category, ranking FROM peer_district_metrics WHERE district_id = '{district_id}' ORDER BY category, metric_name",
         ],
@@ -516,11 +548,11 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
     ),
 
     # ============================================================================
-    # 18. peer_comparisons - Peer district metric comparisons
+    # 18. peer_comparisons - Peer district metric comparisons (TABLE, not MV)
     # ============================================================================
     "peer_comparisons": MaterializedViewInfo(
         name="peer_comparisons",
-        description="Per-metric comparisons of a district against its peer group with the district's value, peer average, percentile, ranking, and interpretation (excellent/good/average/needs_improvement/critical)",
+        description="Per-metric comparisons of a district against its peer group with the district's value, peer average, percentile, ranking, and interpretation (excellent/good/average/needs_improvement/critical). NOTE: This is a table, not a materialized view.",
         primary_intents=[
             QueryIntent.PEER_BENCHMARKING
         ],
@@ -531,9 +563,43 @@ MATERIALIZED_VIEW_REGISTRY: Dict[str, MaterializedViewInfo] = {
         ],
         aggregations=["your_value", "peer_average", "percentile", "ranking"],
         filters_available=["district_id", "interpretation", "metric"],
-        performance_notes="Best for detailed peer comparison reports. Each row is one metric comparison. Interpretation values: excellent, good, average, needs_improvement, critical.",
+        performance_notes="Best for detailed peer comparison reports. Each row is one metric comparison. Interpretation values: excellent, good, average, needs_improvement, critical. NOTE: This is a table, not a materialized view.",
         sample_queries=[
             "SELECT metric, your_value, peer_average, percentile, ranking, total_districts, unit, interpretation FROM peer_comparisons WHERE district_id = '{district_id}' ORDER BY percentile DESC"
+        ],
+        priority=1
+    ),
+
+    # ============================================================================
+    # 19. mv_monthly_insights_snapshot - Monthly email insights data
+    # ============================================================================
+    "mv_monthly_insights_snapshot": MaterializedViewInfo(
+        name="mv_monthly_insights_snapshot",
+        description="Monthly snapshot of district and school-level insights for email reports. Contains usage metrics, ROI data, software rankings, violations, and peer benchmarking data.",
+        primary_intents=[
+            QueryIntent.DASHBOARD_OVERVIEW,
+            QueryIntent.REPORT_GENERATION,
+            QueryIntent.SOFTWARE_ROI
+        ],
+        key_columns=[
+            "id", "district_id", "school_id", "snapshot_month",
+            "active_students", "active_teachers", "total_usage_minutes",
+            "in_school_minutes", "at_home_minutes", "teacher_usage_pct", "student_usage_pct",
+            "chrome_os_users", "windows_users", "total_investment",
+            "total_software_count", "authorized_software_count", "unauthorized_software_count",
+            "average_roi", "high_roi_count", "moderate_roi_count", "low_roi_count",
+            "potential_savings", "subject_roi",
+            "grade_band_elementary_pct", "grade_band_middle_pct", "grade_band_high_pct",
+            "open_violations_count", "new_violations_count", "resolved_violations_count",
+            "peer_rank", "peer_total", "peer_percentile",
+            "top_software", "bottom_software", "top_unauthorized", "created_at"
+        ],
+        aggregations=["active_students", "active_teachers", "total_usage_minutes", "total_investment", "average_roi", "potential_savings"],
+        filters_available=["district_id", "school_id", "snapshot_month"],
+        performance_notes="Best for monthly email insights and executive reports. Contains both district-level (school_id=NULL) and school-level rows. JSONB columns: subject_roi, top_software, bottom_software, top_unauthorized.",
+        sample_queries=[
+            "SELECT * FROM mv_monthly_insights_snapshot WHERE district_id = '{district_id}' AND school_id IS NULL ORDER BY snapshot_month DESC LIMIT 1",
+            "SELECT school_id, active_students, total_usage_minutes, average_roi FROM mv_monthly_insights_snapshot WHERE district_id = '{district_id}' AND school_id IS NOT NULL"
         ],
         priority=1
     ),
@@ -972,12 +1038,13 @@ LIMIT 20"""
 # ============================================================================
 # Agent Instructions Generator
 # ============================================================================
-def get_mv_aware_instructions(district_id: str) -> List[str]:
+def get_mv_aware_instructions(district_id: str, school_id: Optional[str] = None) -> List[str]:
     """
     Generate comprehensive agent instructions that include MV knowledge.
     """
+    scope_info = f" and school {school_id}" if school_id else ""
     instructions = [
-        f"You are an AI assistant specialized in educational software analytics for district {district_id}.",
+        f"You are an AI assistant specialized in educational software analytics for district {district_id}{scope_info}.",
         "",
         "=" * 80,
         "CRITICAL: MATERIALIZED VIEW PRIORITY SYSTEM",
@@ -1011,7 +1078,7 @@ def get_mv_aware_instructions(district_id: str) -> List[str]:
         "   - Use for: Top users, per-user reports, individual utilization",
         "   - Contains: user_email, total_minutes, sessions_count, avg_weekly_minutes",
         "",
-        "6. mv_unauthorized_software_analytics_v3 - SECURITY/COMPLIANCE",
+        "6. mv_unauthorized_software_analytics_v4 - SECURITY/COMPLIANCE",
         "   - Use for: Unauthorized software monitoring, security dashboards",
         "   - Contains: unauthorized apps with student_users, teacher_users counts",
         "",
@@ -1046,7 +1113,7 @@ def get_mv_aware_instructions(district_id: str) -> List[str]:
         "• 'Dashboard/overview/summary' → mv_software_usage_analytics_v4",
         "• 'How many students/teachers?' → mv_dashboard_user_analytics",
         "• 'Top users by usage' → mv_user_software_utilization_v2",
-        "• 'Unauthorized/unapproved software' → mv_unauthorized_software_analytics_v3",
+        "• 'Unauthorized/unapproved software' → mv_unauthorized_software_analytics_v4",
         "• 'Compare schools' → mv_software_usage_by_school_v2",
         "• 'Software rankings/top software' → mv_software_usage_rankings_v4",
         "• 'Investment/cost analysis' → mv_software_investment_summary",
@@ -1079,7 +1146,7 @@ def get_mv_aware_instructions(district_id: str) -> List[str]:
         "",
         "-- Unauthorized software (USE THIS for security)",
         f"SELECT name, category, total_usage_minutes, unique_users, student_users",
-        f"FROM mv_unauthorized_software_analytics_v3",
+        f"FROM mv_unauthorized_software_analytics_v4",
         f"WHERE district_id = '{district_id}'",
         f"ORDER BY total_usage_minutes DESC;",
         "",
@@ -1108,5 +1175,26 @@ def get_mv_aware_instructions(district_id: str) -> List[str]:
         "",
         f"CRITICAL: ALL queries MUST filter by district_id = '{district_id}'",
     ]
+
+    if school_id:
+        instructions.extend([
+            "",
+            "=" * 80,
+            "SCHOOL-SPECIFIC FILTERING",
+            "=" * 80,
+            "",
+            f"Data is filtered to school_id = '{school_id}'",
+            "",
+            "Apply school filtering based on the view's schema:",
+            "- Views with school_id column: Add AND school_id = '{school_id}'",
+            "  (mv_dashboard_user_analytics, mv_user_software_utilization_v2, mv_active_users_summary, mv_software_usage_by_school_v2)",
+            "",
+            "- Views with school_name column only: Use subquery lookup",
+            f"  AND school_name = (SELECT name FROM schools WHERE id = '{school_id}' AND district_id = '{district_id}')",
+            "  (mv_software_investment_summary, mv_unauthorized_software_analytics_v4, mv_software_usage_rankings_v4)",
+            "",
+            "- Views without school support: Return district-level data (note this in response)",
+            "  (mv_software_usage_analytics_v4, peer_district_metrics, peer_comparisons)",
+        ])
 
     return instructions
